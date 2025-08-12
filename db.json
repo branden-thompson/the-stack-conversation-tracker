@@ -1,0 +1,56 @@
+{
+  "cards": [
+    {
+      "id": "ej7JYznImJFrFpEITwRM8",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 20,
+        "y": 80
+      },
+      "stackOrder": 0,
+      "createdAt": "2025-08-12T22:44:16.837Z",
+      "updatedAt": "2025-08-12T22:44:16.938Z"
+    },
+    {
+      "id": "i8nTwVcuMnwLX2CCqNF5g",
+      "type": "accusation",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 625,
+        "y": 80
+      },
+      "stackOrder": 0,
+      "createdAt": "2025-08-12T22:44:21.012Z",
+      "updatedAt": "2025-08-12T23:08:01.350Z"
+    },
+    {
+      "id": "oqunM2W1qLnKJzAvZnN9s",
+      "type": "question",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 335,
+        "y": 80
+      },
+      "stackOrder": 0,
+      "createdAt": "2025-08-12T22:44:22.496Z",
+      "updatedAt": "2025-08-12T23:08:05.806Z"
+    },
+    {
+      "id": "9kpVWFcWyWSni2TJnvtye",
+      "type": "statement",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 893,
+        "y": 80
+      },
+      "stackOrder": 0,
+      "createdAt": "2025-08-12T22:51:45.500Z",
+      "updatedAt": "2025-08-12T23:08:01.785Z"
+    }
+  ]
+}
