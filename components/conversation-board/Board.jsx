@@ -223,8 +223,11 @@ function BoardInner({
               </div>
             </div>
 
+            {/* Right controls: ThemeToggle + 40px gap + other buttons */}
             <div className="flex gap-2 items-center">
-              <ThemeToggle />
+              <div className="mr-10">
+                <ThemeToggle />
+              </div>
               <Button
                 onClick={() => setHelpOpen(true)}
                 variant="outline"
