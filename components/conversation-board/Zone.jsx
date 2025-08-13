@@ -1,30 +1,26 @@
 /**
  * Zone Component
- * Droppable area; can auto-organize cards into stacks by type (Active) or free-form (others).
- * Fixes:
- * - Organized stacks never overlap and keep a consistent 20px gap horizontally & vertically
- * - Stack containers reserve space based on actual card size via padding (robust to dynamic widths/heights)
- * - Empty zones remain visible; zones fill their resizable space
- * - "Organize" button uses secondary variant
+ * - Dark mode surfaces
+ * - Organized stacks with 20px gaps & no overlap
+ * - Restore outlined "Organize" button (secondary variant) in light & dark
  */
 
 'use client';
 
 import { useMemo, useState, useCallback } from 'react';
 import { useDroppable } from '@dnd-kit/core';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
 
-/** Spacing & stacking constants */
-const STACK_GAP_PX = 20; // required horizontal & vertical buffer between stacks
+/* ---------- Layout / stacking constants ---------- */
+const STACK_GAP_PX = 20;
 const STACK_OFFSET_PX = CARD_DIMENSIONS?.stackOffset ?? 12;
-
-/** Base card size hints (we'll adapt to real size using padding technique) */
 const BASE_CARD_WIDTH  = Math.max(CARD_DIMENSIONS?.width  ?? 300, 300);
 const BASE_CARD_HEIGHT = Math.max(CARD_DIMENSIONS?.height ?? 140, 140);
 
-/** Helpers */
+/* ---------- Helpers ---------- */
 function byNewestFirst(a, b) {
   const at = a.updatedAt ?? a.createdAt ?? 0;
   const bt = b.updatedAt ?? b.createdAt ?? 0;
@@ -42,6 +38,7 @@ function groupCardsByType(cards) {
   return map;
 }
 
+/* ---------- Component ---------- */
 export function Zone({
   zoneId,
   cards = [],
@@ -61,7 +58,7 @@ export function Zone({
   const zoneConfig = ZONES?.[zoneId] ?? {
     title: titleOverride ?? 'Zone',
     description: '',
-    className: 'bg-white',
+    className: '',
   };
 
   const [organizeOnce, setOrganizeOnce] = useState(false);
@@ -77,7 +74,7 @@ export function Zone({
     }));
   }, [cards, effectiveOrganize]);
 
-  /** Persist an organized layout into absolute positions (optional convenience) */
+  /* Persist organized layout (optional convenience) */
   const handleOrganizePersist = useCallback(async () => {
     if (!cards.length) {
       setOrganizeOnce(true);
@@ -85,8 +82,6 @@ export function Zone({
     }
     const grouped = groupCardsByType(cards);
 
-    // We still compute a stable order for writing positions, but the visual layout is now robust
-    // thanks to padding-based stack containers in renderOrganized().
     let cursorX = STACK_GAP_PX;
     let cursorY = STACK_GAP_PX;
     let rowMaxH = 0;
@@ -96,14 +91,12 @@ export function Zone({
       cards: bucket.sort(byNewestFirst),
     }));
 
-    // Use conservative “estimated” sizes for persisted coordinates (visual wraps are handled by CSS)
     for (const stack of ordered) {
       const count = stack.cards.length;
       const estStackW = BASE_CARD_WIDTH  + STACK_OFFSET_PX * Math.max(0, count - 1);
       const estStackH = BASE_CARD_HEIGHT + STACK_OFFSET_PX * Math.max(0, count - 1);
 
-      // Wrap if we exceed a soft width; exact wrapping handled by CSS, this is just a persisted hint
-      const SOFT_ROW_WIDTH = 1200;
+      const SOFT_ROW_WIDTH = 1200; // heuristic; container scrolls if smaller
       if (cursorX + estStackW + STACK_GAP_PX > SOFT_ROW_WIDTH) {
         cursorX = STACK_GAP_PX;
         cursorY += rowMaxH + STACK_GAP_PX;
@@ -114,10 +107,7 @@ export function Zone({
         const c = stack.cards[i];
         await onUpdateCard?.(c.id, {
           zone: zoneId,
-          position: {
-            x: cursorX + i * STACK_OFFSET_PX,
-            y: cursorY + i * STACK_OFFSET_PX,
-          },
+          position: { x: cursorX + i * STACK_OFFSET_PX, y: cursorY + i * STACK_OFFSET_PX },
           stackOrder: i,
         });
       }
@@ -129,9 +119,9 @@ export function Zone({
     setOrganizeOnce(true);
   }, [cards, onUpdateCard, zoneId]);
 
-  /** ---------- RENDERERS ---------- */
+  /* ---------- Renderers ---------- */
 
-  // Free-form: honor saved positions; group within-threshold cards into local stacks
+  // Free-form (manual layout)
   const renderFreeForm = () => {
     const threshold = 20;
     const grouped = {};
@@ -155,7 +145,6 @@ export function Zone({
 
     return (
       <div className="relative h-full w-full min-h-0 overflow-auto">
-        {/* Always-present drop surface */}
         <div ref={setNodeRef} className="absolute inset-0" />
         {Object.entries(grouped).map(([key, stack]) => {
           const [x, y] = key.split('-').map(Number);
@@ -181,7 +170,7 @@ export function Zone({
           );
         })}
         {cards.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500">
             <p className="text-sm">Drop cards here</p>
           </div>
         )}
@@ -189,13 +178,12 @@ export function Zone({
     );
   };
 
-  // Organized: robust overlapping stacks with guaranteed 20px gaps using padding-based containers
+  // Organized (auto stacks by type, newest on top)
   const renderOrganized = () => {
     const hasStacks = stacks && stacks.length > 0;
 
     return (
       <div className="relative h-full w-full min-h-0 overflow-auto">
-        {/* Always-present drop surface */}
         <div ref={setNodeRef} className="absolute inset-0" />
         <div
           className="flex flex-wrap items-start content-start"
@@ -205,28 +193,15 @@ export function Zone({
             stacks.map((stack) => {
               const count = stack.cards.length;
               const pad = STACK_OFFSET_PX * Math.max(0, count - 1);
-
-              /** Padding-based stack container:
-               * - First card renders in normal flow to determine natural width/height.
-               * - Subsequent cards are absolutely positioned with right/down offsets.
-               * - We add padding-right/bottom equal to the total offset so the container
-               *   reserves enough space and *contributes* correct width/height to the flex row,
-               *   preventing overlap and ensuring a natural 20px gap between stacks.
-               */
               return (
                 <div
                   key={stack.type}
                   className="relative inline-block"
-                  style={{
-                    paddingRight: pad,
-                    paddingBottom: pad,
-                  }}
+                  style={{ paddingRight: pad, paddingBottom: pad }}
                   title={stack.label}
                 >
-                  {/* anchor for absolutely positioned overlapping cards */}
                   <div className="relative inline-block">
                     {stack.cards.map((card, i) => {
-                      // First card in normal flow; others absolutely positioned
                       const isFirst = i === 0;
                       return (
                         <div
@@ -250,7 +225,7 @@ export function Zone({
               );
             })
           ) : (
-            <div className="relative w-full h-[200px] border border-dashed rounded-lg flex items-center justify-center text-gray-400">
+            <div className="relative w-full h-[200px] border border-dashed rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-700">
               <p className="text-sm">No cards yet</p>
             </div>
           )}
@@ -263,21 +238,32 @@ export function Zone({
     <div
       className={cn(
         'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden',
+        // zone surface w/ dark support
+        'bg-white border-gray-200',
+        'dark:bg-gray-900 dark:border-gray-700',
         zoneConfig.className,
-        isOver && 'ring-2 ring-blue-400 ring-offset-2',
-        'bg-white'
+        isOver && 'ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900'
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-white/70 border-b">
+      <div className="flex items-center justify-between p-3 bg-white/70 dark:bg-gray-800/70 border-b border-gray-200 dark:border-gray-700">
         <div className="flex flex-col text-left">
-          <h3 className="font-semibold text-sm">{titleOverride ?? zoneConfig.title}</h3>
+          <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+            {titleOverride ?? zoneConfig.title}
+          </h3>
           {zoneConfig.description ? (
-            <p className="text-xs text-gray-600">{zoneConfig.description}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-300">{zoneConfig.description}</p>
           ) : null}
         </div>
+
         {showOrganizeButton && (
-          <Button size="sm" variant="secondary" className="shrink-0" onClick={handleOrganizePersist}>
+          <Button
+            size="sm"
+            variant="secondary"
+            /* Restore visible outline in both themes while keeping secondary look */
+            className="shrink-0 border border-gray-300 dark:border-gray-600 bg-transparent dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={handleOrganizePersist}
+          >
             Organize
           </Button>
         )}
@@ -292,7 +278,6 @@ export function Zone({
 }
 
 /* Lazy import to avoid SSR dnd mismatch */
-import dynamic from 'next/dynamic';
 const ConversationCard = dynamic(
   () => import('./ConversationCard').then((m) => m.ConversationCard),
   { ssr: false }
