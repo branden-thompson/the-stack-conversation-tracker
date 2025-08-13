@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3000"  # Changed to avoid conflicts
+    environment:
+      # In-compose URL for the bundled API:
+      NEXT_PUBLIC_API_BASE: "http://api:80"
+    depends_on:
+      - api
+
+  api:
+    image: clue/json-server
+    platform: linux/amd64  # Specify platform to avoid warnings
+    volumes:
+      - ./db.json:/data/db.json:ro
+      - ./routes.json:/data/routes.json:ro
+    ports:
+      - "5051:80"  # Changed to avoid conflicts

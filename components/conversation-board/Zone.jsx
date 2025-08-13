@@ -1,37 +1,45 @@
 /**
  * Zone Component
- * Auto-organizes by type/date with variable-width packing and equal gutters.
- * Measures per-type card width/height; uses max(header scrollWidth, card offsetWidth)
- * so stack wrappers are always wide enough to contain card headers/controls.
+ * Droppable area; can auto-organize cards into stacks by type (Active) or free-form (others).
+ * Fixes:
+ * - Organized stacks never overlap and keep a consistent 20px gap horizontally & vertically
+ * - Stack containers reserve space based on actual card size via padding (robust to dynamic widths/heights)
+ * - Empty zones remain visible; zones fill their resizable space
+ * - "Organize" button uses secondary variant
  */
 
 'use client';
 
-import { useMemo, useRef, useEffect, useCallback, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useDroppable } from '@dnd-kit/core';
-import { cn } from '@/lib/utils';
-import { ConversationCard } from './ConversationCard';
-import { ZONES, CARD_DIMENSIONS } from '@/lib/utils/constants';
-import { Move } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
 
-const TYPE_ORDER_BASE = ['topic', 'question', 'accusation', 'fact'];
-const GUTTER = 20;
-const PADDING_X = 20;
-const PADDING_Y = 20;
-const STACK_TOP = 60;
+/** Spacing & stacking constants */
+const STACK_GAP_PX = 20; // required horizontal & vertical buffer between stacks
+const STACK_OFFSET_PX = CARD_DIMENSIONS?.stackOffset ?? 12;
 
-function getOrderedTypes(cards) {
-  const base = [...TYPE_ORDER_BASE];
-  const seen = new Set(base);
+/** Base card size hints (we'll adapt to real size using padding technique) */
+const BASE_CARD_WIDTH  = Math.max(CARD_DIMENSIONS?.width  ?? 300, 300);
+const BASE_CARD_HEIGHT = Math.max(CARD_DIMENSIONS?.height ?? 140, 140);
+
+/** Helpers */
+function byNewestFirst(a, b) {
+  const at = a.updatedAt ?? a.createdAt ?? 0;
+  const bt = b.updatedAt ?? b.createdAt ?? 0;
+  return bt - at;
+}
+
+function groupCardsByType(cards) {
+  const map = new Map();
   for (const c of cards) {
     const t = c.type || 'topic';
-    if (!seen.has(t)) {
-      seen.add(t);
-      base.push(t);
-    }
+    if (!map.has(t)) map.set(t, []);
+    map.get(t).push(c);
   }
-  return base;
+  for (const [, arr] of map) arr.sort(byNewestFirst);
+  return map;
 }
 
 export function Zone({
@@ -39,311 +47,274 @@ export function Zone({
   cards = [],
   onUpdateCard,
   onDeleteCard,
+  onUpdateCardPosition,
   isDraggingCard,
-  activeCardId,
-  organizeLabel = 'Organize',
-  draggableEnabled = true,
-  titleOverride,
   autoOrganize = false,
-  showOrganizeButton = false,
+  showOrganizeButton = true,
+  titleOverride,
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: zoneId,
-    data: { type: 'zone', accepts: 'card' }
+    data: { type: 'zone', accepts: 'card' },
   });
 
-  const zoneConfig = ZONES[zoneId];
+  const zoneConfig = ZONES?.[zoneId] ?? {
+    title: titleOverride ?? 'Zone',
+    description: '',
+    className: 'bg-white',
+  };
 
-  const canvasRef = useRef(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [typeHeights, setTypeHeights] = useState({});
-  const [typeWidths, setTypeWidths] = useState({});
+  const [organizeOnce, setOrganizeOnce] = useState(false);
+  const effectiveOrganize = autoOrganize || organizeOnce;
 
-  useEffect(() => {
-    const el = canvasRef.current;
-    if (!el) return;
-    const updateWidth = () => {
-      const rect = el.getBoundingClientRect();
-      setContainerWidth(rect.width);
-    };
-    updateWidth();
-    const ro = new ResizeObserver(updateWidth);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const stacks = useMemo(() => {
+    if (!effectiveOrganize) return null;
+    const grouped = groupCardsByType(cards);
+    return Array.from(grouped.entries()).map(([type, bucket]) => ({
+      type,
+      cards: bucket,
+      label: CARD_TYPES?.[type]?.label ?? type,
+    }));
+  }, [cards, effectiveOrganize]);
 
-  // Measure tallest & widest card per type (include header scrollWidth)
-  const measureTypeMetrics = useCallback(() => {
-    const root = canvasRef.current;
-    if (!root) return;
+  /** Persist an organized layout into absolute positions (optional convenience) */
+  const handleOrganizePersist = useCallback(async () => {
+    if (!cards.length) {
+      setOrganizeOnce(true);
+      return;
+    }
+    const grouped = groupCardsByType(cards);
 
-    const presentTypes = Array.from(new Set(cards.map(c => c.type || 'topic')));
-    const nextHeights = {};
-    const nextWidths = {};
+    // We still compute a stable order for writing positions, but the visual layout is now robust
+    // thanks to padding-based stack containers in renderOrganized().
+    let cursorX = STACK_GAP_PX;
+    let cursorY = STACK_GAP_PX;
+    let rowMaxH = 0;
 
-    presentTypes.forEach((t) => {
-      const nodes = root.querySelectorAll(`[data-card-type="${t}"]`);
-      let maxH = 0;
-      let maxW = 0;
-      nodes.forEach((node) => {
-        const nodeH = node.offsetHeight || 0;
-        const nodeW = node.offsetWidth || 0;
+    const ordered = Array.from(grouped.entries()).map(([type, bucket]) => ({
+      type,
+      cards: bucket.sort(byNewestFirst),
+    }));
 
-        // Also capture the header's scrollWidth if present
-        const header = node.querySelector('.cc-header');
-        const headerW = header ? Math.ceil(header.scrollWidth) : 0;
+    // Use conservative “estimated” sizes for persisted coordinates (visual wraps are handled by CSS)
+    for (const stack of ordered) {
+      const count = stack.cards.length;
+      const estStackW = BASE_CARD_WIDTH  + STACK_OFFSET_PX * Math.max(0, count - 1);
+      const estStackH = BASE_CARD_HEIGHT + STACK_OFFSET_PX * Math.max(0, count - 1);
 
-        maxH = Math.max(maxH, nodeH);
-        maxW = Math.max(maxW, nodeW, headerW);
-      });
-      if (maxH > 0) nextHeights[t] = maxH;
-      if (maxW > 0) nextWidths[t] = maxW;
-    });
-
-    const sameH =
-      Object.keys(nextHeights).length === Object.keys(typeHeights).length &&
-      Object.keys(nextHeights).every((k) => nextHeights[k] === typeHeights[k]);
-    const sameW =
-      Object.keys(nextWidths).length === Object.keys(typeWidths).length &&
-      Object.keys(nextWidths).every((k) => nextWidths[k] === typeWidths[k]);
-
-    if (!sameH) setTypeHeights(nextHeights);
-    if (!sameW) setTypeWidths(nextWidths);
-  }, [cards, typeHeights, typeWidths]);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => measureTypeMetrics());
-    return () => cancelAnimationFrame(id);
-  }, [cards, containerWidth, measureTypeMetrics]);
-
-  const computeTypeAnchors = useCallback(() => {
-    const orderedTypes = getOrderedTypes(cards);
-    const presentTypes = orderedTypes.filter(t =>
-      cards.some(c => (c.type || 'topic') === t)
-    );
-
-    const usableW = Math.max(containerWidth - PADDING_X * 2, CARD_DIMENSIONS.width);
-    if (!presentTypes.length) return { anchors: {}, rows: [], rowHeights: [] };
-
-    const rows = [];
-    const rowX = [];
-
-    let currentRow = [];
-    let currentRowX = [];
-    let cursorX = PADDING_X;
-
-    presentTypes.forEach((type) => {
-      const w = Math.max(typeWidths[type] ?? CARD_DIMENSIONS.width, CARD_DIMENSIONS.width);
-      const projectedEnd = cursorX + w;
-      const fitsInCurrentRow = (projectedEnd - PADDING_X) <= usableW;
-
-      if (!currentRow.length) {
-        // first item in row
-      } else if (!fitsInCurrentRow) {
-        rows.push(currentRow);
-        rowX.push(currentRowX);
-        currentRow = [];
-        currentRowX = [];
-        cursorX = PADDING_X;
+      // Wrap if we exceed a soft width; exact wrapping handled by CSS, this is just a persisted hint
+      const SOFT_ROW_WIDTH = 1200;
+      if (cursorX + estStackW + STACK_GAP_PX > SOFT_ROW_WIDTH) {
+        cursorX = STACK_GAP_PX;
+        cursorY += rowMaxH + STACK_GAP_PX;
+        rowMaxH = 0;
       }
 
-      currentRow.push(type);
-      currentRowX.push(cursorX);
-      cursorX += w + GUTTER; // constant horizontal spacing
-    });
+      for (let i = 0; i < count; i++) {
+        const c = stack.cards[i];
+        await onUpdateCard?.(c.id, {
+          zone: zoneId,
+          position: {
+            x: cursorX + i * STACK_OFFSET_PX,
+            y: cursorY + i * STACK_OFFSET_PX,
+          },
+          stackOrder: i,
+        });
+      }
 
-    if (currentRow.length) {
-      rows.push(currentRow);
-      rowX.push(currentRowX);
+      cursorX += estStackW + STACK_GAP_PX;
+      rowMaxH = Math.max(rowMaxH, estStackH);
     }
 
-    const rowHeights = rows.map((row) => {
-      const maxH = row.reduce((acc, t) => {
-        const h = typeHeights[t] ?? CARD_DIMENSIONS.height;
-        return Math.max(acc, h);
-      }, 0);
-      return maxH + GUTTER; // constant vertical spacing
-    });
+    setOrganizeOnce(true);
+  }, [cards, onUpdateCard, zoneId]);
 
-    const anchors = {};
-    rows.forEach((rowTypes, rowIndex) => {
-      const yBase =
-        STACK_TOP +
-        PADDING_Y +
-        rowHeights.slice(0, rowIndex).reduce((sum, v) => sum + v, 0);
+  /** ---------- RENDERERS ---------- */
 
-      rowTypes.forEach((type, i) => {
-        const x = rowX[rowIndex][i];
-        anchors[type] = { x, y: yBase };
-      });
-    });
-
-    return { anchors, rows, rowHeights };
-  }, [cards, containerWidth, typeWidths, typeHeights]);
-
-  const organize = useCallback(async () => {
-    if (!cards.length) return;
-
-    const { anchors } = computeTypeAnchors();
-    if (!anchors || Object.keys(anchors).length === 0) return;
-
-    const groups = {};
-    for (const c of cards) {
-      const t = c.type || 'topic';
-      if (!groups[t]) groups[t] = [];
-      groups[t].push(c);
-    }
-
-    const updates = [];
-
-    for (const type of Object.keys(groups)) {
-      const stack = groups[type];
-      if (!stack.length || !anchors[type]) continue;
-
-      stack.sort((a, b) => {
-        const ta = a.createdAt ?? a.meta?.createdAt ?? 0;
-        const tb = b.createdAt ?? b.meta?.createdAt ?? 0;
-        return ta - tb;
-      });
-
-      const { x, y } = anchors[type];
-
-      stack.forEach((card, idx) => {
-        const desired = { zone: zoneId, position: { x, y }, stackOrder: idx };
-        const pos = card.position || {};
-        const changed =
-          card.zone !== zoneId ||
-          pos.x !== desired.position.x ||
-          pos.y !== desired.position.y ||
-          (card.stackOrder || 0) !== desired.stackOrder;
-        if (changed) updates.push(onUpdateCard(card.id, desired));
-      });
-    }
-
-    if (updates.length) {
-      await Promise.all(updates);
-    }
-  }, [cards, zoneId, onUpdateCard, computeTypeAnchors]);
-
-  useEffect(() => {
-    if (!autoOrganize) return;
-    if (!cards.length) return;
-    const id = requestAnimationFrame(() => organize());
-    return () => cancelAnimationFrame(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoOrganize, containerWidth, typeHeights, typeWidths, cards]);
-
-  const content = useMemo(() => {
-    const stacks = {};
+  // Free-form: honor saved positions; group within-threshold cards into local stacks
+  const renderFreeForm = () => {
     const threshold = 20;
-
+    const grouped = {};
     cards.forEach((card) => {
-      const type = card.type || 'topic';
       const x = card.position?.x ?? 0;
       const y = card.position?.y ?? 0;
-
-      let foundKey = null;
-      for (const key in stacks) {
-        const [t, sx, sy] = key.split('|');
-        if (t !== type) continue;
-        const nx = Number(sx);
-        const ny = Number(sy);
-        if (Math.abs(nx - x) < threshold && Math.abs(ny - y) < threshold) {
-          foundKey = key;
-          break;
+      let key = `${x}-${y}`;
+      for (const k in grouped) {
+        const [sx, sy] = k.split('-').map(Number);
+        if (Math.abs(sx - x) < threshold && Math.abs(sy - y) < threshold) {
+          key = k; break;
         }
       }
-
-      const key = foundKey || `${type}|${x}|${y}`;
-      if (!stacks[key]) stacks[key] = [];
-      stacks[key].push(card);
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(card);
     });
 
-    Object.values(stacks).forEach((stack) => {
-      stack.sort((a, b) => (a.stackOrder || 0) - (b.stackOrder || 0));
-    });
+    Object.values(grouped).forEach((stack) =>
+      stack.sort((a, b) => (a.stackOrder ?? 0) - (b.stackOrder ?? 0))
+    );
 
-    return Object.entries(stacks).map(([key, stack]) => {
-      const [, sx, sy] = key.split('|');
-      const x = Number(sx);
-      const y = Number(sy);
-      const stackType = stack[0]?.type || 'topic';
-
-      const stackWidth = Math.max(typeWidths[stackType] ?? CARD_DIMENSIONS.width, CARD_DIMENSIONS.width);
-
-      return (
-        <div
-          key={key}
-          className="absolute"
-          style={{ left: `${x}px`, top: `${y}px`, width: `${stackWidth}px` }}
-          data-stack-type={stackType}
-        >
-          {stack.map((card, index) => (
-            <ConversationCard
-              key={card.id}
-              card={card}
-              onUpdate={onUpdateCard}
-              onDelete={onDeleteCard}
-              isStacked={stack.length > 1}
-              stackPosition={index}
-              zoneId={zoneId}
-              isOverlay={false}
-              isSourceDragging={isDraggingCard && activeCardId === card.id}
-              draggableEnabled={draggableEnabled}
-            />
-          ))}
-        </div>
-      );
-    });
-  }, [cards, isDraggingCard, activeCardId, zoneId, onUpdateCard, onDeleteCard, draggableEnabled, typeWidths]);
-
-  return (
-    <div
-      className={cn(
-        'relative h-full rounded-lg border-2 transition-all overflow-hidden',
-        zoneConfig?.className,
-        isOver && 'ring-2 ring-blue-400 ring-offset-2'
-      )}
-    >
-      {/* Zone Header */}
-      <div className="flex items-center justify-between p-3 bg-white/60 border-b">
-        <div className="flex items-center gap-2">
-          <Move className="w-4 h-4 text-gray-500" />
-          <div className="text-left">
-            <h3 className="font-semibold text-sm">
-              {titleOverride || zoneConfig?.title}
-            </h3>
-            <p className="text-xs text-gray-600">
-              {zoneConfig?.description}
-            </p>
+    return (
+      <div className="relative h-full w-full min-h-0 overflow-auto">
+        {/* Always-present drop surface */}
+        <div ref={setNodeRef} className="absolute inset-0" />
+        {Object.entries(grouped).map(([key, stack]) => {
+          const [x, y] = key.split('-').map(Number);
+          return (
+            <div key={key} className="absolute" style={{ left: x, top: y }}>
+              {stack.map((card, i) => (
+                <div
+                  key={card.id}
+                  className="absolute"
+                  style={{ left: i * STACK_OFFSET_PX, top: i * STACK_OFFSET_PX }}
+                >
+                  <CardWrapper
+                    card={card}
+                    stackIndex={i}
+                    zoneId={zoneId}
+                    onUpdateCard={onUpdateCard}
+                    onDeleteCard={onDeleteCard}
+                    draggableEnabled={true}
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        })}
+        {cards.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+            <p className="text-sm">Drop cards here</p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">{cards.length} cards</span>
-          {showOrganizeButton && (
-            <Button
-              variant="outline"
-              onClick={organize}
-              title="Stack by type and date (newest on top)"
-            >
-              {organizeLabel}
-            </Button>
-          )}
-        </div>
+        )}
       </div>
+    );
+  };
 
-      {/* Card Canvas */}
-      <div ref={setNodeRef} className="absolute inset-0 top-[56px] p-2 overflow-auto">
-        <div ref={canvasRef} className="relative w-full h-full">
-          {content}
-          {cards.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400">
-              <p className="text-sm">Drop cards here</p>
+  // Organized: robust overlapping stacks with guaranteed 20px gaps using padding-based containers
+  const renderOrganized = () => {
+    const hasStacks = stacks && stacks.length > 0;
+
+    return (
+      <div className="relative h-full w-full min-h-0 overflow-auto">
+        {/* Always-present drop surface */}
+        <div ref={setNodeRef} className="absolute inset-0" />
+        <div
+          className="flex flex-wrap items-start content-start"
+          style={{ gap: `${STACK_GAP_PX}px`, padding: `${STACK_GAP_PX}px` }}
+        >
+          {hasStacks ? (
+            stacks.map((stack) => {
+              const count = stack.cards.length;
+              const pad = STACK_OFFSET_PX * Math.max(0, count - 1);
+
+              /** Padding-based stack container:
+               * - First card renders in normal flow to determine natural width/height.
+               * - Subsequent cards are absolutely positioned with right/down offsets.
+               * - We add padding-right/bottom equal to the total offset so the container
+               *   reserves enough space and *contributes* correct width/height to the flex row,
+               *   preventing overlap and ensuring a natural 20px gap between stacks.
+               */
+              return (
+                <div
+                  key={stack.type}
+                  className="relative inline-block"
+                  style={{
+                    paddingRight: pad,
+                    paddingBottom: pad,
+                  }}
+                  title={stack.label}
+                >
+                  {/* anchor for absolutely positioned overlapping cards */}
+                  <div className="relative inline-block">
+                    {stack.cards.map((card, i) => {
+                      // First card in normal flow; others absolutely positioned
+                      const isFirst = i === 0;
+                      return (
+                        <div
+                          key={card.id}
+                          className={cn(!isFirst && 'absolute')}
+                          style={!isFirst ? { left: i * STACK_OFFSET_PX, top: i * STACK_OFFSET_PX } : undefined}
+                        >
+                          <CardWrapper
+                            card={card}
+                            stackIndex={i}
+                            zoneId={zoneId}
+                            onUpdateCard={onUpdateCard}
+                            onDeleteCard={onDeleteCard}
+                            draggableEnabled={true}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="relative w-full h-[200px] border border-dashed rounded-lg flex items-center justify-center text-gray-400">
+              <p className="text-sm">No cards yet</p>
             </div>
           )}
         </div>
       </div>
+    );
+  };
+
+  return (
+    <div
+      className={cn(
+        'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden',
+        zoneConfig.className,
+        isOver && 'ring-2 ring-blue-400 ring-offset-2',
+        'bg-white'
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-3 bg-white/70 border-b">
+        <div className="flex flex-col text-left">
+          <h3 className="font-semibold text-sm">{titleOverride ?? zoneConfig.title}</h3>
+          {zoneConfig.description ? (
+            <p className="text-xs text-gray-600">{zoneConfig.description}</p>
+          ) : null}
+        </div>
+        {showOrganizeButton && (
+          <Button size="sm" variant="secondary" className="shrink-0" onClick={handleOrganizePersist}>
+            Organize
+          </Button>
+        )}
+      </div>
+
+      {/* Body */}
+      <div className="relative flex-1 min-h-0">
+        {effectiveOrganize ? renderOrganized() : renderFreeForm()}
+      </div>
     </div>
+  );
+}
+
+/* Lazy import to avoid SSR dnd mismatch */
+import dynamic from 'next/dynamic';
+const ConversationCard = dynamic(
+  () => import('./ConversationCard').then((m) => m.ConversationCard),
+  { ssr: false }
+);
+
+function CardWrapper({
+  card,
+  stackIndex,
+  zoneId,
+  onUpdateCard,
+  onDeleteCard,
+  draggableEnabled,
+}) {
+  return (
+    <ConversationCard
+      card={card}
+      onUpdate={onUpdateCard}
+      onDelete={onDeleteCard}
+      isStacked={true}
+      stackPosition={stackIndex}
+      zoneId={zoneId}
+      draggableEnabled={draggableEnabled}
+    />
   );
 }

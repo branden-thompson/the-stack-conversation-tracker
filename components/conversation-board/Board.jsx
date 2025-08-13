@@ -60,22 +60,21 @@ function buildNewCardPayload(type) {
     stackOrder: 0,
     createdAt: now,
     updatedAt: now,
-    createdBy: 'User',
+    createdBy: 'system', // keep footer creator if you show it; can differ from "person"
+    person: 'system',    // <-- default assignee for shortcut-created cards
   };
 }
 
-function Board() {
-  const {
-    cards,
-    loading,
-    error,
-    createCard,
-    updateCard,
-    deleteCard,
-    getCardsByZone,
-    refreshCards
-  } = useCards();
-  
+function BoardInner({
+  cards,
+  loading,
+  error,
+  createCard,
+  updateCard,
+  deleteCard,
+  getCardsByZone,
+  refreshCards,
+}) {
   const [activeCard, setActiveCard] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -226,8 +225,12 @@ function Board() {
         <header className="bg-white border-b px-6 py-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">The Stack | Conversation tracking and facilitation</h1>
-              <p className="text-xs text-gray-600">Organize and track discussion topics visually</p>
+              <h1 className="text-xl font-bold text-gray-900">
+                The Stack | Conversation tracking and facilitation
+              </h1>
+              <p className="text-xs text-gray-600">
+                Organize and track discussion topics visually
+              </p>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => setHelpOpen(true)} variant="outline" size="sm" title="Help and keyboard shortcuts">
@@ -347,12 +350,19 @@ function Board() {
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           onCreateCard={(data) => {
-            const t = (data?.type || '').toLowerCase();
-            let resolved = TYPE_KEYS.topic;
-            if (t.includes('question')) resolved = TYPE_KEYS.question;
-            else if (t.includes('accus')) resolved = TYPE_KEYS.accusation;
-            else if (t.includes('fact') || t.includes('factual') || t.includes('objective')) resolved = TYPE_KEYS.fact;
-            return createCard({ ...buildNewCardPayload(resolved), ...data, type: resolved });
+            // Ensure safe default for person if dialog somehow passes empty/undefined
+            const person = (data?.person && data.person.trim()) ? data.person.trim() : 'system';
+            return createCard({
+              type: data?.type || TYPE_KEYS.topic,
+              content: data?.content || '',
+              zone: 'active',
+              position: { x: 10, y: 60 },
+              stackOrder: 0,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
+              createdBy: 'system',
+              person, // <-- attach assignee
+            });
           }}
         />
 
@@ -362,6 +372,30 @@ function Board() {
   );
 }
 
-// Export BOTH ways to avoid import mismatches
-export default Board;
+export default function Board() {
+  const {
+    cards,
+    loading,
+    error,
+    createCard,
+    updateCard,
+    deleteCard,
+    getCardsByZone,
+    refreshCards
+  } = useCards();
+
+  return (
+    <BoardInner
+      cards={cards}
+      loading={loading}
+      error={error}
+      createCard={createCard}
+      updateCard={updateCard}
+      deleteCard={deleteCard}
+      getCardsByZone={getCardsByZone}
+      refreshCards={refreshCards}
+    />
+  );
+}
+
 export { Board };

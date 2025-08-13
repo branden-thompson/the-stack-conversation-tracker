@@ -1,33 +1,65 @@
 /**
- * ConversationCard Component
- * Draggable card with editable content and flexible vertical size.
- * Ensures header (type + controls) always fits inside the card and edge padding is symmetric.
+ * ConversationCard
+ * Fixes:
+ * - Stack number badge moved to top-right and kept inside the card (no clipping)
  */
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Button } from '@/components/ui/button';
 import {
-  X,
   GripVertical,
-  Layers,
-  User as UserIcon,
-  Calendar as CalendarIcon,
-  Check,
+  X as CloseIcon,
+  ThumbsUp,
+  ThumbsDown,
   Timer,
+  Calendar,
+  User
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
 import { cn } from '@/lib/utils';
-import { useAutosizeTextArea } from '@/lib/hooks/useAutosizeTextArea';
 
-function humanizeType(type) {
-  if (!type) return 'Card';
-  return String(type)
-    .replace(/[_-]+/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+const CONTROL_RAIL_WIDTH = 44;
+const RAIL_BTN_SIZE = 36;
+const RAIL_GAP = 8;
+const RAIL_TOP_BOTTOM = 8;
+const RAIL_BUTTON_COUNT = 4;
+const RAIL_MIN_HEIGHT =
+  RAIL_TOP_BOTTOM * 2 +
+  RAIL_BTN_SIZE * RAIL_BUTTON_COUNT +
+  RAIL_GAP * (RAIL_BUTTON_COUNT - 1);
+
+const HEADER_MIN = 44;
+const FOOTER_MIN = 46;
+const BASE_MIN_CARD_HEIGHT = Math.max(
+  CARD_DIMENSIONS?.height ?? 140,
+  RAIL_MIN_HEIGHT + HEADER_MIN + FOOTER_MIN
+);
+const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 280, 300);
+const MAX_CARD_WIDTH = 480;
+
+const TYPE_LABEL = {
+  topic: 'TOPIC',
+  conversation: 'TOPIC',
+  conversation_topic: 'TOPIC',
+  question: 'QUESTION',
+  open_question: 'QUESTION',
+  'open-question': 'QUESTION',
+  accusation: 'ACCUSATION',
+  claim: 'ACCUSATION',
+  allegation: 'ACCUSATION',
+  fact: 'FACT',
+  factual: 'FACT',
+  factual_statement: 'FACT',
+  'factual-statement': 'FACT',
+  objective_fact: 'FACT',
+  'objective-fact': 'FACT',
+  objective: 'FACT',
+  statement: 'FACT',
+};
 
 export function ConversationCard({
   card,
@@ -36,86 +68,36 @@ export function ConversationCard({
   isStacked = false,
   stackPosition = 0,
   zoneId,
-  isOverlay = false,
-  isSourceDragging = false,
   draggableEnabled = true,
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(card.content ?? '');
-  const [computedMinWidth, setComputedMinWidth] = useState(CARD_DIMENSIONS.width);
-
   const inputRef = useRef(null);
-  const headerRef = useRef(null); // measure header content width
 
-  const cardTypeCfg = CARD_TYPES[card.type] || CARD_TYPES.topic;
-  const typeLabel = cardTypeCfg?.label || humanizeType(card.type || 'topic');
+  const typeKey = card.type || 'topic';
+  const cardType = CARD_TYPES[typeKey] || CARD_TYPES.topic;
 
-  const createdBy = card.createdBy ?? card.meta?.createdBy ?? 'Created By User';
-  const createdAtRaw = card.createdAt ?? card.meta?.createdAt ?? null;
-
-  const createdAtFormatted = createdAtRaw
-    ? new Date(createdAtRaw).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : null;
-
-  useAutosizeTextArea(inputRef, content, { minRows: 3, maxRows: 12 });
-
-  // dnd-kit
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.id,
-    data: { type: 'card', card, fromZone: zoneId },
+    disabled: !draggableEnabled,
+    data: { type: 'card', card, fromZone: zoneId }
   });
 
-  // Measure header width (so card is never narrower than header content)
-  useEffect(() => {
-    if (!headerRef.current) return;
-
-    const el = headerRef.current;
-    const update = () => {
-      // scrollWidth = full width header needs without clipping (includes padding)
-      const headerNeeded = Math.ceil(el.scrollWidth);
-      const minW = Math.max(CARD_DIMENSIONS.width, headerNeeded);
-      setComputedMinWidth(minW);
-    };
-
-    update();
-
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener('resize', update);
-
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', update);
-    };
-  }, [typeLabel, isStacked, stackPosition, content]);
-
-  const translate = CSS.Translate.toString(transform);
-
   const style = {
-    transform: translate,
-    willChange: 'transform',
-    position: isStacked ? 'absolute' : 'relative',
-    top: isStacked ? stackPosition * CARD_DIMENSIONS.stackOffset : 0,
-    left: isStacked ? stackPosition * CARD_DIMENSIONS.stackOffset : 0,
-    zIndex: isDragging ? 1000 : isStacked ? stackPosition + 1 : 1,
-    opacity: isOverlay ? 1 : isSourceDragging ? 0 : 1,
-    // Fill the stack wrapper but never be narrower than header needs
-    width: '100%',
-    minWidth: computedMinWidth,
-    maxWidth: '100%',
-    minHeight: CARD_DIMENSIONS.height,
-    boxSizing: 'border-box',
-    userSelect: isDragging ? 'none' : 'auto',
-    transition: isDragging ? 'none' : undefined,
-    cursor: draggableEnabled ? 'default' : 'not-allowed',
-    pointerEvents: isSourceDragging ? 'none' : 'auto',
+    transform: CSS.Transform.toString(transform),
+    position: isStacked ? 'relative' : 'relative',
+    zIndex: isDragging ? 1000 : (isStacked ? stackPosition + 1 : 1),
+    opacity: isDragging ? 0 : 1,
+    minWidth: MIN_CARD_WIDTH,
+    width: 'max-content',
+    maxWidth: MAX_CARD_WIDTH,
+    minHeight: BASE_MIN_CARD_HEIGHT,
+    transition: isDragging ? 'none' : 'box-shadow 150ms ease, border-color 150ms ease',
+    willChange: isDragging ? 'transform' : 'auto',
+    contain: 'layout paint style',
   };
+
+  const dragHandleProps = draggableEnabled ? listeners : {};
 
   const handleEdit = (e) => {
     e.stopPropagation();
@@ -123,9 +105,8 @@ export function ConversationCard({
   };
 
   const handleSave = async () => {
-    const trimmed = content.trim();
-    if (trimmed !== (card.content ?? '')) {
-      await onUpdate?.(card.id, { content: trimmed });
+    if ((card.content ?? '') !== content) {
+      await onUpdate?.(card.id, { content });
     }
     setIsEditing(false);
   };
@@ -144,25 +125,6 @@ export function ConversationCard({
     }
   };
 
-  const handleUnstack = async (e) => {
-    e.stopPropagation();
-    const newPosition = {
-      x: (card.position?.x ?? 0) + 30,
-      y: (card.position?.y ?? 0) + 30,
-    };
-    await onUpdate?.(card.id, { position: newPosition, stackOrder: 0 });
-  };
-
-  // Move helpers (header buttons)
-  const moveToZone = async (e, targetZone) => {
-    e.stopPropagation();
-    await onUpdate?.(card.id, {
-      zone: targetZone,
-      position: { x: 10, y: 60 },
-      stackOrder: 0,
-    });
-  };
-
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -170,124 +132,120 @@ export function ConversationCard({
     }
   }, [isEditing]);
 
-  const headerDnD = draggableEnabled ? { ...listeners, ...attributes } : {};
+  const moveToZone = async (targetZone) => {
+    if (!targetZone || targetZone === zoneId) return;
+    await onUpdate?.(card.id, {
+      zone: targetZone,
+      stackOrder: 0,
+      position: card.position ?? { x: 10, y: 60 },
+      updatedAt: Date.now(),
+    });
+  };
+
+  const createdTs = card.createdAt ?? Date.now();
+  const dateText = useMemo(() => {
+    try {
+      return new Date(createdTs).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return '';
+    }
+  }, [createdTs]);
+
+  const person = (card.person && String(card.person).trim()) || 'system';
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        'relative flex flex-col rounded-lg border-2 shadow-sm transition-[box-shadow] hover:shadow-md hover:z-20',
-        'overflow-visible',
-        cardTypeCfg.color,
-        cardTypeCfg.borderColor,
-        cardTypeCfg.textColor,
-        isOverlay && 'hover:shadow-sm'
+        'relative rounded-xl border-2 shadow-sm bg-white flex flex-col',
+        cardType?.borderColor,
+        cardType?.color,
+        cardType?.textColor
       )}
-      role="group"
-      data-card-type={card.type || 'topic'}
-      data-card-id={card.id}
+      {...attributes}
     >
-      {/* HEADER — entire area is the drag handle (if enabled) */}
+      {/* Right-side rail */}
       <div
-        ref={headerRef}
-        className={cn(
-          // Asymmetric header padding: left = pl-3, right = pr-0.
-          // Controls group adds pr-3 so edge gaps (left icon vs right X) are identical.
-          'cc-header flex items-center justify-between pl-3 pr-0 py-3 border-b border-gray-200 bg-white/70',
-          'whitespace-nowrap',
-          draggableEnabled ? 'cursor-grab active:cursor-grabbing select-none' : 'cursor-default'
-        )}
-        {...headerDnD}
+        className="absolute top-2 right-2 flex flex-col items-center gap-2"
+        style={{ width: CONTROL_RAIL_WIDTH }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Type label (never truncated) */}
-        <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-gray-400 shrink-0" />
-          <span className="text-xs font-medium">{typeLabel}</span>
-        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Delete card"
+          title="Delete"
+          className="rounded-md border bg-white hover:bg-gray-50 text-gray-700"
+          onClick={() => onDelete?.(card.id)}
+        >
+          <CloseIcon className="w-4 h-4" />
+        </Button>
 
-        {/* Controls (uniform circular badges; min 20px gap from title; right pr-3 for symmetric edge padding) */}
-        <div className="flex items-center gap-1 ml-5 pr-3">
-          {/* Resolve → Resolved zone */}
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => moveToZone(e, 'resolved')}
-            className="p-1 rounded transition-colors hover:bg-green-100"
-            aria-label="Move to Resolved"
-            title="Move to Resolved"
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-500 text-white">
-              <Check className="w-3 h-3" />
-            </span>
-          </button>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Move to Resolved"
+          title="Resolve"
+          className="rounded-full bg-green-500 hover:bg-green-600 text-white shadow-sm"
+          onClick={() => moveToZone('resolved')}
+        >
+          <ThumbsUp className="w-4 h-4" />
+        </Button>
 
-          {/* Unresolved → Unresolved zone */}
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => moveToZone(e, 'unresolved')}
-            className="p-1 rounded transition-colors hover:bg-red-100"
-            aria-label="Move to Unresolved"
-            title="Move to Unresolved"
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white">
-              <X className="w-3 h-3" />
-            </span>
-          </button>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Move to Unresolved"
+          title="Mark Unresolved"
+          className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
+          onClick={() => moveToZone('unresolved')}
+        >
+          <ThumbsDown className="w-4 h-4" />
+        </Button>
 
-          {/* Parking Lot → Parking zone */}
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => moveToZone(e, 'parking')}
-            className="p-1 rounded transition-colors hover:bg-gray-100"
-            aria-label="Move to Parking Lot"
-            title="Move to Parking Lot"
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-700 text-white">
-              <Timer className="w-3 h-3" />
-            </span>
-          </button>
-
-          {/* Unstack (only when stacked & not base) */}
-          {isStacked && stackPosition > 0 && (
-            <button
-              type="button"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={handleUnstack}
-              className="p-1 rounded transition-colors hover:bg-gray-200/50"
-              aria-label="Unstack card"
-              title="Separate from stack"
-            >
-              <Layers className="w-3 h-3" />
-            </button>
-          )}
-
-          {/* Delete */}
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete?.(card.id);
-            }}
-            className="p-1 rounded transition-colors hover:bg-red-200/50"
-            aria-label="Delete card"
-            title="Delete"
-          >
-            <X className="w-3 h-3" />
-          </button>
-        </div>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Move to Parking Lot"
+          title="Parking Lot"
+          className="rounded-full bg-slate-700 hover:bg-slate-800 text-white shadow-sm"
+          onClick={() => moveToZone('parking')}
+        >
+          <Timer className="w-4 h-4" />
+        </Button>
       </div>
 
-      {/* CONTENT — grows as needed; preserved line breaks */}
-      <div className="flex-1 px-3 py-4">
+      {/* Header */}
+      <div
+        className="flex items-center justify-between pl-2 pr-2 pt-2"
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + 8 }}
+        {...dragHandleProps}
+      >
+        <div className="flex items-center gap-2">
+          <GripVertical className="w-4 h-4 text-gray-500" />
+          <span className="font-extrabold tracking-wide text-gray-800 text-lg">
+            {TYPE_LABEL[typeKey] || 'TOPIC'}
+          </span>
+        </div>
+        <div className="w-4 h-4" />
+      </div>
+
+      {/* Content */}
+      <div
+        className="px-4 py-3 flex-1"
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + 12 }}
+        onDoubleClick={handleEdit}
+      >
         {isEditing ? (
           <textarea
             ref={inputRef}
@@ -296,27 +254,18 @@ export function ConversationCard({
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
             className={cn(
-              'w-full p-2 text-lg rounded border text-center',
-              'focus:outline-none focus:ring-1 bg-white/80',
-              'whitespace-pre-wrap break-words',
-              'resize-none overflow-hidden',
-              cardTypeCfg.borderColor
+              'w-full p-2 text-base rounded-md border resize-none',
+              'focus:outline-none focus:ring-1 bg-white/90',
+              cardType?.borderColor
             )}
-            rows={3}
+            rows={4}
             placeholder="Enter card content..."
           />
         ) : (
-          <div
-            className="text-lg leading-snug text-center whitespace-pre-wrap break-words cursor-text"
-            onDoubleClick={handleEdit}
-            onMouseDown={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            {content ? (
-              content
+          <div className="text-lg text-gray-700 text-center min-h-[56px] leading-relaxed break-words px-2">
+            {card.content && card.content.trim().length > 0 ? (
+              card.content
             ) : (
               <span className="text-gray-400 italic">Double-click to add content...</span>
             )}
@@ -324,34 +273,26 @@ export function ConversationCard({
         )}
       </div>
 
-      {/* FOOTER */}
-      <div className="h-10 px-3 border-t border-gray-200 bg-white/70 text-xs text-gray-500 leading-none">
-        <div className="h-full flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1 min-w-0 max-w-[60%]">
-            {createdAtFormatted && (
-              <>
-                <CalendarIcon className="w-4 h-4 shrink-0" />
-                <span className="truncate" title={createdAtFormatted}>
-                  {createdAtFormatted}
-                </span>
-              </>
-            )}
+      {/* Footer (stacked vertically; anchored bottom) */}
+      <div
+        className="px-3 pb-3 pt-1 text-sm text-gray-700 mt-auto"
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + 8 }}
+      >
+        <div className="flex flex-col items-start gap-1 text-gray-600">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="text-[12px]">{dateText}</span>
           </div>
-          <div className="flex items-center gap-1 min-w-0 max-w-[38%]">
-            <UserIcon className="w-4 h-4 shrink-0" />
-            <span className="truncate" title={String(createdBy)}>
-              {String(createdBy)}
-            </span>
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4" />
+            <span className="text-[12px] capitalize">{person}</span>
           </div>
         </div>
       </div>
 
-      {/* STACK BADGE */}
+      {/* Stack index badge (top-right, inside card, never clipped) */}
       {isStacked && stackPosition > 0 && (
-        <div
-          className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm font-medium z-50 pointer-events-none"
-          title={`Stack position ${stackPosition + 1}`}
-        >
+        <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm font-medium pointer-events-none z-10">
           {stackPosition + 1}
         </div>
       )}

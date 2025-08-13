@@ -1,165 +1,144 @@
 /**
  * CardDialog Component
- * Modal dialog for creating new conversation cards
+ * Modal to create a new card. Now supports assigning a person (data only).
  */
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { CARD_TYPES, ZONES } from '@/lib/utils/constants';
+import { Label } from '@/components/ui/label';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { CARD_TYPES } from '@/lib/utils/constants';
+import { usePeople } from '@/lib/hooks/usePeople';
 
-export function CardDialog({ 
-  open, 
-  onOpenChange, 
-  onCreateCard 
-}) {
-  const [content, setContent] = useState('');
+export function CardDialog({ open, onOpenChange, onCreateCard }) {
   const [type, setType] = useState('topic');
-  const [zone, setZone] = useState('active');
-  const [isCreating, setIsCreating] = useState(false);
-  
-  /**
-   * Handle form submission
-   */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!content.trim()) {
-      return;
-    }
-    
-    setIsCreating(true);
-    
-    try {
-      await onCreateCard({
-        content: content.trim(),
-        type,
-        zone,
-        position: { x: 10, y: 60 }, // Default position in zone
-        stackOrder: 0
-      });
-      
-      // Reset form
-      setContent('');
-      setType('topic');
-      setZone('active');
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Error creating card:', error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-  
-  /**
-   * Handle dialog close
-   */
+  const [content, setContent] = useState('');
+  const [assignee, setAssignee] = useState(''); // free text; defaults to 'system' if empty
+  const [submitting, setSubmitting] = useState(false);
+
+  const { people, createPerson, findByName } = usePeople();
+
+  const typeOptions = useMemo(() => {
+    const keys = Object.keys(CARD_TYPES || {});
+    // keep common order if available
+    const order = ['topic', 'question', 'accusation', 'fact', 'factual', 'factual_statement', 'objective_fact'];
+    const sorted = [...new Set([...order, ...keys])].filter(k => CARD_TYPES?.[k]);
+    return sorted.map(k => ({ key: k, label: CARD_TYPES[k].label || k }));
+  }, []);
+
   const handleClose = () => {
-    setContent('');
-    setType('topic');
-    setZone('active');
-    onOpenChange(false);
+    onOpenChange?.(false);
   };
-  
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
+    if (submitting) return;
+
+    setSubmitting(true);
+    try {
+      // Resolve person safely
+      let personName = assignee?.trim();
+      if (!personName) {
+        personName = 'system'; // safe default
+      }
+
+      // Ensure person exists (create if not found)
+      const existing = findByName(personName);
+      if (!existing && personName.toLowerCase() !== 'system') {
+        await createPerson(personName);
+      }
+
+      await onCreateCard?.({
+        type,
+        content: content?.trim() || '',
+        person: personName, // <-- attach person (string) to card payload
+      });
+
+      // reset
+      setType('topic');
+      setContent('');
+      setAssignee('');
+      handleClose();
+    } catch (err) {
+      // keep dialog open; you could surface an error toast here
+      /* noop */
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Create New Card</DialogTitle>
-          <DialogDescription>
-            Add a new conversation card to track discussion topics
-          </DialogDescription>
+          <DialogTitle>New Card</DialogTitle>
+          <DialogDescription>Create a new conversation card.</DialogDescription>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
-            {/* Card Content */}
-            <div className="grid gap-2">
-              <Label htmlFor="content">Content</Label>
-              <Input
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Enter card content..."
-                className="col-span-3"
-                autoFocus
-              />
-            </div>
-            
-            {/* Card Type */}
-            <div className="grid gap-2">
-              <Label htmlFor="type">Card Type</Label>
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Select card type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(CARD_TYPES).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <div className="flex items-center gap-2">
-                        <div 
-                          className={`w-3 h-3 rounded ${config.color} ${config.borderColor} border`}
-                        />
-                        {config.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Initial Zone */}
-            <div className="grid gap-2">
-              <Label htmlFor="zone">Initial Zone</Label>
-              <Select value={zone} onValueChange={setZone}>
-                <SelectTrigger id="zone">
-                  <SelectValue placeholder="Select zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(ZONES).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {/* Type */}
+          <div className="space-y-2">
+            <Label>Card type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a type" />
+              </SelectTrigger>
+              <SelectContent>
+                {typeOptions.map(opt => (
+                  <SelectItem key={opt.key} value={opt.key}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleClose}
-              disabled={isCreating}
-            >
+
+          {/* Content */}
+          <div className="space-y-2">
+            <Label>Content</Label>
+            <textarea
+              className="w-full border rounded-md p-2 text-sm min-h-[90px]"
+              placeholder="What’s the topic/question/fact/accusation?"
+              value={content}
+              onChange={e => setContent(e.target.value)}
+            />
+          </div>
+
+          {/* Assignee */}
+          <div className="space-y-2">
+            <Label>Assigned to (person)</Label>
+            <Input
+              placeholder="e.g. Alex (leave blank to default to 'system')"
+              value={assignee}
+              onChange={(e) => setAssignee(e.target.value)}
+              list="people-list"
+            />
+            {/* Simple datalist for quick pick of existing names */}
+            <datalist id="people-list">
+              {people.map(p => (
+                <option key={p.id} value={p.name} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={submitting}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
-              disabled={!content.trim() || isCreating}
-            >
-              {isCreating ? 'Creating...' : 'Create Card'}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? 'Creating…' : 'Create'}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
