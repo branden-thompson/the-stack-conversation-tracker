@@ -1,8 +1,9 @@
 /**
- * Board Component (LK.G + Left Tray + Conversation Controls + 8px gutters)
+ * Board Component (LK.G + Left Tray + Conversation Controls wired to API + 8px gutters)
  * - Hamburger icon-button + left slide-in tray
- * - Right-side conversation controls (status + Start/Pause/Stop)
+ * - Right-side conversation controls (status + Start/Pause/Stop) wired to /api/conversations
  * - Consistent 8px gaps between buttons in all header groups (gap-2)
+ * - Status block uses min-w-[270px] and mr-3 (12px) before Start button
  */
 
 'use client';
@@ -19,6 +20,7 @@ import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useConversations } from '@/lib/hooks/useConversations'; // <-- NEW
 import {
   ResizableHandle,
   ResizablePanel,
@@ -69,69 +71,6 @@ function buildNewCardPayload(type) {
   };
 }
 
-// Local conversation state for UI; can later be swapped to API without UI changes.
-function useLocalConversation() {
-  const [status, setStatus] = useState/** @type {'idle'|'active'|'paused'} */('idle');
-  const [name, setName] = useState('');
-  const [startedAt, setStartedAt] = useState(0);
-  const [accumulatedMs, setAccumulatedMs] = useState(0);
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    if (status !== 'active') return;
-    const t = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(t);
-  }, [status]);
-
-  const elapsed = useMemo(() => {
-    if (status === 'active') return accumulatedMs + (Date.now() - startedAt);
-    return accumulatedMs;
-  }, [status, startedAt, accumulatedMs, tick]);
-
-  const fmt = (ms) => {
-    if (!ms || ms < 0) return '00:00:00';
-    const s = Math.floor(ms / 1000);
-    const h = String(Math.floor(s / 3600)).padStart(2, '0');
-    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-    const ss = String(s % 60).padStart(2, '0');
-    return `${h}:${m}:${ss}`;
-  };
-
-  const start = () => {
-    let n = name;
-    if (!n) {
-      n = window.prompt('Name this conversation:', '') || '';
-    }
-    if (!n.trim()) return;
-    setName(n.trim());
-    setStartedAt(Date.now());
-    setStatus('active');
-  };
-
-  const pause = () => {
-    if (status !== 'active') return;
-    setAccumulatedMs((prev) => prev + (Date.now() - startedAt));
-    setStatus('paused');
-  };
-
-  const resume = () => {
-    if (status !== 'paused') return;
-    setStartedAt(Date.now());
-    setStatus('active');
-  };
-
-  const stop = () => {
-    const ok = window.confirm('End this conversation? This will stop the timer.');
-    if (!ok) return;
-    setStatus('idle');
-    setStartedAt(0);
-    setAccumulatedMs(0);
-    setName('');
-  };
-
-  return { status, name, elapsed, fmt, start, pause, resume, stop };
-}
-
 function BoardInner({
   cards,
   loading,
@@ -152,8 +91,8 @@ function BoardInner({
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
 
-  // Conversation controls (local)
-  const convo = useLocalConversation();
+  // Conversation controls (API)
+  const convo = useConversations(); // <-- now using API
 
   const boardRef = useRef(null);
 
@@ -162,12 +101,12 @@ function BoardInner({
   }, []);
 
   useKeyboardShortcuts({
-    onNewTopic: () => createCard(buildNewCardPayload(TYPE_KEYS.topic)),        // ctrl+n
-    onNewQuestion: () => createCard(buildNewCardPayload(TYPE_KEYS.question)),  // ctrl+q
-    onNewAccusation: () => createCard(buildNewCardPayload(TYPE_KEYS.accusation)), // ctrl+a
-    onNewFact: () => createCard(buildNewCardPayload(TYPE_KEYS.fact)),          // ctrl+f
-    onNewOpinion: () => createCard(buildNewCardPayload(TYPE_KEYS.opinion)),    // ctrl+o
-    onNewGuess: () => createCard(buildNewCardPayload(TYPE_KEYS.guess)),        // ctrl+g
+    onNewTopic: () => createCard(buildNewCardPayload('topic')),        // ctrl+n
+    onNewQuestion: () => createCard(buildNewCardPayload('question')),  // ctrl+q
+    onNewAccusation: () => createCard(buildNewCardPayload('accusation')), // ctrl+a
+    onNewFact: () => createCard(buildNewCardPayload('fact')),          // ctrl+f
+    onNewOpinion: () => createCard(buildNewCardPayload('opinion')),    // ctrl+o
+    onNewGuess: () => createCard(buildNewCardPayload('guess')),        // ctrl+g
     onDeleteSelected: selectedCard ? () => deleteCard(selectedCard) : null,
     onResetLayout: resetLayout,
     onDeselect: () => setSelectedCard(null),
@@ -363,38 +302,40 @@ function BoardInner({
 
               {/* Group 3: Conversation status + controls (gap-2) */}
               <div className="flex items-center gap-2">
-                {/* Status (adds 12px gap via mr-3 and prevents shrink via min-w-[270px]) */}
+                {/* Status: 12px extra space via mr-3 + min width to avoid shrink */}
                 <div className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 min-w-[270px]">
                   <Clock3 className="w-4 h-4 mr-2 opacity-80" />
                   <div className="flex flex-col leading-tight">
                     <span className="font-semibold">
-                      {convo.status === 'idle'
+                      {!convo.active
                         ? 'No active conversation'
-                        : convo.name || 'Unnamed conversation'}
+                        : convo.active.name || 'Unnamed conversation'}
                     </span>
-                    <span className="font-mono text-xs opacity-80">{convo.fmt(convo.elapsed)}</span>
+                    <span className="font-mono text-xs opacity-80">
+                      {convo.fmt(convo.elapsedMs)}
+                    </span>
                   </div>
                 </div>
 
-                {/* Start / Pause / Stop */}
+                {/* Start / Pause / Stop -> wired to API */}
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={convo.status === 'active'}
+                  disabled={convo.active?.status === 'active'}
                   onClick={() => {
-                    if (convo.status === 'paused') convo.resume();
+                    if (convo.active?.status === 'paused') convo.resume();
                     else convo.start();
                   }}
-                  title={convo.status === 'paused' ? 'Resume' : 'Start'}
+                  title={convo.active?.status === 'paused' ? 'Resume' : 'Start'}
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  {convo.status === 'paused' ? 'Resume' : 'Start'}
+                  {convo.active?.status === 'paused' ? 'Resume' : 'Start'}
                 </Button>
 
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={convo.status !== 'active'}
+                  disabled={convo.active?.status !== 'active'}
                   onClick={convo.pause}
                   title="Pause"
                 >
@@ -405,7 +346,7 @@ function BoardInner({
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={convo.status === 'idle'}
+                  disabled={!convo.active}
                   onClick={convo.stop}
                   title="Stop"
                 >
@@ -513,7 +454,7 @@ function BoardInner({
           onOpenChange={setDialogOpen}
           onCreateCard={(data) => {
             const person = (data?.person && data.person.trim()) ? data.person.trim() : 'system';
-            const type = data?.type || TYPE_KEYS.topic;
+            const type = data?.type || 'topic';
             return createCard({
               type,
               content: data?.content || '',

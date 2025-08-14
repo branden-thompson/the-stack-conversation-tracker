@@ -65,6 +65,9 @@ export default function DevConvos() {
     listEvents, clearEvents,
   } = useConversations();
 
+  // MINIMAL HARDENING: always treat items as an array
+  const safeItems = Array.isArray(items) ? items : [];
+
   const [name, setName] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [events, setEvents] = useState([]);
@@ -72,10 +75,11 @@ export default function DevConvos() {
   const [filterType, setFilterType] = useState('all');
   const [query, setQuery] = useState('');
   const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
+  
 
   const selected = useMemo(
-    () => items.find((c) => c.id === (selectedId || activeId)) || null,
-    [items, selectedId, activeId]
+    () => safeItems.find((c) => c.id === (selectedId || activeId)) || null,
+    [safeItems, selectedId, activeId]
   );
 
   // Poll events for the selected conversation
@@ -161,7 +165,7 @@ export default function DevConvos() {
         <div className="flex-1 overflow-auto divide-y divide-gray-200 dark:divide-gray-800">
           {loading && <div className="p-3 text-sm">Loading…</div>}
           {error && <div className="p-3 text-sm text-red-500">{error}</div>}
-          {items.map((c) => (
+          {safeItems.map((c) => (
             <div
               key={c.id}
               className={`p-3 cursor-pointer ${selected?.id === c.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
