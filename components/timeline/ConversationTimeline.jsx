@@ -118,7 +118,7 @@ export function ConversationTimeline({ conversation, events }) {
           <div key={dateString} className="mb-12">
             {/* Date separator */}
             <div className="flex items-center justify-center mb-8">
-              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
+              <div className="z-2000 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-sm">
                 {formatDate(dayEvents[0].at)}
               </div>
             </div>
@@ -127,7 +127,7 @@ export function ConversationTimeline({ conversation, events }) {
             {dayEvents.map((event, eventIndex) => {
               const globalIndex = events.indexOf(event);
               const previousEvent = globalIndex > 0 ? events[globalIndex - 1] : null;
-              const isLeft = eventIndex % 2 === 0;
+              const isLeft = eventIndex % 2 === 1;
               
               return (
                 <div key={event.id} className="relative mb-8">
@@ -141,8 +141,8 @@ export function ConversationTimeline({ conversation, events }) {
                   )}
                   
                   {/* Timeline node */}
-                  <div className={`flex ${isLeft ? 'justify-end pr-8' : 'justify-start pl-8'}`}>
-                    <div className={`w-full max-w-md ${isLeft ? 'mr-4' : 'ml-4'}`}>
+                  <div className={`flex ${isLeft ? 'justify-end pr-16' : 'justify-start pl-16'}`}>
+                    <div className="w-full max-w-md">
                       <TimelineNode
                         event={event}
                         isLeft={isLeft}
@@ -156,12 +156,6 @@ export function ConversationTimeline({ conversation, events }) {
                     <div className="w-4 h-4 bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-400 rounded-full shadow-sm" />
                   </div>
                   
-                  {/* Connection line */}
-                  <div className={`absolute top-1/2 transform -translate-y-0.5 h-0.5 bg-blue-300 dark:bg-blue-600 ${
-                    isLeft 
-                      ? 'right-1/2 w-8 mr-2' 
-                      : 'left-1/2 w-8 ml-2'
-                  }`} />
                 </div>
               );
             })}
