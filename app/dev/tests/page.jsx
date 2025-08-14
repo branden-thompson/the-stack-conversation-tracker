@@ -32,43 +32,85 @@ import {
 
 // Mock test data structure (will be replaced with real data)
 const INITIAL_TEST_STATE = {
-  status: 'idle', // idle, running, completed, failed
+  status: 'idle',
   lastRun: null,
   results: {
     unit: {
-      total: 83,
-      passed: 83,
+      total: 117,
+      passed: 117,
       failed: 0,
-      duration: '1.85s',
+      duration: '0.00s',
       files: [
-        { name: 'useCards.test.ts', tests: 17, passed: 17, failed: 0 },
-        { name: 'useConversationControls.test.ts', tests: 22, passed: 22, failed: 0 },
-        { name: 'useBoardDnD.test.ts', tests: 18, passed: 18, failed: 0 },
-        { name: 'utils.test.js', tests: 26, passed: 26, failed: 0 }
-      ]
+        {
+                "name": "useCards.test.ts",
+                "tests": 17,
+                "passed": 17,
+                "failed": 0
+        },
+        {
+                "name": "useConversationControls.test.ts",
+                "tests": 22,
+                "passed": 22,
+                "failed": 0
+        },
+        {
+                "name": "useBoardDnD.test.ts",
+                "tests": 18,
+                "passed": 18,
+                "failed": 0
+        },
+        {
+                "name": "utils.test.js",
+                "tests": 26,
+                "passed": 26,
+                "failed": 0
+        },
+        {
+                "name": "card.test.jsx",
+                "tests": 34,
+                "passed": 34,
+                "failed": 0
+        }
+]
     },
     integration: {
       total: 69,
       passed: 69,
       failed: 0,
-      duration: '2.10s',
+      duration: '0.00s',
       files: [
-        { name: 'cards.test.js', tests: 21, passed: 21, failed: 0 },
-        { name: 'events.test.js', tests: 16, passed: 16, failed: 0 },
-        { name: 'database.test.js', tests: 32, passed: 32, failed: 0 }
-      ]
+        {
+                "name": "cards.test.js",
+                "tests": 21,
+                "passed": 21,
+                "failed": 0
+        },
+        {
+                "name": "events.test.js",
+                "tests": 16,
+                "passed": 16,
+                "failed": 0
+        },
+        {
+                "name": "database.test.js",
+                "tests": 32,
+                "passed": 32,
+                "failed": 0
+        }
+]
     }
   },
   coverage: {
-    statements: 78.42,
-    branches: 87.15,
-    functions: 72.88,
-    lines: 78.42,
+    statements: 85.20,
+    branches: 89.50,
+    functions: 78.80,
+    lines: 85.20,
     files: {
       'lib/hooks/useCards.js': { statements: 97.86, branches: 94.11, functions: 100, lines: 97.86 },
       'lib/hooks/useConversationControls.js': { statements: 100, branches: 89.13, functions: 100, lines: 100 },
       'lib/hooks/useBoardDnD.js': { statements: 100, branches: 80.55, functions: 100, lines: 100 },
       'lib/utils.js': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'components/ui/card.jsx': { statements: 100, branches: 100, functions: 100, lines: 100 },
       'app/api/cards/route.js': { statements: 95.24, branches: 92.31, functions: 100, lines: 95.24 },
       'app/api/conversations/[id]/events/route.js': { statements: 100, branches: 85.71, functions: 100, lines: 100 },
       'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 }

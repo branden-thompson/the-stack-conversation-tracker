@@ -11,7 +11,9 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "test:update-dev": "vitest run && node scripts/update-dev-data.js",
+    "update-dev-data": "node scripts/update-dev-data.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

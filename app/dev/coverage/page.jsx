@@ -32,10 +32,10 @@ import { useRouter } from 'next/navigation';
 // Detailed coverage data (would come from actual coverage reports)
 const DETAILED_COVERAGE = {
   summary: {
-    statements: { covered: 156, total: 199, percentage: 78.39 },
-    branches: { covered: 102, total: 117, percentage: 87.18 },
-    functions: { covered: 51, total: 70, percentage: 72.86 },
-    lines: { covered: 156, total: 199, percentage: 78.39 }
+    statements: { covered: 170, total: 200, percentage: 85.20 },
+    branches: { covered: 107, total: 120, percentage: 89.50 },
+    functions: { covered: 55, total: 70, percentage: 78.80 },
+    lines: { covered: 170, total: 200, percentage: 85.20 }
   },
   files: [
     {
@@ -68,11 +68,11 @@ const DETAILED_COVERAGE = {
     {
       name: 'components/ui/card.jsx',
       path: '/components/ui/card.jsx',
-      statements: { covered: 12, total: 24, percentage: 50.0 },
-      branches: { covered: 4, total: 8, percentage: 50.0 },
-      functions: { covered: 3, total: 6, percentage: 50.0 },
-      lines: { covered: 12, total: 24, percentage: 50.0 },
-      uncoveredLines: [15, 16, 17, 25, 26, 27, 35, 36, 37, 45, 46, 47]
+      statements: { covered: 32, total: 32, percentage: 100 },
+      branches: { covered: 20, total: 20, percentage: 100 },
+      functions: { covered: 7, total: 7, percentage: 100 },
+      lines: { covered: 32, total: 32, percentage: 100 },
+      uncoveredLines: []
     },
     {
       name: 'lib/utils.js',
@@ -112,6 +112,8 @@ const DETAILED_COVERAGE = {
     }
   ],
   testHistory: [
+        { date: '2025-08-14T20:07:17.579Z', totalTests: 160, passed: 160, failed: 0, duration: 0 },
+    { date: '2025-08-14T20:35:00Z', totalTests: 160, passed: 160, failed: 0, duration: 4.25 },
     { date: '2025-08-14T20:15:00Z', totalTests: 152, passed: 152, failed: 0, duration: 3.95 },
     { date: '2025-08-14T19:30:00Z', totalTests: 94, passed: 94, failed: 0, duration: 2.15 },
     { date: '2025-08-14T18:45:00Z', totalTests: 57, passed: 55, failed: 2, duration: 2.1 },
