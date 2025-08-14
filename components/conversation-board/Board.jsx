@@ -13,10 +13,10 @@ import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
 import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
+import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
-import { useConversations } from '@/lib/hooks/useConversations';
 
 const DEFAULT_LAYOUT = {
   rows: { top: 70, bottom: 30 },
@@ -58,15 +58,6 @@ function buildNewCardPayload(type) {
   };
 }
 
-// Format runtime display for header
-function fmtDuration(ms) {
-  if (!ms || ms < 0) return '00:00:00';
-  const s = Math.floor(ms / 1000);
-  const h = String(Math.floor(s / 3600)).padStart(2, '0');
-  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-  const ss = String(s % 60).padStart(2, '0');
-  return `${h}:${m}:${ss}`;
-}
 
 function BoardInner({
   cards,
@@ -85,38 +76,9 @@ function BoardInner({
   const [isDraggingCard, setIsDraggingCard] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
 
-  // Conversations API
-  const conv = useConversations();
-  const { activeId, items: convItems, create, patch, refresh: refreshConvos } = conv;
-
-  // Display runtime ticker (client-side) for active conversation
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const activeConversation = useMemo(() => {
-    if (!activeId) return null;
-    return (convItems || []).find(c => c.id === activeId) || null;
-  }, [activeId, convItems]);
-
-  const runtime = useMemo(() => {
-    const c = activeConversation;
-    if (!c) return '00:00:00';
-    if (c.status === 'active') {
-      const base = c.startedAt || Date.now();
-      const paused = c.pausedAt ? c.pausedAt - base : 0;
-      return fmtDuration(Date.now() - base - (paused > 0 ? paused : 0));
-    }
-    if (c.status === 'paused' && c.startedAt) {
-      return fmtDuration((c.pausedAt || Date.now()) - c.startedAt);
-    }
-    if (c.status === 'stopped' && c.startedAt) {
-      return fmtDuration((c.stoppedAt || c.updatedAt) - c.startedAt);
-    }
-    return '00:00:00';
-  }, [activeConversation, tick]);
+  // Conversation controls and state
+  const conversationControls = useConversationControls();
+  const { activeConversation, runtime, onStart, onPause, onResumeOrStart, onStop, conversationApi: conv } = conversationControls;
 
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
@@ -288,38 +250,6 @@ function BoardInner({
     );
   }
 
-
-  // Conversation header actions
-  async function onStart() {
-    let n = window.prompt('Name this conversation:', '') || '';
-    n = n.trim();
-    if (!n) return;
-    await create(n);         // server sets it active
-    await refreshConvos();
-  }
-
-  async function onPause() {
-    const c = activeConversation;
-    if (!c) return;
-    await patch(c.id, { status: 'paused', pausedAt: Date.now() });
-  }
-
-  async function onResumeOrStart() {
-    const c = activeConversation;
-    if (c && c.status === 'paused') {
-      await patch(c.id, { status: 'active', startedAt: Date.now(), pausedAt: null, stoppedAt: null });
-    } else {
-      await onStart();
-    }
-  }
-
-  async function onStop() {
-    const c = activeConversation;
-    if (!c) return;
-    const ok = window.confirm('End this conversation? This will stop the timer.');
-    if (!ok) return;
-    await patch(c.id, { status: 'stopped', stoppedAt: Date.now() });
-  }
 
   return (
     <DndContext collisionDetection={collisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
