@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { DndContext, DragOverlay, pointerWithin, rectIntersection } from '@dnd-kit/core';
-import { Plus, RefreshCw, HelpCircle, Maximize2, Menu, Play, Pause as PauseIcon, Square, Clock3, X } from 'lucide-react';
+import { Plus, RefreshCw, HelpCircle, Maximize2, Menu, Play, Pause as PauseIcon, Square, Clock3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Zone } from './Zone';
 import { ConversationCard } from './ConversationCard';
@@ -16,6 +16,7 @@ import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { LeftTray } from '@/components/ui/left-tray';
 import { useConversations } from '@/lib/hooks/useConversations';
 import {
   ResizableHandle,
@@ -148,12 +149,6 @@ function BoardInner({
     selectedCard,
   });
 
-  // ESC closes tray
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape' && trayOpen) setTrayOpen(false); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [trayOpen]);
 
   const cardsByZone = getCardsByZone();
 
@@ -586,66 +581,14 @@ function BoardInner({
         <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       </div>
 
-      {/* LEFT TRAY + OVERLAY */}
-      {trayOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={() => setTrayOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-      <aside
-        className={[
-          'fixed z-50 inset-y-0 left-0 w-[280px] bg-white dark:bg-gray-800',
-          'border-r border-gray-200 dark:border-gray-700',
-          'shadow-lg transform transition-transform duration-200',
-          trayOpen ? 'translate-x-0' : '-translate-x-full',
-        ].join(' ')}
-        role="dialog"
-        aria-label="Main menu"
-      >
-        <div className="h-full flex flex-col">
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">The Stack</div>
-            <Button variant="outline" size="icon" onClick={() => setTrayOpen(false)}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* Scrollable content: Zones list only (Quick actions moved to footer) */}
-          <div className="flex-1 overflow-auto p-3 space-y-2 text-sm">
-            <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
-            <ul className="space-y-1">
-              <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
-              <li className="text-gray-700 dark:text-gray-200">Parking Lot</li>
-              <li className="text-gray-700 dark:text-gray-200">Resolved</li>
-              <li className="text-gray-700 dark:text-gray-200">Unresolved</li>
-            </ul>
-          </div>
-
-          {/* Footer: Quick actions just above ThemeToggle */}
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
-            <div>
-              <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
-              <div className="mt-2 space-y-2">
-                <Button variant="outline" className="w-full justify-start" onClick={() => setDialogOpen(true)}>
-                  + New Card
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={resetLayout}>
-                  Reset Layout
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={refreshCards}>
-                  Refresh Cards
-                </Button>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </aside>
+      {/* LEFT TRAY */}
+      <LeftTray
+        isOpen={trayOpen}
+        onClose={() => setTrayOpen(false)}
+        onNewCard={() => setDialogOpen(true)}
+        onResetLayout={resetLayout}
+        onRefreshCards={refreshCards}
+      />
     </DndContext>
   );
 }
