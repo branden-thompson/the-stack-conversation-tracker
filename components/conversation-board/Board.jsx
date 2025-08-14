@@ -1,14 +1,15 @@
 /**
- * Board Component
- * - Adds OPINION type + remaps ctrl+o → OPINION; ctrl+f → FACT
- * - Preserves dark mode, zones, DnD, stacking-by-type
+ * Board Component (LK.G + Left Tray)
+ * - Restores hamburger icon-button in header
+ * - Adds left slide-in tray (overlay + ESC/Click to close)
+ * - Preserves LAST KNOWN GOOD behaviors (DnD, zones, shortcuts, theme, spacing)
  */
 
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { DndContext, DragOverlay, pointerWithin, rectIntersection } from '@dnd-kit/core';
-import { Plus, RefreshCw, HelpCircle, Maximize2 } from 'lucide-react';
+import { Plus, RefreshCw, HelpCircle, Maximize2, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Zone } from './Zone';
 import { ConversationCard } from './ConversationCard';
@@ -30,7 +31,11 @@ const DEFAULT_LAYOUT = {
   bottomRowCols: { resolved: 50, unresolved: 50 },
 };
 
-const TOOLBAR_H = 40; // keep in sync with ThemeToggle
+// Header sizing & spacing (kept consistent with LK.G)
+const TOOLBAR_H = 40;               // match ThemeToggle height
+const GROUP_GAP = 8;                // space between buttons within a group
+const DIVIDER_MX = 'mx-6';          // doubled divider spacing (padding tweak we added)
+const HEADER_SIDE_GAP = 'gap-3';    // between logo/hamburger & title
 
 function resolveCardType(aliases, fallback) {
   if (CARD_TYPES && typeof CARD_TYPES === 'object') {
@@ -47,7 +52,7 @@ const TYPE_KEYS = {
   accusation: resolveCardType(['accusation', 'claim', 'allegation'], 'accusation'),
   fact: resolveCardType(['fact', 'factual', 'factual_statement', 'objective_fact'], 'fact'),
   guess: resolveCardType(['guess'], 'guess'),
-  opinion: resolveCardType(['opinion'], 'opinion'), // NEW
+  opinion: resolveCardType(['opinion'], 'opinion'),
 };
 
 function buildNewCardPayload(type) {
@@ -82,24 +87,37 @@ function BoardInner({
   const [isDraggingCard, setIsDraggingCard] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
 
+  // NEW: left tray state
+  const [trayOpen, setTrayOpen] = useState(false);
+
   const boardRef = useRef(null);
 
   const resetLayout = useCallback(() => {
     setLayoutKey((k) => k + 1);
   }, []);
 
+  // Keyboard shortcuts (LK.G map: ctrl+n/q/a/f/o/g)
   useKeyboardShortcuts({
-    onNewTopic: () => createCard(buildNewCardPayload(TYPE_KEYS.topic)),
-    onNewQuestion: () => createCard(buildNewCardPayload(TYPE_KEYS.question)),
-    onNewAccusation: () => createCard(buildNewCardPayload(TYPE_KEYS.accusation)),
+    onNewTopic: () => createCard(buildNewCardPayload(TYPE_KEYS.topic)),        // ctrl+n
+    onNewQuestion: () => createCard(buildNewCardPayload(TYPE_KEYS.question)),  // ctrl+q
+    onNewAccusation: () => createCard(buildNewCardPayload(TYPE_KEYS.accusation)), // ctrl+a
     onNewFact: () => createCard(buildNewCardPayload(TYPE_KEYS.fact)),          // ctrl+f
     onNewOpinion: () => createCard(buildNewCardPayload(TYPE_KEYS.opinion)),    // ctrl+o
-    onNewGuess: () => createCard(buildNewCardPayload(TYPE_KEYS.guess)),
+    onNewGuess: () => createCard(buildNewCardPayload(TYPE_KEYS.guess)),        // ctrl+g
     onDeleteSelected: selectedCard ? () => deleteCard(selectedCard) : null,
     onResetLayout: resetLayout,
     onDeselect: () => setSelectedCard(null),
     selectedCard,
   });
+
+  // ESC closes tray
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && trayOpen) setTrayOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [trayOpen]);
 
   const cardsByZone = getCardsByZone();
 
@@ -124,7 +142,7 @@ function BoardInner({
         x: Math.max(10, (draggedCard.position?.x || 10) + delta.x),
         y: Math.max(60, (draggedCard.position?.y || 60) + delta.y),
       };
-      // stack only with same type
+      // Only stack with same type
       const targetZoneCards = (cardsByZone[over.id] || []).filter((c) => c.type === draggedCard.type);
       const threshold = 30;
       let stackTarget = null;
@@ -211,56 +229,73 @@ function BoardInner({
         {/* Header */}
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 shadow-sm">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src="/stack-icon.svg" alt="The Stack" width={50} height={50} className="block" />
+            {/* Left side: Hamburger + Title */}
+            <div className={`flex items-center ${HEADER_SIDE_GAP}`}>
+              <Button
+                variant="outline"
+                size="icon"
+                className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px]`}
+                title="Open menu"
+                onClick={() => setTrayOpen(true)}
+              >
+                <Menu className="w-4 h-4" />
+              </Button>
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                  The Stack | Conversation tracking and facilitation
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  The Stack
                 </h1>
                 <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Organize and track discussion topics visually
+                  Conversation tracking and facilitation
                 </p>
               </div>
             </div>
 
-            {/* Right controls: ThemeToggle + 40px gap + other buttons */}
-            <div className="flex gap-2 items-center">
-              <div className="mr-10">
+            {/* Right side: Theme | divider | Help/Reset/Refresh/New */}
+            <div className="flex items-center">
+              {/* Group 1: Theme */}
+              <div className={`flex items-center gap-${GROUP_GAP}`}>
                 <ThemeToggle />
               </div>
-              <Button
-                onClick={() => setHelpOpen(true)}
-                variant="outline"
-                title="Help and keyboard shortcuts"
-                className={actionBtnClass}
-              >
-                <HelpCircle className="w-4 h-4 mr-2" />
-                Help
-              </Button>
-              <Button
-                onClick={resetLayout}
-                variant="outline"
-                title="Reset layout to start sizes"
-                className={actionBtnClass}
-              >
-                <Maximize2 className="w-4 h-4 mr-2" />
-                Reset
-              </Button>
-              <Button
-                onClick={refreshCards}
-                variant="outline"
-                className={actionBtnClass}
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Refresh
-              </Button>
-              <Button
-                onClick={() => setDialogOpen(true)}
-                className={actionBtnClass}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Card
-              </Button>
+
+              {/* Divider with balanced spacing */}
+              <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
+
+              {/* Group 2: App controls */}
+              <div className={`flex items-center gap-${GROUP_GAP}`}>
+                <Button
+                  onClick={() => setHelpOpen(true)}
+                  variant="outline"
+                  title="Help and keyboard shortcuts"
+                  className={actionBtnClass}
+                >
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Help
+                </Button>
+                <Button
+                  onClick={resetLayout}
+                  variant="outline"
+                  title="Reset layout to start sizes"
+                  className={actionBtnClass}
+                >
+                  <Maximize2 className="w-4 h-4 mr-2" />
+                  Reset
+                </Button>
+                <Button
+                  onClick={refreshCards}
+                  variant="outline"
+                  className={actionBtnClass}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button
+                  onClick={() => setDialogOpen(true)}
+                  className={actionBtnClass}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Card
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -346,8 +381,8 @@ function BoardInner({
           </ResizablePanelGroup>
         </main>
 
-        {/* Drag Overlay */}
-        <DragOverlay>
+        {/* Drag Overlay (no snap-back) */}
+        <DragOverlay dropAnimation={null}>
           {activeCard ? (
             <div style={{ cursor: 'grabbing' }}>
               <ConversationCard card={activeCard} onUpdate={() => {}} onDelete={() => {}} />
@@ -378,6 +413,62 @@ function BoardInner({
 
         <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       </div>
+
+      {/* LEFT TRAY + OVERLAY */}
+      {/* Overlay */}
+      {trayOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40"
+          onClick={() => setTrayOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+      {/* Tray panel */}
+      <aside
+        className={[
+          'fixed z-50 inset-y-0 left-0 w-[280px] bg-white dark:bg-gray-800',
+          'border-r border-gray-200 dark:border-gray-700',
+          'shadow-lg transform transition-transform duration-200',
+          trayOpen ? 'translate-x-0' : '-translate-x-full',
+        ].join(' ')}
+        role="dialog"
+        aria-label="Main menu"
+      >
+        <div className="h-full flex flex-col">
+          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Menu</div>
+            <Button variant="outline" size="sm" onClick={() => setTrayOpen(false)}>
+              Close
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-auto p-3 space-y-2 text-sm">
+            {/* Put whatever you want here; placeholders for now */}
+            <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
+            <Button variant="outline" className="w-full justify-start" onClick={() => setDialogOpen(true)}>
+              + New Card
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={resetLayout}>
+              Reset Layout
+            </Button>
+            <Button variant="outline" className="w-full justify-start" onClick={refreshCards}>
+              Refresh Cards
+            </Button>
+
+            <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
+            <ul className="space-y-1">
+              <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
+              <li className="text-gray-700 dark:text-gray-200">Parking Lot</li>
+              <li className="text-gray-700 dark:text-gray-200">Resolved</li>
+              <li className="text-gray-700 dark:text-gray-200">Unresolved</li>
+            </ul>
+          </div>
+
+          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
+            <ThemeToggle />
+          </div>
+        </div>
+      </aside>
     </DndContext>
   );
 }
