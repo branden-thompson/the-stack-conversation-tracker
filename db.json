@@ -1,45 +1,5 @@
 {
-  "cards": [
-    {
-      "id": "A8YpMWhQ2fdsART0OrJwT",
-      "type": "topic",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-14T14:31:02.800Z",
-      "updatedAt": "2025-08-14T14:31:02.800Z"
-    },
-    {
-      "id": "E40QpiEVlD2GEaXWZ6Ne9",
-      "type": "opinion",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-14T14:31:04.882Z",
-      "updatedAt": "2025-08-14T14:31:04.882Z"
-    },
-    {
-      "id": "rKTPA44TSPIYk5C1t48uG",
-      "type": "question",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-14T14:31:06.852Z",
-      "updatedAt": "2025-08-14T14:31:06.852Z"
-    }
-  ],
+  "cards": [],
   "people": [
     {
       "id": "p-system",

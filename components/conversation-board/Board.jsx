@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { DndContext, pointerWithin, rectIntersection } from '@dnd-kit/core';
-import { Plus, RefreshCw, HelpCircle, Maximize2, Menu, Play, Pause as PauseIcon, Square, Clock3 } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BoardCanvas } from './BoardCanvas';
 import { CardDialog } from './CardDialog';
@@ -14,8 +14,8 @@ import { HelpDialog } from './HelpDialog';
 import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { LeftTray } from '@/components/ui/left-tray';
+import { AppHeader } from '@/components/ui/app-header';
 import { useConversations } from '@/lib/hooks/useConversations';
 
 const DEFAULT_LAYOUT = {
@@ -24,9 +24,6 @@ const DEFAULT_LAYOUT = {
   bottomRowCols: { resolved: 50, unresolved: 50 },
 };
 
-const TOOLBAR_H = 40;
-const DIVIDER_MX = 'mx-6';
-const HEADER_SIDE_GAP = 'gap-3';
 
 function resolveCardType(aliases, fallback) {
   if (CARD_TYPES && typeof CARD_TYPES === 'object') {
@@ -282,7 +279,7 @@ function BoardInner({
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <div className="text-center text-red-600">
           <p className="mb-4">Error loading board: {error}</p>
-          <Button onClick={refreshCards} variant="outline" className={`h-[${TOOLBAR_H}px] leading-none`}>
+          <Button onClick={refreshCards} variant="outline" className="h-10 leading-none">
             <RefreshCw className="w-4 h-4 mr-2" />
             Retry
           </Button>
@@ -291,7 +288,6 @@ function BoardInner({
     );
   }
 
-  const actionBtnClass = `h-[${TOOLBAR_H}px] leading-none`;
 
   // Conversation header actions
   async function onStart() {
@@ -329,125 +325,18 @@ function BoardInner({
     <DndContext collisionDetection={collisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* Header */}
-        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 shadow-sm">
-          <div className="flex items-center justify-between">
-            {/* Left: Hamburger + Title */}
-            <div className={`flex items-center ${HEADER_SIDE_GAP}`}>
-              <Button
-                variant="outline"
-                size="icon"
-                className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px]`}
-                title="Open menu"
-                onClick={() => setTrayOpen(true)}
-              >
-                <Menu className="w-4 h-4" />
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">The Stack</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-300">
-                  Conversation tracking and facilitation
-                </p>
-              </div>
-            </div>
-
-            {/* Right groups */}
-            <div className="flex items-center">
-              {/* Theme */}
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-              </div>
-
-              {/* Divider */}
-              <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
-
-              {/* App controls */}
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => setHelpOpen(true)}
-                  variant="outline"
-                  title="Help and keyboard shortcuts"
-                  className={actionBtnClass}
-                >
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Help
-                </Button>
-                <Button
-                  onClick={resetLayout}
-                  variant="outline"
-                  title="Reset layout to start sizes"
-                  className={actionBtnClass}
-                >
-                  <Maximize2 className="w-4 h-4 mr-2" />
-                  Reset
-                </Button>
-                <Button
-                  onClick={refreshCards}
-                  variant="outline"
-                  className={actionBtnClass}
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
-                <Button
-                  onClick={() => setDialogOpen(true)}
-                  className={actionBtnClass}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Card
-                </Button>
-              </div>
-
-              {/* Divider */}
-              <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
-
-              {/* Conversation status + controls */}
-              <div className="flex items-center gap-2">
-                <div className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 min-w-[270px]">
-                  <Clock3 className="w-4 h-4 mr-2 opacity-80" />
-                  <div className="flex flex-col leading-tight">
-                    <span className="font-semibold">
-                      {activeConversation ? activeConversation.name : 'No active conversation'}
-                    </span>
-                    <span className="font-mono text-xs opacity-80">{runtime}</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className={actionBtnClass}
-                  disabled={activeConversation?.status === 'active'}
-                  onClick={onResumeOrStart}
-                  title={activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  {activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className={actionBtnClass}
-                  disabled={activeConversation?.status !== 'active'}
-                  onClick={onPause}
-                  title="Pause"
-                >
-                  <PauseIcon className="w-4 h-4 mr-2" />
-                  Pause
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className={actionBtnClass}
-                  disabled={!activeConversation || activeConversation.status === 'stopped'}
-                  onClick={onStop}
-                  title="Stop"
-                >
-                  <Square className="w-4 h-4 mr-2" />
-                  Stop
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AppHeader
+          onOpenTray={() => setTrayOpen(true)}
+          onOpenHelp={() => setHelpOpen(true)}
+          onOpenNewCard={() => setDialogOpen(true)}
+          onResetLayout={resetLayout}
+          onRefreshCards={refreshCards}
+          activeConversation={activeConversation}
+          runtime={runtime}
+          onConversationResumeOrStart={onResumeOrStart}
+          onConversationPause={onPause}
+          onConversationStop={onStop}
+        />
 
         {/* Board Canvas */}
         <BoardCanvas
