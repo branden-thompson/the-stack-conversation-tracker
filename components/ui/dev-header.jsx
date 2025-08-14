@@ -53,7 +53,7 @@ export function DevHeader({
           <div>
             <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{title}</h1>
             {subtitle && (
-              <p className="text-xs text-stone-600 dark:text-stone-300">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 {subtitle}
               </p>
             )}

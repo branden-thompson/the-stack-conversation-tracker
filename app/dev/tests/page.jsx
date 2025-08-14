@@ -79,7 +79,7 @@ function TestResultsCard({ title, results, icon: Icon }) {
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
         <div className={`px-2 py-1 rounded text-sm font-medium ${
-          isSuccess ? 'bg-green-100 text-green-800' : results.total === 0 ? 'bg-gray-100 text-stone-600' : 'bg-red-100 text-red-800'
+          isSuccess ? 'bg-green-100 text-green-800' : results.total === 0 ? 'bg-stone-100 text-stone-600 dark:text-stone-300' : 'bg-red-100 text-red-800'
         }`}>
           {results.total === 0 ? 'No Tests' : isSuccess ? 'All Passing' : `${results.failed} Failed`}
         </div>
@@ -88,24 +88,24 @@ function TestResultsCard({ title, results, icon: Icon }) {
       <div className="grid grid-cols-4 gap-4 mb-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-stone-900 dark:text-stone-100">{results.total}</div>
-          <div className="text-sm text-stone-600">Total</div>
+          <div className="text-sm text-stone-500 dark:text-stone-400">Total</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">{results.passed}</div>
-          <div className="text-sm text-stone-600">Passed</div>
+          <div className="text-sm text-stone-500 dark:text-stone-400">Passed</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-red-600">{results.failed}</div>
-          <div className="text-sm text-stone-600">Failed</div>
+          <div className="text-sm text-stone-500 dark:text-stone-400">Failed</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">{successRate.toFixed(0)}%</div>
-          <div className="text-sm text-stone-600">Success</div>
+          <div className="text-sm text-stone-500 dark:text-stone-400">Success</div>
         </div>
       </div>
       
       {results.duration && (
-        <div className="text-sm text-stone-600">
+        <div className="text-sm text-stone-500 dark:text-stone-400">
           Duration: {results.duration}
         </div>
       )}
@@ -113,7 +113,7 @@ function TestResultsCard({ title, results, icon: Icon }) {
       {/* Individual test files */}
       {results.files && results.files.length > 0 && (
         <div className="mt-4 space-y-2">
-          <h4 className="text-sm font-medium text-stone-700">Test Files:</h4>
+          <h4 className="text-sm font-medium text-stone-600 dark:text-stone-300">Test Files:</h4>
           {results.files.map((file) => (
             <div key={file.name} className="flex items-center justify-between p-2 bg-stone-50 dark:bg-stone-800 rounded">
               <span className="text-sm">{file.name}</span>
@@ -156,14 +156,14 @@ function CoverageCard({ coverage }) {
             <div className={`text-2xl font-bold ${getColorClass(item.value)}`}>
               {item.value.toFixed(1)}%
             </div>
-            <div className="text-sm text-stone-600">{item.label}</div>
+            <div className="text-sm text-stone-500 dark:text-stone-400">{item.label}</div>
           </div>
         ))}
       </div>
       
       {/* Top files by coverage */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-stone-700">Hook Coverage:</h4>
+        <h4 className="text-sm font-medium text-stone-600 dark:text-stone-300">Hook Coverage:</h4>
         {Object.entries(coverage.files).map(([file, metrics]) => (
           <div key={file} className="flex items-center justify-between p-2 bg-stone-50 dark:bg-stone-800 rounded">
             <span className="text-sm font-mono">{file.split('/').pop()}</span>
@@ -242,7 +242,7 @@ export default function TestsPage() {
       </Button>
       <Button 
         variant="outline"
-        onClick={() => window.open('/api/tests/coverage', '_blank')}
+        onClick={() => window.open('/dev/coverage', '_blank')}
         className="h-[40px] leading-none"
       >
         <BarChart3 className="w-4 h-4 mr-2" />
@@ -281,15 +281,15 @@ export default function TestsPage() {
                        `${testState.results.unit.failed} Tests Failing`}
                     </h2>
                     {testState.lastRun && (
-                      <p className="text-sm text-stone-600">
+                      <p className="text-sm text-stone-500 dark:text-stone-400">
                         Last run: {new Date(testState.lastRun).toLocaleString()}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-stone-600">{testState.results.unit.duration}</span>
+                  <Clock className="w-4 h-4 text-stone-400 dark:text-stone-500" />
+                  <span className="text-sm text-stone-500 dark:text-stone-400">{testState.results.unit.duration}</span>
                 </div>
               </div>
             </Card>

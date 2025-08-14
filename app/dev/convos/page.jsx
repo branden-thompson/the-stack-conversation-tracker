@@ -223,7 +223,7 @@ export default function DevConvos() {
                   {c.status}
                 </span>
               </div>
-              <div className="text-xs text-stone-500 mt-1">
+              <div className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                 {new Date(c.createdAt).toLocaleString()}
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -298,7 +298,7 @@ export default function DevConvos() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{selected.name}</div>
-                <div className="text-xs text-stone-500">
+                <div className="text-xs text-stone-400 dark:text-stone-500">
                   id: {selected.id}
                 </div>
               </div>
@@ -342,7 +342,7 @@ export default function DevConvos() {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-stone-500">Select a conversation from the left.</div>
+            <div className="text-sm text-stone-400 dark:text-stone-500">Select a conversation from the left.</div>
           )}
         </div>
 
@@ -399,21 +399,21 @@ export default function DevConvos() {
                             <div className="text-sm font-medium">
                               {typeLabel(e.type)}
                             </div>
-                            <div className="text-xs font-mono text-stone-500 dark:text-stone-400">
+                            <div className="text-xs font-mono text-stone-400 dark:text-stone-500 dark:text-stone-400">
                               {new Date(e.at).toLocaleString()}
                             </div>
                           </div>
-                          <div className="text-xs text-stone-700 dark:text-stone-300 mt-1">
+                          <div className="text-xs text-stone-600 dark:text-stone-400 mt-1">
                             {summarizePayload(e.type, e.payload)}
                           </div>
                         </li>
                       ))}
                     </ol>
                   ) : (
-                    <div className="p-6 text-sm text-stone-500">No timeline entries.</div>
+                    <div className="p-6 text-sm text-stone-400 dark:text-stone-500">No timeline entries.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-stone-500">Select a conversation to view timeline.</div>
+                  <div className="p-6 text-sm text-stone-400 dark:text-stone-500">Select a conversation to view timeline.</div>
                 )}
               </div>
             </section>
@@ -442,10 +442,10 @@ export default function DevConvos() {
                       ))}
                     </ul>
                   ) : (
-                    <div className="p-6 text-sm text-stone-500">No events.</div>
+                    <div className="p-6 text-sm text-stone-400 dark:text-stone-500">No events.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-stone-500">Select a conversation to view events.</div>
+                  <div className="p-6 text-sm text-stone-400 dark:text-stone-500">Select a conversation to view events.</div>
                 )}
               </div>
             </section>

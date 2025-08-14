@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { X, MessageSquare, TestTube, Home } from 'lucide-react';
+import { X, MessageSquare, TestTube, Home, BarChart3 } from 'lucide-react';
 
 export function LeftTray({
   isOpen,
@@ -94,6 +94,14 @@ export function LeftTray({
                 >
                   <TestTube className="w-4 h-4 mr-2" />
                   Test Results
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/coverage' ? 'default' : 'ghost'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/coverage'); onClose(); }}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Coverage Report
                 </Button>
               </div>
             </div>
