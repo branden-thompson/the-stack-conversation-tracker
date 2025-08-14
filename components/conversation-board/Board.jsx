@@ -606,7 +606,7 @@ function BoardInner({
       >
         <div className="h-full flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div className="text-md font-semibold text-gray-900 dark:text-gray-100">The Stack</div>
+            <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">The Stack</div>
             <Button variant="outline" size="icon" onClick={() => setTrayOpen(false)}>
               <X className="w-4 h-4" />
             </Button>
