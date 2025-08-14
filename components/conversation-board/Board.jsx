@@ -6,7 +6,7 @@
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { DndContext, DragOverlay, pointerWithin, rectIntersection } from '@dnd-kit/core';
-import { Plus, RefreshCw, HelpCircle, Maximize2, Menu, Play, Pause as PauseIcon, Square, Clock3 } from 'lucide-react';
+import { Plus, RefreshCw, HelpCircle, Maximize2, Menu, Play, Pause as PauseIcon, Square, Clock3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Zone } from './Zone';
 import { ConversationCard } from './ConversationCard';
@@ -606,24 +606,14 @@ function BoardInner({
       >
         <div className="h-full flex flex-col">
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">Menu</div>
-            <Button variant="outline" size="sm" onClick={() => setTrayOpen(false)}>
-              Close
+            <div className="text-md font-semibold text-gray-900 dark:text-gray-100">The Stack</div>
+            <Button variant="outline" size="icon" onClick={() => setTrayOpen(false)}>
+              <X className="w-4 h-4" />
             </Button>
           </div>
 
+          {/* Scrollable content: Zones list only (Quick actions moved to footer) */}
           <div className="flex-1 overflow-auto p-3 space-y-2 text-sm">
-            <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setDialogOpen(true)}>
-              + New Card
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={resetLayout}>
-              Reset Layout
-            </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={refreshCards}>
-              Refresh Cards
-            </Button>
-
             <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
             <ul className="space-y-1">
               <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
@@ -633,8 +623,26 @@ function BoardInner({
             </ul>
           </div>
 
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
-            <ThemeToggle />
+          {/* Footer: Quick actions just above ThemeToggle */}
+          <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+            <div>
+              <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
+              <div className="mt-2 space-y-2">
+                <Button variant="outline" className="w-full justify-start" onClick={() => setDialogOpen(true)}>
+                  + New Card
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={resetLayout}>
+                  Reset Layout
+                </Button>
+                <Button variant="outline" className="w-full justify-start" onClick={refreshCards}>
+                  Refresh Cards
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </aside>

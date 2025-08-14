@@ -1,32 +1,5 @@
 {
-  "cards": [
-    {
-      "id": "70-HhgqQLbqDmwGEodE0x",
-      "type": "topic",
-      "content": "test",
-      "zone": "parking",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-14T04:08:34.886Z",
-      "updatedAt": "2025-08-14T04:09:00.720Z"
-    },
-    {
-      "id": "rW8X7z6hwamKYaiYTxHrF",
-      "type": "fact",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-14T04:08:43.539Z",
-      "updatedAt": "2025-08-14T04:08:43.539Z"
-    }
-  ],
+  "cards": [],
   "people": [
     {
       "id": "p-system",
