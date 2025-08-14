@@ -352,4 +352,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { extractTestResults, extractCoverageData, updateTestsPage, updateCoveragePage };// test comment
+export { extractTestResults, extractCoverageData, updateTestsPage, updateCoveragePage };
