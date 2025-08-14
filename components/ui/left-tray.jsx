@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { X, MessageSquare, TestTube, Home, BarChart3 } from 'lucide-react';
+import { X, MessageSquare, TestTube, Home, BarChart3, Timeline } from 'lucide-react';
 
 export function LeftTray({
   isOpen,
@@ -102,6 +102,14 @@ export function LeftTray({
                 >
                   <Home className="w-4 h-4 mr-2" />
                   Main App
+                </Button>
+                <Button 
+                  variant={pathname?.startsWith('/timeline') ? 'default' : 'ghost'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/timeline/none'); onClose(); }}
+                >
+                  <Timeline className="w-4 h-4 mr-2" />
+                  Timeline Explorer
                 </Button>
               </div>
             </div>
