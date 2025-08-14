@@ -32,6 +32,29 @@ export function LeftTray({
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
+  // Dynamic color schemes based on page type
+  const colorScheme = isDevPage ? {
+    // App pages: Blue/cyan theme for technical feel
+    bg: 'bg-stone-50 dark:bg-stone-900',
+    border: 'border-stone-200 dark:border-stone-700',
+    headerBg: 'bg-stone-100 dark:bg-stone-800',
+    headerBorder: 'border-stone-200 dark:border-stone-700',
+    headerText: 'text-stone-900 dark:text-stone-100',
+    sectionText: 'text-stone-600 dark:text-stone-300',
+    divider: 'border-stone-200 dark:border-stone-700',
+    footerBorder: 'border-stone-200 dark:border-stone-700'
+  } : {
+    // Dev pages:  Warm stone theme for conversation focus
+    bg: 'bg-slate-50 dark:bg-slate-900',
+    border: 'border-slate-200 dark:border-slate-700',
+    headerBg: 'bg-slate-100 dark:bg-slate-800',
+    headerBorder: 'border-slate-200 dark:border-slate-700',
+    headerText: 'text-slate-900 dark:text-slate-100',
+    sectionText: 'text-slate-600 dark:text-slate-300',
+    divider: 'border-slate-200 dark:border-slate-700',
+    footerBorder: 'border-slate-200 dark:border-slate-700'
+  };
+
   return (
     <>
       {/* OVERLAY */}
@@ -46,9 +69,10 @@ export function LeftTray({
       {/* TRAY */}
       <aside
         className={[
-          'fixed z-50 inset-y-0 left-0 w-[280px] bg-white dark:bg-gray-800',
-          'border-r border-gray-200 dark:border-gray-700',
-          'shadow-lg transform transition-transform duration-200',
+          'fixed z-50 inset-y-0 left-0 w-[280px]',
+          colorScheme.bg,
+          `border-r ${colorScheme.border}`,
+          'shadow-lg transform transition-all duration-200',
           isOpen ? 'translate-x-0' : '-translate-x-full',
         ].join(' ')}
         role="dialog"
@@ -56,8 +80,8 @@ export function LeftTray({
       >
         <div className="h-full flex flex-col">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <div className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          <div className={`px-4 py-3 ${colorScheme.headerBg} border-b ${colorScheme.headerBorder} flex items-center justify-between`}>
+            <div className={`text-xl font-semibold ${colorScheme.headerText}`}>
               {title}
             </div>
             <Button variant="outline" size="icon" onClick={onClose}>
@@ -69,7 +93,7 @@ export function LeftTray({
           <div className="flex-1 overflow-auto p-3 space-y-4 text-sm">
             {/* Navigation */}
             <div>
-              <div className="pt-2 text-gray-600 dark:text-gray-300">Navigation</div>
+              <div className={`pt-2 ${colorScheme.sectionText}`}>Navigation</div>
               <div className="mt-2 space-y-1">
                 <Button 
                   variant={pathname === '/' ? 'default' : 'ghost'}
@@ -82,24 +106,12 @@ export function LeftTray({
               </div>
             </div>
 
-            {/* Zones (only show for main app) */}
-            {!isDevPage && (
-              <div>
-                <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
-                <ul className="mt-2 space-y-1">
-                  <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
-                  <li className="text-gray-700 dark:text-gray-200">Parking Lot</li>
-                  <li className="text-gray-700 dark:text-gray-200">Resolved</li>
-                  <li className="text-gray-700 dark:text-gray-200">Unresolved</li>
-                </ul>
-              </div>
-            )}
           </div>
 
           {/* Footer: Dev Ops Center, Quick actions and theme toggle */}
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          <div className={`p-3 border-t ${colorScheme.footerBorder} space-y-3`}>
             <div>
-              <div className="text-gray-600 dark:text-gray-300">Dev Ops Center</div>
+              <div className={colorScheme.sectionText}>Dev Ops Center</div>
               <div className="mt-2 space-y-2">
                 <Button 
                   variant={pathname === '/dev/tests' ? 'default' : 'outline'}
@@ -129,10 +141,10 @@ export function LeftTray({
             </div>
 
             {/* Divider */}
-            <div className="border-t border-gray-200 dark:border-gray-700"></div>
+            <div className={`border-t ${colorScheme.divider}`}></div>
 
             <div>
-              <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
+              <div className={colorScheme.sectionText}>Quick actions</div>
               <div className="mt-2 space-y-2">
                 <Button 
                   variant="outline" 
