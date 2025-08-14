@@ -28,8 +28,8 @@ export function DevHeader({
   rightControls,
   
   // Customization
-  title = "The Stack | D.O.C",
-  subtitle = "Developer Operations Center",
+  title = "Developer Operations Center",
+  subtitle = "See the inside of The Stack",
   
   // Additional styling
   className = "",

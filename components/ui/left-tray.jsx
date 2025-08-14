@@ -109,7 +109,7 @@ export function LeftTray({
           </div>
 
           {/* Footer: Dev Ops Center, Quick actions and theme toggle */}
-          <div className={`p-3 border-t ${colorScheme.footerBorder} space-y-3`}>
+          <div className={`p-3 border-t ${colorScheme.footerBorder} space-y-4`}>
             <div>
               <div className={colorScheme.sectionText}>Dev Ops Center</div>
               <div className="mt-2 space-y-2">
