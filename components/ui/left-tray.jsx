@@ -79,30 +79,6 @@ export function LeftTray({
                   <Home className="w-4 h-4 mr-2" />
                   Main App
                 </Button>
-                <Button 
-                  variant={pathname === '/dev/convos' ? 'default' : 'ghost'}
-                  className="w-full justify-start" 
-                  onClick={() => { router.push('/dev/convos'); onClose(); }}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Conversations
-                </Button>
-                <Button 
-                  variant={pathname === '/dev/tests' ? 'default' : 'ghost'}
-                  className="w-full justify-start" 
-                  onClick={() => { router.push('/dev/tests'); onClose(); }}
-                >
-                  <TestTube className="w-4 h-4 mr-2" />
-                  Test Results
-                </Button>
-                <Button 
-                  variant={pathname === '/dev/coverage' ? 'default' : 'ghost'}
-                  className="w-full justify-start" 
-                  onClick={() => { router.push('/dev/coverage'); onClose(); }}
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Coverage Report
-                </Button>
               </div>
             </div>
 
@@ -120,8 +96,41 @@ export function LeftTray({
             )}
           </div>
 
-          {/* Footer: Quick actions and theme toggle */}
+          {/* Footer: Dev Ops Center, Quick actions and theme toggle */}
           <div className="p-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+            <div>
+              <div className="text-gray-600 dark:text-gray-300">Dev Ops Center</div>
+              <div className="mt-2 space-y-2">
+                <Button 
+                  variant={pathname === '/dev/tests' ? 'default' : 'outline'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/tests'); onClose(); }}
+                >
+                  <TestTube className="w-4 h-4 mr-2" />
+                  Test Dashboard
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/coverage' ? 'default' : 'outline'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/coverage'); onClose(); }}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Coverage Report
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/convos' ? 'default' : 'outline'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/convos'); onClose(); }}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Event Tracking
+                </Button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
             <div>
               <div className="text-gray-600 dark:text-gray-300">Quick actions</div>
               <div className="mt-2 space-y-2">
