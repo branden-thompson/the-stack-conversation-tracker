@@ -133,7 +133,24 @@ async function updateTestsPage(testResults, coverage, breakdown) {
   console.log('📝 Updating tests page...');
   
   const testsPagePath = path.join(process.cwd(), 'app/dev/tests/page.jsx');
-  let content = await readFile(testsPagePath, 'utf8');
+  
+  // === BUFFER OVERFLOW PREVENTION ===
+  let content;
+  try {
+    content = await readFile(testsPagePath, 'utf8');
+    
+    // Check file size before processing
+    if (content.length > 2000000) { // 2MB limit
+      throw new Error(`Tests page file too large: ${content.length} bytes`);
+    }
+    
+    if (content.length === 0) {
+      throw new Error('Tests page file is empty');
+    }
+  } catch (error) {
+    console.error('❌ Error reading tests page:', error.message);
+    return;
+  }
   
   // Update test counts and results
   const newInitialState = `const INITIAL_TEST_STATE = {
@@ -174,19 +191,57 @@ async function updateTestsPage(testResults, coverage, breakdown) {
 };`;
 
   // Replace the INITIAL_TEST_STATE
-  content = content.replace(
+  const updatedContent = content.replace(
     /const INITIAL_TEST_STATE = \{[\s\S]*?\};/,
     newInitialState
   );
   
-  await writeFile(testsPagePath, content);
+  // === SAFETY CHECKS ===
+  if (updatedContent === content) {
+    console.warn('⚠️  No changes detected in tests page content');
+    return;
+  }
+  
+  if (updatedContent.length > 2000000) { // 2MB limit
+    console.error('❌ Updated content too large, aborting write');
+    return;
+  }
+  
+  if (updatedContent.length < 1000) { // Sanity check - page should be substantial
+    console.error('❌ Updated content suspiciously small, aborting write');
+    return;
+  }
+  
+  try {
+    await writeFile(testsPagePath, updatedContent);
+    console.log('✅ Tests page updated successfully');
+  } catch (error) {
+    console.error('❌ Error writing tests page:', error.message);
+  }
 }
 
 async function updateCoveragePage(testResults, coverage) {
   console.log('📊 Updating coverage page...');
   
   const coveragePagePath = path.join(process.cwd(), 'app/dev/coverage/page.jsx');
-  let content = await readFile(coveragePagePath, 'utf8');
+  
+  // === BUFFER OVERFLOW PREVENTION ===
+  let content;
+  try {
+    content = await readFile(coveragePagePath, 'utf8');
+    
+    // Check file size before processing
+    if (content.length > 2000000) { // 2MB limit
+      throw new Error(`Coverage page file too large: ${content.length} bytes`);
+    }
+    
+    if (content.length === 0) {
+      throw new Error('Coverage page file is empty');
+    }
+  } catch (error) {
+    console.error('❌ Error reading coverage page:', error.message);
+    return;
+  }
   
   // Calculate new summary based on coverage
   const totalLines = Math.round(coverage.lines > 0 ? 200 : 180);
@@ -210,12 +265,55 @@ async function updateCoveragePage(testResults, coverage) {
   );
   
   // Add to test history (after first existing entry)
-  content = content.replace(
+  let updatedContent = content.replace(
+    /summary: \{[\s\S]*?\},/,
+    newSummary
+  );
+  
+  updatedContent = updatedContent.replace(
     /(testHistory: \[\s*)/,
     `$1${newHistoryEntry}\n    `
   );
   
-  await writeFile(coveragePagePath, content);
+  // === SAFETY CHECKS ===
+  if (updatedContent === content) {
+    console.warn('⚠️  No changes detected in coverage page content');
+    return;
+  }
+  
+  if (updatedContent.length > 2000000) { // 2MB limit
+    console.error('❌ Updated coverage content too large, aborting write');
+    return;
+  }
+  
+  if (updatedContent.length < 1000) { // Sanity check
+    console.error('❌ Updated coverage content suspiciously small, aborting write');
+    return;
+  }
+  
+  // === PREVENT RUNAWAY HISTORY ===
+  // Count test history entries to prevent unbounded growth
+  const historyCount = (updatedContent.match(/{ date: '/g) || []).length;
+  if (historyCount > 50) {
+    console.warn('⚠️  Too many history entries (${historyCount}), trimming to last 30');
+    // Keep only the most recent 30 entries
+    const historyMatch = updatedContent.match(/(testHistory: \[\s*)([\s\S]*?)(\s*\])/);
+    if (historyMatch) {
+      const entries = historyMatch[2].split('\n').filter(line => line.trim().startsWith('{ date:'));
+      const trimmedEntries = entries.slice(0, 30).join('\n');
+      updatedContent = updatedContent.replace(
+        /(testHistory: \[\s*)[\s\S]*?(\s*\])/,
+        `$1${trimmedEntries}$2`
+      );
+    }
+  }
+  
+  try {
+    await writeFile(coveragePagePath, updatedContent);
+    console.log('✅ Coverage page updated successfully');
+  } catch (error) {
+    console.error('❌ Error writing coverage page:', error.message);
+  }
 }
 
 async function main() {
