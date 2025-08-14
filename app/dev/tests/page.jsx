@@ -72,14 +72,14 @@ function TestResultsCard({ title, results, icon: Icon }) {
   const isSuccess = results.failed === 0 && results.total > 0;
   
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Icon className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-semibold">{title}</h3>
         </div>
         <div className={`px-2 py-1 rounded text-sm font-medium ${
-          isSuccess ? 'bg-green-100 text-green-800' : results.total === 0 ? 'bg-gray-100 text-gray-600' : 'bg-red-100 text-red-800'
+          isSuccess ? 'bg-green-100 text-green-800' : results.total === 0 ? 'bg-gray-100 text-stone-600' : 'bg-red-100 text-red-800'
         }`}>
           {results.total === 0 ? 'No Tests' : isSuccess ? 'All Passing' : `${results.failed} Failed`}
         </div>
@@ -87,25 +87,25 @@ function TestResultsCard({ title, results, icon: Icon }) {
       
       <div className="grid grid-cols-4 gap-4 mb-4">
         <div className="text-center">
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{results.total}</div>
-          <div className="text-sm text-gray-600">Total</div>
+          <div className="text-2xl font-bold text-stone-900 dark:text-stone-100">{results.total}</div>
+          <div className="text-sm text-stone-600">Total</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-green-600">{results.passed}</div>
-          <div className="text-sm text-gray-600">Passed</div>
+          <div className="text-sm text-stone-600">Passed</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-red-600">{results.failed}</div>
-          <div className="text-sm text-gray-600">Failed</div>
+          <div className="text-sm text-stone-600">Failed</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-600">{successRate.toFixed(0)}%</div>
-          <div className="text-sm text-gray-600">Success</div>
+          <div className="text-sm text-stone-600">Success</div>
         </div>
       </div>
       
       {results.duration && (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-stone-600">
           Duration: {results.duration}
         </div>
       )}
@@ -113,9 +113,9 @@ function TestResultsCard({ title, results, icon: Icon }) {
       {/* Individual test files */}
       {results.files && results.files.length > 0 && (
         <div className="mt-4 space-y-2">
-          <h4 className="text-sm font-medium text-gray-700">Test Files:</h4>
+          <h4 className="text-sm font-medium text-stone-700">Test Files:</h4>
           {results.files.map((file) => (
-            <div key={file.name} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+            <div key={file.name} className="flex items-center justify-between p-2 bg-stone-50 dark:bg-stone-800 rounded">
               <span className="text-sm">{file.name}</span>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -144,7 +144,7 @@ function CoverageCard({ coverage }) {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="w-5 h-5 text-purple-600" />
         <h3 className="text-lg font-semibold">Code Coverage</h3>
@@ -156,16 +156,16 @@ function CoverageCard({ coverage }) {
             <div className={`text-2xl font-bold ${getColorClass(item.value)}`}>
               {item.value.toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">{item.label}</div>
+            <div className="text-sm text-stone-600">{item.label}</div>
           </div>
         ))}
       </div>
       
       {/* Top files by coverage */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-gray-700">Hook Coverage:</h4>
+        <h4 className="text-sm font-medium text-stone-700">Hook Coverage:</h4>
         {Object.entries(coverage.files).map(([file, metrics]) => (
-          <div key={file} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+          <div key={file} className="flex items-center justify-between p-2 bg-stone-50 dark:bg-stone-800 rounded">
             <span className="text-sm font-mono">{file.split('/').pop()}</span>
             <span className={`text-sm font-medium ${getColorClass(metrics.statements)}`}>
               {metrics.statements.toFixed(1)}%
@@ -183,7 +183,7 @@ function ErrorBoundary({ children, fallback }) {
   } catch (error) {
     console.error('Test Dashboard Error:', error);
     return fallback || (
-      <Card className="p-6">
+      <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
         <div className="flex items-center gap-2 text-red-600">
           <AlertCircle className="w-5 h-5" />
           <span>Error loading test data</span>
@@ -264,7 +264,7 @@ export default function TestsPage() {
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Status Banner */}
-            <Card className="p-4">
+            <Card className="p-4 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {testState.status === 'running' ? (
@@ -281,7 +281,7 @@ export default function TestsPage() {
                        `${testState.results.unit.failed} Tests Failing`}
                     </h2>
                     {testState.lastRun && (
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-stone-600">
                         Last run: {new Date(testState.lastRun).toLocaleString()}
                       </p>
                     )}
@@ -289,7 +289,7 @@ export default function TestsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{testState.results.unit.duration}</span>
+                  <span className="text-sm text-stone-600">{testState.results.unit.duration}</span>
                 </div>
               </div>
             </Card>
@@ -312,7 +312,7 @@ export default function TestsPage() {
             <CoverageCard coverage={testState.coverage} />
 
             {/* Test Commands */}
-            <Card className="p-6">
+            <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
               <h3 className="text-lg font-semibold mb-4">Test Commands</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 <Button variant="outline" onClick={() => runTests('unit')}>

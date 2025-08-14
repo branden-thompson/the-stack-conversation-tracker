@@ -18,7 +18,7 @@ function fmtDuration(ms) {
 
 function JSONPreview({ value }) {
   return (
-    <pre className="text-xs bg-black/5 dark:bg-white/5 rounded p-2 overflow-auto max-h-40">
+    <pre className="text-xs bg-stone-100 dark:bg-stone-800 rounded p-2 overflow-auto max-h-40">
       {JSON.stringify(value, null, 2)}
     </pre>
   );
@@ -26,11 +26,11 @@ function JSONPreview({ value }) {
 
 const typeColor = (type) => {
   switch (type) {
-    case 'card.created': return 'bg-stone-500';
+    case 'card.created': return 'bg-emerald-500';
     case 'card.moved':   return 'bg-sky-500';
     case 'card.updated': return 'bg-amber-500';
     case 'card.deleted': return 'bg-rose-500';
-    default:             return 'bg-gray-400';
+    default:             return 'bg-stone-400';
   }
 };
 
@@ -190,7 +190,7 @@ export default function DevConvos() {
         <div className="p-3 border-b border-stone-200 dark:border-stone-700">
           <div className="flex gap-2">
             <input
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
               placeholder="New conversation name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -214,16 +214,16 @@ export default function DevConvos() {
           {safeItems.map((c) => (
             <div
               key={c.id}
-              className={`p-3 cursor-pointer ${selected?.id === c.id ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+              className={`p-3 cursor-pointer ${selected?.id === c.id ? 'bg-stone-100 dark:bg-stone-800' : ''}`}
               onClick={() => setSelectedId(c.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="font-semibold truncate">{c.name}</div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700">
                   {c.status}
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-stone-500 mt-1">
                 {new Date(c.createdAt).toLocaleString()}
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -298,12 +298,12 @@ export default function DevConvos() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{selected.name}</div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-stone-500">
                   id: {selected.id}
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
+                <span className="text-sm px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700">
                   {selected.status}
                 </span>
                 <span className="text-sm font-mono">{runtime}</span>
@@ -342,14 +342,14 @@ export default function DevConvos() {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-gray-500">Select a conversation from the left.</div>
+            <div className="text-sm text-stone-500">Select a conversation from the left.</div>
           )}
         </div>
 
         {/* Filters */}
         <div className="p-3 border-b border-stone-200 dark:border-stone-700 flex items-center gap-2">
           <select
-            className="border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -360,13 +360,13 @@ export default function DevConvos() {
             <option value="card.deleted">card.deleted</option>
           </select>
           <input
-            className="border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 flex-1"
+            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 flex-1"
             placeholder="Search in type or payload…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <select
-            className="border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
             value={sortDir}
             onChange={(e) => setSortDir(e.target.value)}
           >
@@ -399,21 +399,21 @@ export default function DevConvos() {
                             <div className="text-sm font-medium">
                               {typeLabel(e.type)}
                             </div>
-                            <div className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                            <div className="text-xs font-mono text-stone-500 dark:text-stone-400">
                               {new Date(e.at).toLocaleString()}
                             </div>
                           </div>
-                          <div className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+                          <div className="text-xs text-stone-700 dark:text-stone-300 mt-1">
                             {summarizePayload(e.type, e.payload)}
                           </div>
                         </li>
                       ))}
                     </ol>
                   ) : (
-                    <div className="p-6 text-sm text-gray-500">No timeline entries.</div>
+                    <div className="p-6 text-sm text-stone-500">No timeline entries.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-gray-500">Select a conversation to view timeline.</div>
+                  <div className="p-6 text-sm text-stone-500">Select a conversation to view timeline.</div>
                 )}
               </div>
             </section>
@@ -431,7 +431,7 @@ export default function DevConvos() {
                             <div className="font-mono text-xs opacity-80">
                               {new Date(e.at).toLocaleString()}
                             </div>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700">
                               {e.type}
                             </span>
                           </div>
@@ -442,10 +442,10 @@ export default function DevConvos() {
                       ))}
                     </ul>
                   ) : (
-                    <div className="p-6 text-sm text-gray-500">No events.</div>
+                    <div className="p-6 text-sm text-stone-500">No events.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-gray-500">Select a conversation to view events.</div>
+                  <div className="p-6 text-sm text-stone-500">Select a conversation to view events.</div>
                 )}
               </div>
             </section>
