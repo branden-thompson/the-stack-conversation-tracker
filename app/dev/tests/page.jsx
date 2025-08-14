@@ -394,7 +394,7 @@ export default function TestsPage() {
           onNewCard={() => {}} // Disabled for dev pages
           onResetLayout={() => {}} // Disabled for dev pages  
           onRefreshCards={() => window.location.reload()}
-          title="Dev Menu"
+          title="Dev Ops Center"
         />
       </div>
     </ErrorBoundary>

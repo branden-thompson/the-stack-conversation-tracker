@@ -179,8 +179,6 @@ export default function DevConvos() {
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
         rightControls={rightControls}
-        title="The Stack | D.O.C"
-        subtitle="Conversation Event Tracking"
       />
 
       {/* Main Content */}
@@ -491,7 +489,7 @@ export default function DevConvos() {
         onNewCard={() => {}} // Disabled for dev pages
         onResetLayout={() => {}} // Disabled for dev pages  
         onRefreshCards={() => window.location.reload()}
-        title="Dev Menu"
+        title="Dev Ops Center"
       />
     </div>
   );

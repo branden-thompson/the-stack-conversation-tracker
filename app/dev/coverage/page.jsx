@@ -277,8 +277,6 @@ export default function CoverageReportPage() {
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
         rightControls={rightControls}
-        title="The Stack | D.O.C"
-        subtitle="Full Coverage Report"
       />
 
       {/* Main Content */}
@@ -421,7 +419,7 @@ export default function CoverageReportPage() {
         onNewCard={() => {}} // Disabled for dev pages
         onResetLayout={() => {}} // Disabled for dev pages  
         onRefreshCards={() => window.location.reload()}
-        title="Dev Menu"
+        title="Dev Ops Center"
       />
     </div>
   );
