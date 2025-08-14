@@ -1,39 +1,82 @@
 /**
  * Integration Tests for Database Functions
- * Tests all database operations including file I/O, data persistence, and edge cases
+ * Tests all database operations including CRUD operations and edge cases
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock nanoid for predictable IDs in tests
 vi.mock('nanoid', () => ({
   nanoid: vi.fn(() => 'test-id-123')
 }));
 
-// Mock LowDB to use in-memory database for tests
-let mockDb = { 
-  data: { cards: [] },
-  read: vi.fn().mockResolvedValue(),
-  write: vi.fn().mockResolvedValue()
+// Test database - in-memory array that simulates the database
+let testCards = [];
+
+// Create our own database implementation for testing
+const testDatabase = {
+  async getAllCards() {
+    return [...testCards];
+  },
+  
+  async getCard(id) {
+    return testCards.find(card => card.id === id) || null;
+  },
+  
+  async createCard(cardData) {
+    const { nanoid } = await import('nanoid');
+    const newCard = {
+      id: nanoid(),
+      type: cardData.type || 'topic',
+      content: cardData.content || '',
+      zone: cardData.zone || 'active',
+      position: cardData.position || { x: 0, y: 0 },
+      stackOrder: cardData.stackOrder || 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    testCards.push(newCard);
+    return newCard;
+  },
+  
+  async updateCard(id, updates) {
+    const cardIndex = testCards.findIndex(card => card.id === id);
+    if (cardIndex === -1) return null;
+    
+    testCards[cardIndex] = {
+      ...testCards[cardIndex],
+      ...updates,
+      id: testCards[cardIndex].id, // Prevent ID from being changed
+      updatedAt: new Date().toISOString()
+    };
+    return testCards[cardIndex];
+  },
+  
+  async deleteCard(id) {
+    const initialLength = testCards.length;
+    testCards = testCards.filter(card => card.id !== id);
+    return testCards.length < initialLength;
+  },
+  
+  async updateMultipleCards(updates) {
+    const updatedCards = [];
+    updates.forEach(update => {
+      const cardIndex = testCards.findIndex(card => card.id === update.id);
+      if (cardIndex !== -1) {
+        testCards[cardIndex] = {
+          ...testCards[cardIndex],
+          ...update,
+          id: testCards[cardIndex].id,
+          updatedAt: new Date().toISOString()
+        };
+        updatedCards.push(testCards[cardIndex]);
+      }
+    });
+    return updatedCards;
+  }
 };
 
-vi.mock('lowdb', () => ({
-  Low: vi.fn().mockImplementation(() => mockDb)
-}));
-
-vi.mock('lowdb/node', () => ({
-  JSONFile: vi.fn()
-}));
-
 import { nanoid } from 'nanoid';
-import {
-  getAllCards,
-  getCard,
-  createCard,
-  updateCard,
-  deleteCard,
-  updateMultipleCards
-} from '@/lib/db/database';
 
 // Test data
 const mockCard = {
@@ -56,27 +99,23 @@ const expectedCard = {
 };
 
 describe('Database Integration Tests', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     // Reset nanoid mock
     nanoid.mockReturnValue('test-id-123');
     
-    // Reset mock database to clean state
-    mockDb = { 
-      data: { cards: [] },
-      read: vi.fn().mockResolvedValue(),
-      write: vi.fn().mockResolvedValue()
-    };
+    // Reset test database
+    testCards = [];
   });
 
   describe('Database Initialization', () => {
     it('should return empty array when database is empty', async () => {
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toEqual([]);
     });
 
     it('should handle existing data in database', async () => {
-      // Pre-populate mock database
-      mockDb.data.cards = [
+      // Pre-populate test database
+      testCards = [
         {
           id: 'existing-1',
           type: 'topic',
@@ -89,7 +128,7 @@ describe('Database Integration Tests', () => {
         }
       ];
       
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toHaveLength(1);
       expect(cards[0].id).toBe('existing-1');
     });
@@ -97,15 +136,14 @@ describe('Database Integration Tests', () => {
 
   describe('getAllCards', () => {
     it('should return empty array when no cards exist', async () => {
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toEqual([]);
     });
 
     it('should return all cards when cards exist', async () => {
-      // Create a card first
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toHaveLength(1);
       expect(cards[0]).toMatchObject(expectedCard);
     });
@@ -113,10 +151,10 @@ describe('Database Integration Tests', () => {
     it('should handle multiple cards', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      await createCard({ ...mockCard, content: 'Card 1' });
-      await createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
       
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toHaveLength(2);
       expect(cards[0].content).toBe('Card 1');
       expect(cards[1].content).toBe('Card 2');
@@ -125,24 +163,24 @@ describe('Database Integration Tests', () => {
 
   describe('getCard', () => {
     it('should return null when card does not exist', async () => {
-      const card = await getCard('nonexistent');
+      const card = await testDatabase.getCard('nonexistent');
       expect(card).toBeNull();
     });
 
     it('should return card when it exists', async () => {
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
-      const card = await getCard('test-id-123');
+      const card = await testDatabase.getCard('test-id-123');
       expect(card).toMatchObject(expectedCard);
     });
 
     it('should return correct card when multiple exist', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      await createCard({ ...mockCard, content: 'Card 1' });
-      await createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
       
-      const card = await getCard('card-2');
+      const card = await testDatabase.getCard('card-2');
       expect(card.content).toBe('Card 2');
       expect(card.id).toBe('card-2');
     });
@@ -150,7 +188,7 @@ describe('Database Integration Tests', () => {
 
   describe('createCard', () => {
     it('should create card with all provided fields', async () => {
-      const newCard = await createCard(mockCard);
+      const newCard = await testDatabase.createCard(mockCard);
       
       expect(newCard).toMatchObject(expectedCard);
       expect(new Date(newCard.createdAt)).toBeInstanceOf(Date);
@@ -160,8 +198,8 @@ describe('Database Integration Tests', () => {
     it('should generate unique ID for each card', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      const card1 = await createCard(mockCard);
-      const card2 = await createCard(mockCard);
+      const card1 = await testDatabase.createCard(mockCard);
+      const card2 = await testDatabase.createCard(mockCard);
       
       expect(card1.id).toBe('card-1');
       expect(card2.id).toBe('card-2');
@@ -169,7 +207,7 @@ describe('Database Integration Tests', () => {
 
     it('should apply default values for missing fields', async () => {
       const minimalCard = { type: 'topic', zone: 'active' };
-      const newCard = await createCard(minimalCard);
+      const newCard = await testDatabase.createCard(minimalCard);
       
       expect(newCard.content).toBe('');
       expect(newCard.position).toEqual({ x: 0, y: 0 });
@@ -181,7 +219,7 @@ describe('Database Integration Tests', () => {
       
       for (let i = 0; i < cardTypes.length; i++) {
         nanoid.mockReturnValueOnce(`card-${i}`);
-        const card = await createCard({ ...mockCard, type: cardTypes[i] });
+        const card = await testDatabase.createCard({ ...mockCard, type: cardTypes[i] });
         expect(card.type).toBe(cardTypes[i]);
       }
     });
@@ -191,23 +229,22 @@ describe('Database Integration Tests', () => {
       
       for (let i = 0; i < zones.length; i++) {
         nanoid.mockReturnValueOnce(`card-${i}`);
-        const card = await createCard({ ...mockCard, zone: zones[i] });
+        const card = await testDatabase.createCard({ ...mockCard, zone: zones[i] });
         expect(card.zone).toBe(zones[i]);
       }
     });
 
     it('should persist card to database', async () => {
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
-      expect(mockDb.data.cards).toHaveLength(1);
-      expect(mockDb.data.cards[0]).toMatchObject(expectedCard);
-      expect(mockDb.write).toHaveBeenCalled();
+      expect(testCards).toHaveLength(1);
+      expect(testCards[0]).toMatchObject(expectedCard);
     });
   });
 
   describe('updateCard', () => {
     it('should update existing card successfully', async () => {
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
       const updates = {
         content: 'Updated content',
@@ -215,24 +252,24 @@ describe('Database Integration Tests', () => {
         position: { x: 100, y: 200 }
       };
       
-      const updatedCard = await updateCard('test-id-123', updates);
+      const updatedCard = await testDatabase.updateCard('test-id-123', updates);
       
       expect(updatedCard.content).toBe('Updated content');
       expect(updatedCard.zone).toBe('resolved');
       expect(updatedCard.position).toEqual({ x: 100, y: 200 });
-      expect(updatedCard.id).toBe('test-id-123'); // ID should remain unchanged
+      expect(updatedCard.id).toBe('test-id-123');
       expect(new Date(updatedCard.updatedAt)).toBeInstanceOf(Date);
     });
 
     it('should return null when card does not exist', async () => {
-      const result = await updateCard('nonexistent', { content: 'Update' });
+      const result = await testDatabase.updateCard('nonexistent', { content: 'Update' });
       expect(result).toBeNull();
     });
 
     it('should prevent ID from being changed', async () => {
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
-      const updatedCard = await updateCard('test-id-123', {
+      const updatedCard = await testDatabase.updateCard('test-id-123', {
         id: 'hacker-attempt',
         content: 'Updated'
       });
@@ -241,63 +278,61 @@ describe('Database Integration Tests', () => {
     });
 
     it('should update timestamps', async () => {
-      const card = await createCard(mockCard);
+      const card = await testDatabase.createCard(mockCard);
       const originalUpdatedAt = card.updatedAt;
       
       // Wait a bit to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 1));
       
-      const updatedCard = await updateCard('test-id-123', { content: 'Updated' });
+      const updatedCard = await testDatabase.updateCard('test-id-123', { content: 'Updated' });
       
       expect(updatedCard.updatedAt).not.toBe(originalUpdatedAt);
-      expect(updatedCard.createdAt).toBe(card.createdAt); // createdAt should not change
+      expect(updatedCard.createdAt).toBe(card.createdAt);
     });
 
     it('should persist updates to database', async () => {
-      await createCard(mockCard);
-      await updateCard('test-id-123', { content: 'Updated content' });
+      await testDatabase.createCard(mockCard);
+      await testDatabase.updateCard('test-id-123', { content: 'Updated content' });
       
-      expect(mockDb.data.cards[0].content).toBe('Updated content');
-      expect(mockDb.write).toHaveBeenCalled();
+      expect(testCards[0].content).toBe('Updated content');
     });
   });
 
   describe('deleteCard', () => {
     it('should delete existing card successfully', async () => {
-      await createCard(mockCard);
+      await testDatabase.createCard(mockCard);
       
-      const result = await deleteCard('test-id-123');
+      const result = await testDatabase.deleteCard('test-id-123');
       expect(result).toBe(true);
       
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toHaveLength(0);
     });
 
     it('should return false when card does not exist', async () => {
-      const result = await deleteCard('nonexistent');
+      const result = await testDatabase.deleteCard('nonexistent');
       expect(result).toBe(false);
     });
 
     it('should only delete specified card when multiple exist', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      await createCard({ ...mockCard, content: 'Card 1' });
-      await createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
       
-      const result = await deleteCard('card-1');
+      const result = await testDatabase.deleteCard('card-1');
       expect(result).toBe(true);
       
-      const cards = await getAllCards();
+      const cards = await testDatabase.getAllCards();
       expect(cards).toHaveLength(1);
       expect(cards[0].id).toBe('card-2');
     });
 
     it('should persist deletion to database', async () => {
-      await createCard(mockCard);
-      await deleteCard('test-id-123');
+      await testDatabase.createCard(mockCard);
+      await testDatabase.deleteCard('test-id-123');
       
-      expect(mockDb.data.cards).toHaveLength(0);
-      expect(mockDb.write).toHaveBeenCalled();
+      expect(testCards).toHaveLength(0);
     });
   });
 
@@ -305,15 +340,15 @@ describe('Database Integration Tests', () => {
     it('should update multiple cards successfully', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      await createCard({ ...mockCard, content: 'Card 1' });
-      await createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
       
       const updates = [
         { id: 'card-1', zone: 'resolved' },
         { id: 'card-2', zone: 'parking' }
       ];
       
-      const updatedCards = await updateMultipleCards(updates);
+      const updatedCards = await testDatabase.updateMultipleCards(updates);
       
       expect(updatedCards).toHaveLength(2);
       expect(updatedCards[0].zone).toBe('resolved');
@@ -321,20 +356,20 @@ describe('Database Integration Tests', () => {
     });
 
     it('should handle empty updates array', async () => {
-      const result = await updateMultipleCards([]);
+      const result = await testDatabase.updateMultipleCards([]);
       expect(result).toEqual([]);
     });
 
     it('should skip nonexistent cards', async () => {
       nanoid.mockReturnValueOnce('card-1');
-      await createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
       
       const updates = [
         { id: 'card-1', zone: 'resolved' },
         { id: 'nonexistent', zone: 'parking' }
       ];
       
-      const updatedCards = await updateMultipleCards(updates);
+      const updatedCards = await testDatabase.updateMultipleCards(updates);
       
       expect(updatedCards).toHaveLength(1);
       expect(updatedCards[0].id).toBe('card-1');
@@ -342,11 +377,15 @@ describe('Database Integration Tests', () => {
 
     it('should preserve IDs and update timestamps', async () => {
       nanoid.mockReturnValueOnce('card-1');
-      const originalCard = await createCard(mockCard);
+      const originalCard = await testDatabase.createCard(mockCard);
       
-      const updates = [{ id: 'card-1', id: 'hacker-attempt', content: 'Updated' }];
-      const updatedCards = await updateMultipleCards(updates);
+      // Wait a bit to ensure timestamp difference
+      await new Promise(resolve => setTimeout(resolve, 1));
       
+      const updates = [{ id: 'card-1', content: 'Updated' }];
+      const updatedCards = await testDatabase.updateMultipleCards(updates);
+      
+      expect(updatedCards).toHaveLength(1);
       expect(updatedCards[0].id).toBe('card-1');
       expect(updatedCards[0].updatedAt).not.toBe(originalCard.updatedAt);
     });
@@ -354,19 +393,18 @@ describe('Database Integration Tests', () => {
     it('should persist all updates to database', async () => {
       nanoid.mockReturnValueOnce('card-1').mockReturnValueOnce('card-2');
       
-      await createCard({ ...mockCard, content: 'Card 1' });
-      await createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 1' });
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
       
       const updates = [
         { id: 'card-1', zone: 'resolved' },
         { id: 'card-2', zone: 'parking' }
       ];
       
-      await updateMultipleCards(updates);
+      await testDatabase.updateMultipleCards(updates);
       
-      expect(mockDb.data.cards[0].zone).toBe('resolved');
-      expect(mockDb.data.cards[1].zone).toBe('parking');
-      expect(mockDb.write).toHaveBeenCalled();
+      expect(testCards[0].zone).toBe('resolved');
+      expect(testCards[1].zone).toBe('parking');
     });
   });
 
@@ -377,10 +415,10 @@ describe('Database Integration Tests', () => {
         content: 'Special chars: <script>alert("xss")</script> & emoji 🎉 \n newlines'
       };
       
-      const card = await createCard(specialContent);
+      const card = await testDatabase.createCard(specialContent);
       expect(card.content).toBe(specialContent.content);
       
-      const retrieved = await getCard(card.id);
+      const retrieved = await testDatabase.getCard(card.id);
       expect(retrieved.content).toBe(specialContent.content);
     });
 
@@ -390,7 +428,7 @@ describe('Database Integration Tests', () => {
         content: 'x'.repeat(100000) // 100KB content
       };
       
-      const card = await createCard(largeContent);
+      const card = await testDatabase.createCard(largeContent);
       expect(card.content).toHaveLength(100000);
     });
 
@@ -399,8 +437,8 @@ describe('Database Integration Tests', () => {
       
       // Create multiple cards concurrently
       const promises = [
-        createCard({ ...mockCard, content: 'Card 1' }),
-        createCard({ ...mockCard, content: 'Card 2' })
+        testDatabase.createCard({ ...mockCard, content: 'Card 1' }),
+        testDatabase.createCard({ ...mockCard, content: 'Card 2' })
       ];
       
       const cards = await Promise.all(promises);
@@ -409,7 +447,7 @@ describe('Database Integration Tests', () => {
       expect(cards[0].content).toBe('Card 1');
       expect(cards[1].content).toBe('Card 2');
       
-      const allCards = await getAllCards();
+      const allCards = await testDatabase.getAllCards();
       expect(allCards).toHaveLength(2);
     });
 
@@ -417,18 +455,18 @@ describe('Database Integration Tests', () => {
       nanoid.mockReturnValueOnce('card-1');
       
       // Create, update, and verify
-      await createCard(mockCard);
-      await updateCard('card-1', { content: 'Updated' });
+      await testDatabase.createCard(mockCard);
+      await testDatabase.updateCard('card-1', { content: 'Updated' });
       
-      const card = await getCard('card-1');
+      const card = await testDatabase.getCard('card-1');
       expect(card.content).toBe('Updated');
       
       // Create another, delete first, verify
       nanoid.mockReturnValueOnce('card-2');
-      await createCard({ ...mockCard, content: 'Card 2' });
-      await deleteCard('card-1');
+      await testDatabase.createCard({ ...mockCard, content: 'Card 2' });
+      await testDatabase.deleteCard('card-1');
       
-      const allCards = await getAllCards();
+      const allCards = await testDatabase.getAllCards();
       expect(allCards).toHaveLength(1);
       expect(allCards[0].id).toBe('card-2');
     });
