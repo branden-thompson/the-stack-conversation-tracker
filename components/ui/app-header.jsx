@@ -153,7 +153,7 @@ export function AppHeader({
               {/* Conversation status + controls */}
               <div className="flex items-center gap-2">
                 <div className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 min-w-[270px]">
-                  <Clock3 className="w-4 h-4 mr-2 opacity-80" />
+                  <Clock3 className="w-8 h-8 mr-2 opacity-80" />
                   <div className="flex flex-col leading-tight">
                     <span className="font-semibold">
                       {activeConversation ? activeConversation.name : 'No active conversation'}
