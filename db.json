@@ -1,19 +1,5 @@
 {
-  "cards": [
-    {
-      "id": "lj_PimFDtEJg6dS49tWtA",
-      "type": "topic",
-      "content": "This is a test",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdAt": "2025-08-13T20:01:50.223Z",
-      "updatedAt": "2025-08-13T20:06:24.270Z"
-    }
-  ],
+  "cards": [],
   "people": [
     {
       "id": "p-system",
