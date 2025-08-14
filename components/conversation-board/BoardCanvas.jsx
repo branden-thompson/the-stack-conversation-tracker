@@ -13,9 +13,10 @@
 'use client';
 
 import { useRef } from 'react';
-import { DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { Zone } from './Zone';
 import { ConversationCard } from './ConversationCard';
+import { useBoardDnD } from '@/lib/hooks/useBoardDnD';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -30,8 +31,7 @@ const DEFAULT_LAYOUT = {
 
 export function BoardCanvas({
   layoutKey = 0,
-  activeCard = null,
-  isDraggingCard = false,
+  cards = [],
   getCardsByZone,
   onUpdateCard,
   onDeleteCard,
@@ -39,8 +39,12 @@ export function BoardCanvas({
 }) {
   const boardRef = useRef(null);
 
+  // Initialize DnD logic
+  const dnd = useBoardDnD({ cards, onUpdateCard, getCardsByZone });
+  const { activeCard, isDraggingCard, contextProps } = dnd;
+
   return (
-    <>
+    <DndContext {...contextProps}>
       {/* Board Canvas */}
       <main ref={boardRef} className="flex-1 relative overflow-hidden">
         <ResizablePanelGroup key={layoutKey} direction="vertical" className="h-full">
@@ -130,6 +134,6 @@ export function BoardCanvas({
           </div>
         ) : null}
       </DragOverlay>
-    </>
+    </DndContext>
   );
 }

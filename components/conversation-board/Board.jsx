@@ -4,8 +4,7 @@
 
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
-import { DndContext, pointerWithin, rectIntersection } from '@dnd-kit/core';
+import { useState, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BoardCanvas } from './BoardCanvas';
@@ -14,15 +13,10 @@ import { HelpDialog } from './HelpDialog';
 import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
-import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
 
-const DEFAULT_LAYOUT = {
-  rows: { top: 70, bottom: 30 },
-  topRowCols: { active: 70, parking: 30 },
-  bottomRowCols: { resolved: 50, unresolved: 50 },
-};
 
 
 function resolveCardType(aliases, fallback) {
@@ -69,16 +63,14 @@ function BoardInner({
   getCardsByZone,
   refreshCards,
 }) {
-  const [activeCard, setActiveCard] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [isDraggingCard, setIsDraggingCard] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
 
   // Conversation controls and state
   const conversationControls = useConversationControls();
-  const { activeConversation, runtime, onStart, onPause, onResumeOrStart, onStop, conversationApi: conv } = conversationControls;
+  const { activeConversation, runtime, onPause, onResumeOrStart, onStop, conversationApi: conv } = conversationControls;
 
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
@@ -101,7 +93,6 @@ function BoardInner({
   });
 
 
-  const cardsByZone = getCardsByZone();
 
   // ---- Card helpers that also emit conversation events ----
   async function handleCreate(type) {
@@ -150,80 +141,6 @@ function BoardInner({
     return updated;
   };
 
-  // DnD handlers
-  const handleDragStart = (event) => {
-    const { active } = event;
-    const card = cards.find((c) => c.id === active.id);
-    setActiveCard(card || null);
-    setIsDraggingCard(true);
-  };
-
-  const handleDragEnd = async (event) => {
-    const { active, over, delta } = event;
-    setActiveCard(null);
-    setIsDraggingCard(false);
-    if (!active) return;
-
-    const draggedCard = cards.find((c) => c.id === active.id);
-    if (!draggedCard) return;
-
-    if (over && ZONES[over.id]) {
-      const dropPosition = {
-        x: Math.max(10, (draggedCard.position?.x || 10) + delta.x),
-        y: Math.max(60, (draggedCard.position?.y || 60) + delta.y),
-      };
-      const targetZoneCards = (cardsByZone[over.id] || []).filter((c) => c.type === draggedCard.type);
-      const threshold = 30;
-      let stackTarget = null;
-      for (const card of targetZoneCards) {
-        if (card.id === draggedCard.id) continue;
-        const cardX = card.position?.x || 10;
-        const cardY = card.position?.y || 60;
-        if (Math.abs(dropPosition.x - cardX) < threshold && Math.abs(dropPosition.y - cardY) < threshold) {
-          stackTarget = card;
-          break;
-        }
-      }
-      if (stackTarget) {
-        await wrappedUpdateCard(active.id, {
-          zone: over.id,
-          position: stackTarget.position,
-          stackOrder: (stackTarget.stackOrder || 0) + 1,
-        });
-      } else {
-        await wrappedUpdateCard(active.id, {
-          zone: over.id,
-          position: dropPosition,
-          stackOrder: 0,
-        });
-      }
-    } else if (over?.data?.current?.type === 'card') {
-      const targetCard = cards.find((c) => c.id === over.id);
-      if (targetCard && targetCard.id !== draggedCard.id && targetCard.type === draggedCard.type) {
-        await wrappedUpdateCard(active.id, {
-          zone: targetCard.zone,
-          position: targetCard.position,
-          stackOrder: (targetCard.stackOrder || 0) + 1,
-        });
-      }
-    } else {
-      const currentPosition = draggedCard.position || { x: 10, y: 60 };
-      const newPosition = {
-        x: Math.max(10, currentPosition.x + delta.x),
-        y: Math.max(60, currentPosition.y + delta.y),
-      };
-      await wrappedUpdateCard(active.id, { position: newPosition });
-    }
-  };
-
-  const collisionDetection = useCallback((args) => {
-    const pointerCollisions = pointerWithin(args);
-    const cardCollision = pointerCollisions.find(
-      (collision) => collision.data?.droppableContainer?.data?.current?.type === 'card'
-    );
-    if (cardCollision) return [cardCollision];
-    return rectIntersection(args);
-  }, []);
 
   if (loading) {
     return (
@@ -252,8 +169,7 @@ function BoardInner({
 
 
   return (
-    <DndContext collisionDetection={collisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         {/* Header */}
         <AppHeader
           onOpenTray={() => setTrayOpen(true)}
@@ -271,8 +187,7 @@ function BoardInner({
         {/* Board Canvas */}
         <BoardCanvas
           layoutKey={layoutKey}
-          activeCard={activeCard}
-          isDraggingCard={isDraggingCard}
+          cards={cards}
           getCardsByZone={getCardsByZone}
           onUpdateCard={wrappedUpdateCard}
           onDeleteCard={handleDelete}
@@ -310,17 +225,16 @@ function BoardInner({
         />
 
         <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
-      </div>
 
-      {/* LEFT TRAY */}
-      <LeftTray
-        isOpen={trayOpen}
-        onClose={() => setTrayOpen(false)}
-        onNewCard={() => setDialogOpen(true)}
-        onResetLayout={resetLayout}
-        onRefreshCards={refreshCards}
-      />
-    </DndContext>
+        {/* LEFT TRAY */}
+        <LeftTray
+          isOpen={trayOpen}
+          onClose={() => setTrayOpen(false)}
+          onNewCard={() => setDialogOpen(true)}
+          onResetLayout={resetLayout}
+          onRefreshCards={refreshCards}
+        />
+      </div>
   );
 }
 
