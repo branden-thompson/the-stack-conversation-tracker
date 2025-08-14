@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useConversations } from '@/lib/hooks/useConversations';
 import { Button } from '@/components/ui/button';
+import { DevHeader } from '@/components/ui/dev-header';
+import { LeftTray } from '@/components/ui/left-tray';
+import { RefreshCw, Download } from 'lucide-react';
 
 function fmtDuration(ms) {
   if (!ms || ms < 0) return '00:00:00';
@@ -23,7 +26,7 @@ function JSONPreview({ value }) {
 
 const typeColor = (type) => {
   switch (type) {
-    case 'card.created': return 'bg-emerald-500';
+    case 'card.created': return 'bg-stone-500';
     case 'card.moved':   return 'bg-sky-500';
     case 'card.updated': return 'bg-amber-500';
     case 'card.deleted': return 'bg-rose-500';
@@ -75,6 +78,7 @@ export default function DevConvos() {
   const [filterType, setFilterType] = useState('all');
   const [query, setQuery] = useState('');
   const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
+  const [trayOpen, setTrayOpen] = useState(false);
   
 
   const selected = useMemo(
@@ -137,11 +141,53 @@ export default function DevConvos() {
     return '00:00:00';
   }, [selected]);
 
+  const rightControls = (
+    <>
+      <Button 
+        variant="outline"
+        onClick={() => refresh()}
+        className="h-[40px] leading-none"
+      >
+        <RefreshCw className="w-4 h-4 mr-2" />
+        Refresh
+      </Button>
+      <Button 
+        variant="outline"
+        onClick={() => {
+          const blob = new Blob(
+            [JSON.stringify({ conversations: safeItems, events }, null, 2)],
+            { type: 'application/json' }
+          );
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `dev-conversations-${Date.now()}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        className="h-[40px] leading-none"
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Export All
+      </Button>
+    </>
+  );
+
   return (
-    <div className="h-screen grid grid-cols-[320px_1fr] gap-4 p-6 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="h-screen flex flex-col bg-stone-50 dark:bg-stone-900">
+      {/* Header */}
+      <DevHeader
+        onOpenTray={() => setTrayOpen(true)}
+        rightControls={rightControls}
+        title="The Stack | D.O.C"
+        subtitle="Conversation Event Tracking"
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 text-stone-900 dark:text-stone-100">
       {/* LEFT: conversations list */}
-      <div className="flex flex-col rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+        <div className="p-3 border-b border-stone-200 dark:border-stone-700">
           <div className="flex gap-2">
             <input
               className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
@@ -162,7 +208,7 @@ export default function DevConvos() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto divide-y divide-gray-200 dark:divide-gray-800">
+        <div className="flex-1 overflow-auto divide-y divide-stone-200 dark:divide-stone-800">
           {loading && <div className="p-3 text-sm">Loading…</div>}
           {error && <div className="p-3 text-sm text-red-500">{error}</div>}
           {safeItems.map((c) => (
@@ -245,9 +291,9 @@ export default function DevConvos() {
       </div>
 
       {/* RIGHT: details + filters up top, middle split (timeline/events), emit bar fixed at bottom */}
-      <div className="flex flex-col rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
         {/* Details */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-stone-200 dark:border-stone-700">
           {selected ? (
             <div className="flex items-center justify-between">
               <div>
@@ -301,7 +347,7 @@ export default function DevConvos() {
         </div>
 
         {/* Filters */}
-        <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+        <div className="p-3 border-b border-stone-200 dark:border-stone-700 flex items-center gap-2">
           <select
             className="border rounded px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
             value={filterType}
@@ -333,14 +379,14 @@ export default function DevConvos() {
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-2 h-full">
             {/* Timeline (left column) */}
-            <section className="min-h-0 flex flex-col border-r border-gray-200 dark:border-gray-700">
+            <section className="min-h-0 flex flex-col border-r border-stone-200 dark:border-stone-700">
               <div className="px-4 py-2 text-sm font-semibold">Timeline</div>
               <div className="flex-1 overflow-auto px-4 pb-4">
                 {selected ? (
                   timeline.length ? (
                     <ol className="relative ml-5">
                       {/* vertical rail */}
-                      <span className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 dark:bg-gray-700" />
+                      <span className="absolute left-0 top-0 bottom-0 w-px bg-stone-300 dark:bg-stone-700" />
                       {timeline.map((e) => (
                         <li key={e.id} className="relative pl-4 py-2">
                           {/* dot */}
@@ -378,7 +424,7 @@ export default function DevConvos() {
               <div className="flex-1 overflow-auto">
                 {selected ? (
                   filtered.length ? (
-                    <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+                    <ul className="divide-y divide-stone-200 dark:divide-stone-800">
                       {filtered.map((e) => (
                         <li key={e.id} className="p-3">
                           <div className="flex items-center justify-between">
@@ -408,7 +454,7 @@ export default function DevConvos() {
 
         {/* EMIT BAR: fixed at bottom of right column */}
         {selected && (
-          <div className="p-3 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
+          <div className="p-3 border-t border-stone-200 dark:border-stone-700 flex flex-wrap gap-2">
             <Button
               variant="secondary"
               onClick={() => logEvent(selected.id, 'card.created', { id: crypto.randomUUID(), type: 'topic' })}
@@ -436,6 +482,17 @@ export default function DevConvos() {
           </div>
         )}
       </div>
+      </div>
+
+      {/* Left Tray */}
+      <LeftTray
+        isOpen={trayOpen}
+        onClose={() => setTrayOpen(false)}
+        onNewCard={() => {}} // Disabled for dev pages
+        onResetLayout={() => {}} // Disabled for dev pages  
+        onRefreshCards={() => window.location.reload()}
+        title="Dev Menu"
+      />
     </div>
   );
 }

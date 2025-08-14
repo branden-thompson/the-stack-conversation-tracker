@@ -6,9 +6,10 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { X } from 'lucide-react';
+import { X, MessageSquare, TestTube, Home } from 'lucide-react';
 
 export function LeftTray({
   isOpen,
@@ -18,6 +19,10 @@ export function LeftTray({
   onRefreshCards,
   title = "The Stack",
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const isDevPage = pathname?.startsWith('/dev');
+
   // ESC key handler to close tray
   useEffect(() => {
     const onKey = (e) => { 
@@ -60,15 +65,51 @@ export function LeftTray({
             </Button>
           </div>
 
-          {/* Scrollable content: Zones list */}
-          <div className="flex-1 overflow-auto p-3 space-y-2 text-sm">
-            <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
-            <ul className="space-y-1">
-              <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
-              <li className="text-gray-700 dark:text-gray-200">Parking Lot</li>
-              <li className="text-gray-700 dark:text-gray-200">Resolved</li>
-              <li className="text-gray-700 dark:text-gray-200">Unresolved</li>
-            </ul>
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-auto p-3 space-y-4 text-sm">
+            {/* Navigation */}
+            <div>
+              <div className="pt-2 text-gray-600 dark:text-gray-300">Navigation</div>
+              <div className="mt-2 space-y-1">
+                <Button 
+                  variant={pathname === '/' ? 'default' : 'ghost'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/'); onClose(); }}
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Main App
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/convos' ? 'default' : 'ghost'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/convos'); onClose(); }}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Conversations
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/tests' ? 'default' : 'ghost'}
+                  className="w-full justify-start" 
+                  onClick={() => { router.push('/dev/tests'); onClose(); }}
+                >
+                  <TestTube className="w-4 h-4 mr-2" />
+                  Test Results
+                </Button>
+              </div>
+            </div>
+
+            {/* Zones (only show for main app) */}
+            {!isDevPage && (
+              <div>
+                <div className="pt-2 text-gray-600 dark:text-gray-300">Zones</div>
+                <ul className="mt-2 space-y-1">
+                  <li className="text-gray-700 dark:text-gray-200">Active Conversation</li>
+                  <li className="text-gray-700 dark:text-gray-200">Parking Lot</li>
+                  <li className="text-gray-700 dark:text-gray-200">Resolved</li>
+                  <li className="text-gray-700 dark:text-gray-200">Unresolved</li>
+                </ul>
+              </div>
+            )}
           </div>
 
           {/* Footer: Quick actions and theme toggle */}
