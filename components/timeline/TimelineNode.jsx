@@ -128,7 +128,9 @@ export function TimelineNode({ event, isLeft = false, showTime = true }) {
                 {eventConfig.label}
               </h4>
               {showTime && (
-                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <div className={`flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5 ${
+                  isLeft ? 'flex-row-reverse' : 'flex-row'
+                }`}>
                   <Clock className="w-3 h-3" />
                   <span>{formatTime(event.at)}</span>
                 </div>
