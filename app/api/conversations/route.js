@@ -1,12 +1,22 @@
+// app/api/conversations/route.js
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
-import { startConversation } from './store';
+import { createConversation, listConversations, getActiveId } from './store';
+
+export async function GET() {
+  return NextResponse.json({
+    items: listConversations(),
+    activeId: getActiveId(),
+  });
+}
 
 export async function POST(req) {
-  const body = await req.json().catch(() => ({}));
-  if (body?.action === 'start') {
-    const n = String(body?.name || '').trim();
-    if (!n) return NextResponse.json({ message: 'name required' }, { status: 400 });
-    return NextResponse.json(startConversation(n));
+  const { name } = await req.json().catch(() => ({}));
+  if (!name || !String(name).trim()) {
+    return NextResponse.json({ message: 'name required' }, { status: 400 });
   }
-  return NextResponse.json({ message: 'Unsupported action' }, { status: 400 });
+  const conv = createConversation(String(name).trim());
+  return NextResponse.json(conv);
 }

@@ -1,9 +1,5 @@
 /**
- * Board Component (LK.G + Left Tray + Conversation Controls wired to API + 8px gutters)
- * - Hamburger icon-button + left slide-in tray
- * - Right-side conversation controls (status + Start/Pause/Stop) wired to /api/conversations
- * - Consistent 8px gaps between buttons in all header groups (gap-2)
- * - Status block uses min-w-[270px] and mr-3 (12px) before Start button
+ * Board Component (LK.G + Left Tray + Conversation Controls + Conversations API wiring)
  */
 
 'use client';
@@ -20,7 +16,7 @@ import { useCards } from '@/lib/hooks/useCards';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { ZONES, CARD_TYPES } from '@/lib/utils/constants';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { useConversations } from '@/lib/hooks/useConversations'; // <-- NEW
+import { useConversations } from '@/lib/hooks/useConversations';
 import {
   ResizableHandle,
   ResizablePanel,
@@ -33,10 +29,9 @@ const DEFAULT_LAYOUT = {
   bottomRowCols: { resolved: 50, unresolved: 50 },
 };
 
-// Header sizing/spacing
-const TOOLBAR_H = 40;               // match ThemeToggle height
-const DIVIDER_MX = 'mx-6';          // divider horizontal spacing
-const HEADER_SIDE_GAP = 'gap-3';    // hamburger <-> title group spacing
+const TOOLBAR_H = 40;
+const DIVIDER_MX = 'mx-6';
+const HEADER_SIDE_GAP = 'gap-3';
 
 function resolveCardType(aliases, fallback) {
   if (CARD_TYPES && typeof CARD_TYPES === 'object') {
@@ -71,6 +66,16 @@ function buildNewCardPayload(type) {
   };
 }
 
+// Format runtime display for header
+function fmtDuration(ms) {
+  if (!ms || ms < 0) return '00:00:00';
+  const s = Math.floor(ms / 1000);
+  const h = String(Math.floor(s / 3600)).padStart(2, '0');
+  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+  const ss = String(s % 60).padStart(2, '0');
+  return `${h}:${m}:${ss}`;
+}
+
 function BoardInner({
   cards,
   loading,
@@ -88,11 +93,41 @@ function BoardInner({
   const [isDraggingCard, setIsDraggingCard] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
 
+  // Conversations API
+  const conv = useConversations();
+  const { activeId, items: convItems, create, patch, refresh: refreshConvos } = conv;
+
+  // Display runtime ticker (client-side) for active conversation
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const activeConversation = useMemo(() => {
+    if (!activeId) return null;
+    return (convItems || []).find(c => c.id === activeId) || null;
+  }, [activeId, convItems]);
+
+  const runtime = useMemo(() => {
+    const c = activeConversation;
+    if (!c) return '00:00:00';
+    if (c.status === 'active') {
+      const base = c.startedAt || Date.now();
+      const paused = c.pausedAt ? c.pausedAt - base : 0;
+      return fmtDuration(Date.now() - base - (paused > 0 ? paused : 0));
+    }
+    if (c.status === 'paused' && c.startedAt) {
+      return fmtDuration((c.pausedAt || Date.now()) - c.startedAt);
+    }
+    if (c.status === 'stopped' && c.startedAt) {
+      return fmtDuration((c.stoppedAt || c.updatedAt) - c.startedAt);
+    }
+    return '00:00:00';
+  }, [activeConversation, tick]);
+
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
-
-  // Conversation controls (API)
-  const convo = useConversations(); // <-- now using API
 
   const boardRef = useRef(null);
 
@@ -101,13 +136,13 @@ function BoardInner({
   }, []);
 
   useKeyboardShortcuts({
-    onNewTopic: () => createCard(buildNewCardPayload('topic')),        // ctrl+n
-    onNewQuestion: () => createCard(buildNewCardPayload('question')),  // ctrl+q
-    onNewAccusation: () => createCard(buildNewCardPayload('accusation')), // ctrl+a
-    onNewFact: () => createCard(buildNewCardPayload('fact')),          // ctrl+f
-    onNewOpinion: () => createCard(buildNewCardPayload('opinion')),    // ctrl+o
-    onNewGuess: () => createCard(buildNewCardPayload('guess')),        // ctrl+g
-    onDeleteSelected: selectedCard ? () => deleteCard(selectedCard) : null,
+    onNewTopic: () => handleCreate(TYPE_KEYS.topic),        // ctrl+n
+    onNewQuestion: () => handleCreate(TYPE_KEYS.question),  // ctrl+q
+    onNewAccusation: () => handleCreate(TYPE_KEYS.accusation), // ctrl+a
+    onNewFact: () => handleCreate(TYPE_KEYS.fact),          // ctrl+f
+    onNewOpinion: () => handleCreate(TYPE_KEYS.opinion),    // ctrl+o
+    onNewGuess: () => handleCreate(TYPE_KEYS.guess),        // ctrl+g
+    onDeleteSelected: selectedCard ? () => handleDelete(selectedCard) : null,
     onResetLayout: resetLayout,
     onDeselect: () => setSelectedCard(null),
     selectedCard,
@@ -115,15 +150,61 @@ function BoardInner({
 
   // ESC closes tray
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape' && trayOpen) setTrayOpen(false);
-    };
+    const onKey = (e) => { if (e.key === 'Escape' && trayOpen) setTrayOpen(false); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [trayOpen]);
 
   const cardsByZone = getCardsByZone();
 
+  // ---- Card helpers that also emit conversation events ----
+  async function handleCreate(type) {
+    const payload = buildNewCardPayload(type);
+    const newCard = await createCard(payload);
+    try {
+      if (conv.activeId) {
+        await conv.logEvent(conv.activeId, 'card.created', {
+          id: newCard?.id,
+          type: newCard?.type,
+          zone: newCard?.zone,
+        });
+      }
+    } catch {}
+  }
+
+  async function handleDelete(id) {
+    const card = cards.find(c => c.id === id);
+    await deleteCard(id);
+    try {
+      if (conv.activeId) {
+        await conv.logEvent(conv.activeId, 'card.deleted', { id, zone: card?.zone });
+      }
+    } catch {}
+  }
+
+  const wrappedUpdateCard = async (id, updates) => {
+    const before = cards.find(c => c.id === id);
+    const updated = await updateCard(id, updates);
+    try {
+      if (!conv.activeId) return updated;
+
+      // If content changed
+      if (updates && Object.prototype.hasOwnProperty.call(updates, 'content')) {
+        await conv.logEvent(conv.activeId, 'card.updated', { id, fields: ['content'] });
+      }
+      // If zone changed (move)
+      if (before && updates && updates.zone && updates.zone !== before.zone) {
+        await conv.logEvent(conv.activeId, 'card.moved', {
+          id,
+          from: before.zone,
+          to: updates.zone,
+        });
+      }
+    } catch {}
+    return updated;
+  };
+
+  // DnD handlers
   const handleDragStart = (event) => {
     const { active } = event;
     const card = cards.find((c) => c.id === active.id);
@@ -158,13 +239,13 @@ function BoardInner({
         }
       }
       if (stackTarget) {
-        await updateCard(active.id, {
+        await wrappedUpdateCard(active.id, {
           zone: over.id,
           position: stackTarget.position,
           stackOrder: (stackTarget.stackOrder || 0) + 1,
         });
       } else {
-        await updateCard(active.id, {
+        await wrappedUpdateCard(active.id, {
           zone: over.id,
           position: dropPosition,
           stackOrder: 0,
@@ -173,7 +254,7 @@ function BoardInner({
     } else if (over?.data?.current?.type === 'card') {
       const targetCard = cards.find((c) => c.id === over.id);
       if (targetCard && targetCard.id !== draggedCard.id && targetCard.type === draggedCard.type) {
-        await updateCard(active.id, {
+        await wrappedUpdateCard(active.id, {
           zone: targetCard.zone,
           position: targetCard.position,
           stackOrder: (targetCard.stackOrder || 0) + 1,
@@ -185,7 +266,7 @@ function BoardInner({
         x: Math.max(10, currentPosition.x + delta.x),
         y: Math.max(60, currentPosition.y + delta.y),
       };
-      await updateCard(active.id, { position: newPosition });
+      await wrappedUpdateCard(active.id, { position: newPosition });
     }
   };
 
@@ -225,6 +306,38 @@ function BoardInner({
 
   const actionBtnClass = `h-[${TOOLBAR_H}px] leading-none`;
 
+  // Conversation header actions
+  async function onStart() {
+    let n = window.prompt('Name this conversation:', '') || '';
+    n = n.trim();
+    if (!n) return;
+    await create(n);         // server sets it active
+    await refreshConvos();
+  }
+
+  async function onPause() {
+    const c = activeConversation;
+    if (!c) return;
+    await patch(c.id, { status: 'paused', pausedAt: Date.now() });
+  }
+
+  async function onResumeOrStart() {
+    const c = activeConversation;
+    if (c && c.status === 'paused') {
+      await patch(c.id, { status: 'active', startedAt: Date.now(), pausedAt: null, stoppedAt: null });
+    } else {
+      await onStart();
+    }
+  }
+
+  async function onStop() {
+    const c = activeConversation;
+    if (!c) return;
+    const ok = window.confirm('End this conversation? This will stop the timer.');
+    if (!ok) return;
+    await patch(c.id, { status: 'stopped', stoppedAt: Date.now() });
+  }
+
   return (
     <DndContext collisionDetection={collisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -250,9 +363,9 @@ function BoardInner({
               </div>
             </div>
 
-            {/* Right: Theme | divider | App controls | divider | Conversation controls */}
+            {/* Right groups */}
             <div className="flex items-center">
-              {/* Group 1: Theme (gap-2) */}
+              {/* Theme */}
               <div className="flex items-center gap-2">
                 <ThemeToggle />
               </div>
@@ -260,7 +373,7 @@ function BoardInner({
               {/* Divider */}
               <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
 
-              {/* Group 2: App controls (gap-2) */}
+              {/* App controls */}
               <div className="flex items-center gap-2">
                 <Button
                   onClick={() => setHelpOpen(true)}
@@ -300,43 +413,34 @@ function BoardInner({
               {/* Divider */}
               <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
 
-              {/* Group 3: Conversation status + controls (gap-2) */}
+              {/* Conversation status + controls */}
               <div className="flex items-center gap-2">
-                {/* Status: 12px extra space via mr-3 + min width to avoid shrink */}
                 <div className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 min-w-[270px]">
                   <Clock3 className="w-4 h-4 mr-2 opacity-80" />
                   <div className="flex flex-col leading-tight">
                     <span className="font-semibold">
-                      {!convo.active
-                        ? 'No active conversation'
-                        : convo.active.name || 'Unnamed conversation'}
+                      {activeConversation ? activeConversation.name : 'No active conversation'}
                     </span>
-                    <span className="font-mono text-xs opacity-80">
-                      {convo.fmt(convo.elapsedMs)}
-                    </span>
+                    <span className="font-mono text-xs opacity-80">{runtime}</span>
                   </div>
                 </div>
 
-                {/* Start / Pause / Stop -> wired to API */}
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={convo.active?.status === 'active'}
-                  onClick={() => {
-                    if (convo.active?.status === 'paused') convo.resume();
-                    else convo.start();
-                  }}
-                  title={convo.active?.status === 'paused' ? 'Resume' : 'Start'}
+                  disabled={activeConversation?.status === 'active'}
+                  onClick={onResumeOrStart}
+                  title={activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  {convo.active?.status === 'paused' ? 'Resume' : 'Start'}
+                  {activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
                 </Button>
 
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={convo.active?.status !== 'active'}
-                  onClick={convo.pause}
+                  disabled={activeConversation?.status !== 'active'}
+                  onClick={onPause}
                   title="Pause"
                 >
                   <PauseIcon className="w-4 h-4 mr-2" />
@@ -346,8 +450,8 @@ function BoardInner({
                 <Button
                   variant="outline"
                   className={actionBtnClass}
-                  disabled={!convo.active}
-                  onClick={convo.stop}
+                  disabled={!activeConversation || activeConversation.status === 'stopped'}
+                  onClick={onStop}
                   title="Stop"
                 >
                   <Square className="w-4 h-4 mr-2" />
@@ -368,9 +472,9 @@ function BoardInner({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="active"
-                      cards={cardsByZone.active || []}
-                      onUpdateCard={updateCard}
-                      onDeleteCard={deleteCard}
+                      cards={getCardsByZone().active || []}
+                      onUpdateCard={wrappedUpdateCard}
+                      onDeleteCard={handleDelete}
                       isDraggingCard={isDraggingCard}
                       autoOrganize={true}
                       showOrganizeButton={false}
@@ -385,9 +489,9 @@ function BoardInner({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="parking"
-                      cards={cardsByZone.parking || []}
-                      onUpdateCard={updateCard}
-                      onDeleteCard={deleteCard}
+                      cards={getCardsByZone().parking || []}
+                      onUpdateCard={wrappedUpdateCard}
+                      onDeleteCard={handleDelete}
                       isDraggingCard={isDraggingCard}
                       autoOrganize={false}
                       showOrganizeButton={true}
@@ -407,9 +511,9 @@ function BoardInner({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="resolved"
-                      cards={cardsByZone.resolved || []}
-                      onUpdateCard={updateCard}
-                      onDeleteCard={deleteCard}
+                      cards={getCardsByZone().resolved || []}
+                      onUpdateCard={wrappedUpdateCard}
+                      onDeleteCard={handleDelete}
                       isDraggingCard={isDraggingCard}
                       autoOrganize={false}
                       showOrganizeButton={true}
@@ -424,9 +528,9 @@ function BoardInner({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="unresolved"
-                      cards={cardsByZone.unresolved || []}
-                      onUpdateCard={updateCard}
-                      onDeleteCard={deleteCard}
+                      cards={getCardsByZone().unresolved || []}
+                      onUpdateCard={wrappedUpdateCard}
+                      onDeleteCard={handleDelete}
                       isDraggingCard={isDraggingCard}
                       autoOrganize={false}
                       showOrganizeButton={true}
@@ -452,10 +556,10 @@ function BoardInner({
         <CardDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          onCreateCard={(data) => {
+          onCreateCard={async (data) => {
             const person = (data?.person && data.person.trim()) ? data.person.trim() : 'system';
-            const type = data?.type || 'topic';
-            return createCard({
+            const type = data?.type || TYPE_KEYS.topic;
+            const payload = {
               type,
               content: data?.content || '',
               zone: 'active',
@@ -465,7 +569,17 @@ function BoardInner({
               updatedAt: Date.now(),
               createdBy: 'system',
               person,
-            });
+            };
+            const newCard = await createCard(payload);
+            try {
+              if (conv.activeId) {
+                await conv.logEvent(conv.activeId, 'card.created', {
+                  id: newCard?.id,
+                  type: newCard?.type,
+                  zone: newCard?.zone,
+                });
+              }
+            } catch {}
           }}
         />
 
