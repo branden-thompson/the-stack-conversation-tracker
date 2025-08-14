@@ -258,16 +258,10 @@ async function updateCoveragePage(testResults, coverage) {
   const now = new Date().toISOString();
   const newHistoryEntry = `    { date: '${now}', totalTests: ${testResults.totalTests}, passed: ${testResults.passedTests}, failed: ${testResults.failedTests}, duration: ${parseFloat(testResults.duration)} },`;
   
-  // Replace summary
-  content = content.replace(
-    /summary: \{[\s\S]*?\},/,
-    newSummary
-  );
-  
-  // Add to test history (after first existing entry)
+  // Replace summary (only once)
   let updatedContent = content.replace(
-    /summary: \{[\s\S]*?\},/,
-    newSummary
+    /summary:\s*\{[\s\S]*?\},\s*files:/,
+    newSummary.replace(/,$/, '') + ',\n  files:'
   );
   
   updatedContent = updatedContent.replace(
