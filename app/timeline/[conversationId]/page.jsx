@@ -168,14 +168,8 @@ export default function TimelinePage() {
 
       {/* Left Tray */}
       <LeftTray
-        open={trayOpen}
+        isOpen={trayOpen}
         onClose={() => setTrayOpen(false)}
-        items={[
-          { label: 'Main Board', href: '/' },
-          { label: 'Dev: Conversations', href: '/dev/convos' },
-          { label: 'Dev: Tests', href: '/dev/tests' },
-          { label: 'Dev: Coverage', href: '/dev/coverage' }
-        ]}
       />
     </div>
   );
