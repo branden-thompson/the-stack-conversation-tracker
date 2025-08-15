@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TimelineNode } from './TimelineNode';
-import { Clock, Calendar, MessageCircle } from 'lucide-react';
+import { TreeTimeline } from './TreeTimeline';
+import { Clock, Calendar, MessageCircle, List, TreePine, ChevronDown, ChevronRight } from 'lucide-react';
+import { transformEventsToTree } from '@/lib/utils/timelineTree';
 
 // Format time helper
 function formatTime(timestamp) {
@@ -36,7 +38,153 @@ function getTimeBetweenEvents(currentEvent, previousEvent) {
   }
 }
 
-export function ConversationTimeline({ conversation, events }) {
+// Accordion List View Component
+function AccordionListView({ conversation, events }) {
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  
+  // Transform events into tree structure
+  const treeData = useMemo(() => {
+    return transformEventsToTree(events);
+  }, [events]);
+
+  const { cardBranches } = treeData;
+
+  const toggleCardExpansion = (cardId) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cardId)) {
+        newSet.delete(cardId);
+      } else {
+        newSet.add(cardId);
+      }
+      return newSet;
+    });
+  };
+
+  if (cardBranches.length === 0) {
+    return (
+      <div className="text-center text-gray-500 dark:text-gray-400 p-8">
+        <List className="w-16 h-16 mx-auto mb-4 opacity-30" />
+        <h3 className="text-lg font-semibold mb-2">No Cards Found</h3>
+        <p>This conversation doesn't have any card events to display in list format.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Table Header */}
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 grid grid-cols-5 gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div>Card</div>
+        <div>Type</div>
+        <div>Status</div>
+        <div>Events</div>
+        <div>Created</div>
+      </div>
+
+      {/* Card Rows */}
+      {cardBranches.map((cardBranch) => {
+        const isExpanded = expandedCards.has(cardBranch.cardId);
+        const cardName = cardBranch.rootEvent.payload?.content?.substring(0, 30) || 
+                        `${cardBranch.rootEvent.payload?.type || 'card'} (${cardBranch.cardId.slice(0, 8)})`;
+        
+        return (
+          <div key={cardBranch.cardId} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            {/* Main Row */}
+            <div 
+              className="bg-white dark:bg-gray-800 p-4 grid grid-cols-5 gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => toggleCardExpansion(cardBranch.cardId)}
+            >
+              <div className="flex items-center gap-2">
+                {cardBranch.childEvents.length > 0 && (
+                  isExpanded ? 
+                    <ChevronDown className="w-4 h-4 text-gray-400" /> : 
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                )}
+                <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {cardName}
+                </span>
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">
+                {cardBranch.rootEvent.payload?.type || 'unknown'}
+              </div>
+              <div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  cardBranch.childEvents.some(e => e.type === 'card.deleted') 
+                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
+                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
+                }`}>
+                  {cardBranch.childEvents.some(e => e.type === 'card.deleted') ? 'deleted' : 'active'}
+                </span>
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">
+                {cardBranch.childEvents.length + 1} events
+              </div>
+              <div className="text-gray-600 dark:text-gray-400">
+                {formatTime(cardBranch.rootEvent.at)}
+              </div>
+            </div>
+
+            {/* Expanded Events */}
+            {isExpanded && cardBranch.childEvents.length > 0 && (
+              <div className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                <div className="p-4">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Event History</h4>
+                  <div className="space-y-2">
+                    {cardBranch.childEvents.map((event) => (
+                      <div key={event.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${
+                            event.type === 'card.moved' ? 'bg-blue-500' :
+                            event.type === 'card.updated' ? 'bg-amber-500' :
+                            event.type === 'card.deleted' ? 'bg-rose-500' :
+                            'bg-gray-500'
+                          }`} />
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {event.type.replace('card.', '').charAt(0).toUpperCase() + event.type.replace('card.', '').slice(1)}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {event.type === 'card.moved' && event.payload?.from && event.payload?.to && 
+                              `${event.payload.from} → ${event.payload.to}`}
+                            {event.type === 'card.updated' && event.payload?.fields && 
+                              `Updated: ${event.payload.fields.join(', ')}`}
+                            {event.type === 'card.deleted' && 'Removed from conversation'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatTime(event.at)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Expand/Collapse All Controls */}
+      <div className="flex justify-center gap-4 pt-4">
+        <button
+          onClick={() => setExpandedCards(new Set(cardBranches.map(b => b.cardId)))}
+          className="px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors text-sm"
+        >
+          Expand All
+        </button>
+        <button
+          onClick={() => setExpandedCards(new Set())}
+          className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+        >
+          Collapse All
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function ConversationTimeline({ conversation, events, viewMode, onViewModeChange }) {
+
   // Group events by date for better organization
   const eventsByDate = useMemo(() => {
     if (!events || events.length === 0) return new Map();
@@ -93,132 +241,13 @@ export function ConversationTimeline({ conversation, events }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      {/* Enhanced Conversation Header */}
-      <div className="mb-12 text-center animate-fade-in">
-        <div className="relative mb-4">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent mb-3">
-            {conversation.name}
-          </h2>
-          {/* Decorative underline */}
-          <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full mx-auto opacity-60" />
-        </div>
-        
-        <div className="flex items-center justify-center gap-6 text-sm">
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-full">
-            <Calendar className="w-4 h-4 text-blue-500" />
-            <span className="text-gray-700 dark:text-gray-300">Created {formatDate(conversation.createdAt)}</span>
-          </div>
-          
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-full">
-            <MessageCircle className="w-4 h-4 text-emerald-500" />
-            <span className="text-gray-700 dark:text-gray-300">{events.length} events</span>
-          </div>
-          
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-full">
-            <div className="relative">
-              <span className={`w-3 h-3 rounded-full flex ${
-                conversation.status === 'active' ? 'bg-green-500' :
-                conversation.status === 'paused' ? 'bg-yellow-500' :
-                'bg-gray-500'
-              }`} />
-              {conversation.status === 'active' && (
-                <span className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping opacity-40" />
-              )}
-            </div>
-            <span className="text-gray-700 dark:text-gray-300 capitalize font-medium">{conversation.status}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Timeline */}
-      <div className="relative">
-        {/* Central timeline line with animated progress */}
-        <div className="absolute left-1/2 transform -translate-x-0.5 w-1 bg-gradient-to-b from-blue-200 via-blue-300 to-blue-200 dark:from-blue-800 dark:via-blue-700 dark:to-blue-800 top-0 bottom-0 rounded-full">
-          {/* Animated progress indicator */}
-          <div className="absolute inset-0 w-full bg-gradient-to-b from-blue-400 to-blue-600 rounded-full opacity-60 animate-pulse" />
-          {/* Flowing light effect */}
-          <div className="absolute inset-0 w-full">
-            <div className="w-full h-8 bg-gradient-to-b from-transparent via-blue-300 to-transparent rounded-full animate-bounce-subtle" />
-          </div>
-        </div>
-        
-        {/* Events grouped by date */}
-        {Array.from(eventsByDate.entries()).map(([dateString, dayEvents], dateIndex) => (
-          <div key={dateString} className="mb-12">
-            {/* Date separator with enhanced styling */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="relative z-20 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-lg backdrop-blur-sm animate-fade-in">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-full" />
-                <span className="relative">{formatDate(dayEvents[0].at)}</span>
-              </div>
-            </div>
-            
-            {/* Events for this date */}
-            {dayEvents.map((event, eventIndex) => {
-              const globalIndex = events.indexOf(event);
-              const previousEvent = globalIndex > 0 ? events[globalIndex - 1] : null;
-              const isLeft = eventIndex % 2 === 1;
-              
-              return (
-                <div key={event.id} className="relative mb-8">
-                  {/* Enhanced time gap indicator */}
-                  {previousEvent && (
-                    <div className="flex items-center justify-center mb-4">
-                      <div className="relative">
-                        <div className="text-xs font-medium text-gray-600 dark:text-gray-300 bg-gradient-to-r from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-600 shadow-sm">
-                          <Clock className="inline w-3 h-3 mr-1 opacity-60" />
-                          +{getTimeBetweenEvents(event, previousEvent)}
-                        </div>
-                        {/* Subtle connecting lines */}
-                        <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent -z-10" />
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Timeline node */}
-                  <div className={`flex ${isLeft ? 'justify-end pr-16' : 'justify-start pl-16'}`}>
-                    <div className="w-full max-w-md">
-                      <TimelineNode
-                        event={event}
-                        isLeft={isLeft}
-                        showTime={true}
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Enhanced central dot with animation */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2">
-                    <div className="relative">
-                      {/* Pulsing ring effect */}
-                      <div className="absolute inset-0 w-6 h-6 -translate-x-1 -translate-y-1 border-2 border-blue-400 dark:border-blue-300 rounded-full animate-ping opacity-40" />
-                      {/* Main dot */}
-                      <div className="w-4 h-4 bg-white dark:bg-gray-800 border-2 border-blue-500 dark:border-blue-400 rounded-full shadow-lg relative z-10 transition-all duration-300 hover:scale-125 hover:shadow-xl" />
-                      {/* Inner glow */}
-                      <div className="absolute inset-1 w-2 h-2 bg-blue-400 dark:bg-blue-300 rounded-full animate-pulse" />
-                    </div>
-                  </div>
-                  
-                </div>
-              );
-            })}
-          </div>
-        ))}
-        
-        {/* Enhanced timeline end indicator */}
-        <div className="flex items-center justify-center">
-          <div className="relative">
-            {/* Outer glow ring */}
-            <div className="absolute inset-0 w-8 h-8 -translate-x-1 -translate-y-1 bg-gradient-to-br from-blue-300 to-blue-500 rounded-full animate-ping opacity-30" />
-            {/* Main end indicator */}
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full shadow-xl flex items-center justify-center relative z-10 animate-pulse">
-              <div className="w-2 h-2 bg-white rounded-full shadow-sm" />
-            </div>
-            {/* Success indicator glow */}
-            <div className="absolute inset-0.5 w-5 h-5 bg-gradient-to-br from-emerald-300 to-blue-400 rounded-full opacity-20 animate-bounce-subtle" />
-          </div>
-        </div>
-      </div>
+    <div className={`${viewMode === 'tree' ? 'max-w-7xl mx-auto' : 'max-w-4xl mx-auto'} p-6`}>
+      {/* Conditional Timeline Rendering */}
+      {viewMode === 'tree' ? (
+        <TreeTimeline conversation={conversation} events={events} />
+      ) : (
+        <AccordionListView conversation={conversation} events={events} />
+      )}
     </div>
   );
 }
