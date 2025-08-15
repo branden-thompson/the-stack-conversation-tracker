@@ -1,72 +1,37 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { TimelineNode } from './TimelineNode';
 import { TreeTimeline } from './TreeTimeline';
 import { Clock, Calendar, MessageCircle, List, TreePine, ChevronDown, ChevronRight } from 'lucide-react';
 import { transformEventsToTree } from '@/lib/utils/timelineTree';
+import { formatTime, formatDate, getTimeBetweenEvents } from '@/lib/utils/timelineFormatters';
+import { useExpansionState } from '@/lib/hooks/useExpansionState';
+import { getStatusBadgeStyles, accordionStyles, expansionButtonStyles, getEmptyStateStyles, timelineTextColors } from '@/lib/utils/timelineStyles';
 
-// Format time helper
-function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    second: '2-digit'
-  });
-}
-
-// Format date helper  
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
-
-// Calculate time between events
-function getTimeBetweenEvents(currentEvent, previousEvent) {
-  if (!previousEvent) return null;
-  
-  const diff = currentEvent.at - previousEvent.at;
-  if (diff < 60000) { // < 1 minute
-    return `${Math.floor(diff / 1000)}s`;
-  } else if (diff < 3600000) { // < 1 hour
-    return `${Math.floor(diff / 60000)}m`;
-  } else {
-    return `${Math.floor(diff / 3600000)}h ${Math.floor((diff % 3600000) / 60000)}m`;
-  }
-}
 
 // Accordion List View Component
 function AccordionListView({ conversation, events }) {
-  const [expandedCards, setExpandedCards] = useState(new Set());
-  
   // Transform events into tree structure
   const treeData = useMemo(() => {
     return transformEventsToTree(events);
   }, [events]);
 
   const { cardBranches } = treeData;
-
-  const toggleCardExpansion = (cardId) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cardId)) {
-        newSet.delete(cardId);
-      } else {
-        newSet.add(cardId);
-      }
-      return newSet;
-    });
-  };
+  const { isExpanded, toggleItem, expandAll, collapseAll } = useExpansionState();
+  
+  const emptyStyles = getEmptyStateStyles('w-16');
 
   if (cardBranches.length === 0) {
     return (
-      <div className="text-center text-gray-500 dark:text-gray-400 p-8">
-        <List className="w-16 h-16 mx-auto mb-4 opacity-30" />
-        <h3 className="text-lg font-semibold mb-2">No Cards Found</h3>
-        <p>This conversation doesn't have any card events to display in list format.</p>
+      <div className={emptyStyles.container}>
+        <div className={emptyStyles.content}>
+          <div className={emptyStyles.iconWrapper}>
+            <List className={emptyStyles.icon} />
+          </div>
+          <h3 className={emptyStyles.title}>No Cards Found</h3>
+          <p className={emptyStyles.subtitle}>This conversation doesn't have any card events to display in list format.</p>
+        </div>
       </div>
     );
   }
@@ -74,7 +39,7 @@ function AccordionListView({ conversation, events }) {
   return (
     <div className="space-y-4">
       {/* Table Header */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 grid grid-cols-5 gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+      <div className={accordionStyles.header}>
         <div>Card</div>
         <div>Type</div>
         <div>Status</div>
@@ -84,49 +49,47 @@ function AccordionListView({ conversation, events }) {
 
       {/* Card Rows */}
       {cardBranches.map((cardBranch) => {
-        const isExpanded = expandedCards.has(cardBranch.cardId);
+        const cardIsExpanded = isExpanded(cardBranch.cardId);
         const cardName = cardBranch.rootEvent.payload?.content?.substring(0, 30) || 
                         `${cardBranch.rootEvent.payload?.type || 'card'} (${cardBranch.cardId.slice(0, 8)})`;
         
         return (
-          <div key={cardBranch.cardId} className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+          <div key={cardBranch.cardId} className={accordionStyles.container}>
             {/* Main Row */}
             <div 
-              className="bg-white dark:bg-gray-800 p-4 grid grid-cols-5 gap-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              onClick={() => toggleCardExpansion(cardBranch.cardId)}
+              className={accordionStyles.row}
+              onClick={() => toggleItem(cardBranch.cardId)}
             >
               <div className="flex items-center gap-2">
                 {cardBranch.childEvents.length > 0 && (
-                  isExpanded ? 
+                  cardIsExpanded ? 
                     <ChevronDown className="w-4 h-4 text-gray-400" /> : 
                     <ChevronRight className="w-4 h-4 text-gray-400" />
                 )}
-                <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                <span className={`font-medium ${timelineTextColors.primary} truncate`}>
                   {cardName}
                 </span>
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className={timelineTextColors.muted}>
                 {cardBranch.rootEvent.payload?.type || 'unknown'}
               </div>
               <div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  cardBranch.childEvents.some(e => e.type === 'card.deleted') 
-                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
-                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
-                }`}>
+                <span className={getStatusBadgeStyles(
+                  cardBranch.childEvents.some(e => e.type === 'card.deleted') ? 'failed' : 'active'
+                )}>
                   {cardBranch.childEvents.some(e => e.type === 'card.deleted') ? 'deleted' : 'active'}
                 </span>
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className={timelineTextColors.muted}>
                 {cardBranch.childEvents.length + 1} events
               </div>
-              <div className="text-gray-600 dark:text-gray-400">
+              <div className={timelineTextColors.muted}>
                 {formatTime(cardBranch.rootEvent.at)}
               </div>
             </div>
 
             {/* Expanded Events */}
-            {isExpanded && cardBranch.childEvents.length > 0 && (
+            {cardIsExpanded && cardBranch.childEvents.length > 0 && (
               <div className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
                 <div className="p-4">
                   <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Event History</h4>
@@ -167,14 +130,14 @@ function AccordionListView({ conversation, events }) {
       {/* Expand/Collapse All Controls */}
       <div className="flex justify-center gap-4 pt-4">
         <button
-          onClick={() => setExpandedCards(new Set(cardBranches.map(b => b.cardId)))}
-          className="px-4 py-2 bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/30 transition-colors text-sm"
+          onClick={() => expandAll(cardBranches.map(b => b.cardId))}
+          className={expansionButtonStyles.expandAll}
         >
           Expand All
         </button>
         <button
-          onClick={() => setExpandedCards(new Set())}
-          className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
+          onClick={collapseAll}
+          className={expansionButtonStyles.collapseAll}
         >
           Collapse All
         </button>

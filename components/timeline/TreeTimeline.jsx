@@ -1,22 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { TreeTimelineNode } from './TreeTimelineNode';
 import { CardSubBranch } from './CardSubBranch';
 import { Clock, Calendar, MessageCircle, TreePine } from 'lucide-react';
 import { transformEventsToTree } from '@/lib/utils/timelineTree';
+import { formatDate } from '@/lib/utils/timelineFormatters';
+import { useExpansionState } from '@/lib/hooks/useExpansionState';
+import { getEmptyStateStyles, timelineTextColors } from '@/lib/utils/timelineStyles';
 
-// Format date helper  
-function formatDate(timestamp) {
-  return new Date(timestamp).toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-}
 
 export function TreeTimeline({ conversation, events }) {
-  const [expandedCards, setExpandedCards] = useState(new Set());
+  const { isExpanded, toggleItem } = useExpansionState();
 
   // Transform events into tree structure
   const treeData = useMemo(() => {
@@ -42,29 +37,19 @@ export function TreeTimeline({ conversation, events }) {
     return grouped;
   }, [cardBranches]);
 
-  const toggleCardExpansion = (cardId) => {
-    setExpandedCards(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(cardId)) {
-        newSet.delete(cardId);
-      } else {
-        newSet.add(cardId);
-      }
-      return newSet;
-    });
-  };
+  const emptyStyles = getEmptyStateStyles();
 
   if (!conversation) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center text-gray-500 dark:text-gray-400 animate-fade-in">
-          <div className="relative mb-6">
-            <TreePine className="w-20 h-20 mx-auto opacity-30 animate-pulse" />
-            <div className="absolute inset-0 w-20 h-20 mx-auto border-2 border-gray-300 dark:border-gray-600 rounded-full animate-ping opacity-20"></div>
+      <div className={emptyStyles.container}>
+        <div className={emptyStyles.content}>
+          <div className={emptyStyles.iconWrapper}>
+            <TreePine className={emptyStyles.iconWithPulse} />
+            <div className={emptyStyles.iconRing}></div>
           </div>
-          <h3 className="text-xl font-semibold mb-3 text-gray-700 dark:text-gray-300">Welcome to Tree Timeline</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-2">Visualize your conversation as a branching tree</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500">Select a conversation from the dropdown above to begin</p>
+          <h3 className={emptyStyles.title}>Welcome to Tree Timeline</h3>
+          <p className={emptyStyles.subtitle}>Visualize your conversation as a branching tree</p>
+          <p className={emptyStyles.description}>Select a conversation from the dropdown above to begin</p>
         </div>
       </div>
     );
@@ -72,16 +57,16 @@ export function TreeTimeline({ conversation, events }) {
 
   if (!events || events.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center text-gray-500 dark:text-gray-400 animate-fade-in">
-          <div className="relative mb-6">
-            <TreePine className="w-20 h-20 mx-auto opacity-30" />
+      <div className={emptyStyles.container}>
+        <div className={emptyStyles.content}>
+          <div className={emptyStyles.iconWrapper}>
+            <TreePine className={emptyStyles.icon} />
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-1 h-8 bg-gradient-to-b from-green-400 to-green-600 rounded-full animate-bounce"></div>
             </div>
           </div>
-          <h3 className="text-xl font-semibold mb-3 text-gray-700 dark:text-gray-300">Tree is Empty</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-2">This conversation doesn't have any card events yet</p>
+          <h3 className={emptyStyles.title}>Tree is Empty</h3>
+          <p className={emptyStyles.subtitle}>This conversation doesn't have any card events yet</p>
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 mt-4 max-w-md mx-auto">
             <p className="text-sm text-green-700 dark:text-green-300">
               🌳 Cards and their lifecycle events will appear as branches when you start working with the conversation
@@ -139,7 +124,7 @@ export function TreeTimeline({ conversation, events }) {
             {/* Card branches for this date */}
             {dayBranches.map((cardBranch, branchIndex) => {
               const isLeft = branchIndex % 2 === 1;
-              const isExpanded = expandedCards.has(cardBranch.cardId);
+              const cardIsExpanded = isExpanded(cardBranch.cardId);
               
               return (
                 <div key={cardBranch.cardId} className="relative mb-12">
@@ -148,18 +133,18 @@ export function TreeTimeline({ conversation, events }) {
                     <div className="w-full max-w-sm">
                       <TreeTimelineNode
                         cardBranch={cardBranch}
-                        isExpanded={isExpanded}
-                        onToggleExpand={() => toggleCardExpansion(cardBranch.cardId)}
+                        isExpanded={cardIsExpanded}
+                        onToggleExpand={() => toggleItem(cardBranch.cardId)}
                         showTime={true}
                         isLeft={isLeft}
                       />
                       
                       {/* Sub-branches for card events */}
-                      {isExpanded && cardBranch.childEvents.length > 0 && (
+                      {cardIsExpanded && cardBranch.childEvents.length > 0 && (
                         <div className="mt-4">
                           <CardSubBranch
                             events={cardBranch.childEvents}
-                            isVisible={isExpanded}
+                            isVisible={cardIsExpanded}
                             showTime={true}
                           />
                         </div>

@@ -10,28 +10,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { getCardDisplayName, getCardCurrentStatus, getCardLifecycleDuration } from '@/lib/utils/timelineTree';
+import { formatTime, formatDuration } from '@/lib/utils/timelineFormatters';
+import { timelineTextColors, getStatusBadgeStyles, expansionButtonStyles } from '@/lib/utils/timelineStyles';
 
-// Format time helper
-function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    second: '2-digit'
-  });
-}
-
-// Format duration helper
-function formatDuration(ms) {
-  if (!ms) return null;
-  
-  if (ms < 60000) { // < 1 minute
-    return `${Math.floor(ms / 1000)}s`;
-  } else if (ms < 3600000) { // < 1 hour
-    return `${Math.floor(ms / 60000)}m`;
-  } else {
-    return `${Math.floor(ms / 3600000)}h ${Math.floor((ms % 3600000) / 60000)}m`;
-  }
-}
 
 // Get status styling - Card creation events should always be green
 function getStatusStyling(status) {
@@ -72,16 +53,16 @@ export function TreeTimelineNode({
             {/* Expand/Collapse indicator */}
             {hasChildEvents && (
               <button 
-                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                className={expansionButtonStyles.base}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleExpand && onToggleExpand();
                 }}
               >
                 {isExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <ChevronDown className={`w-4 h-4 ${timelineTextColors.muted}`} />
                 ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <ChevronRight className={`w-4 h-4 ${timelineTextColors.muted}`} />
                 )}
               </button>
             )}
@@ -92,12 +73,12 @@ export function TreeTimelineNode({
             </div>
             
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+              <h4 className={`font-semibold text-sm ${timelineTextColors.primary} truncate`}>
                 {cardName}
               </h4>
               
               {showTime && (
-                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                <div className={`flex items-center gap-1 text-xs ${timelineTextColors.subtle} mt-0.5`}>
                   <Clock className="w-3 h-3" />
                   <span>{formatTime(rootEvent.at)}</span>
                 </div>
@@ -105,7 +86,7 @@ export function TreeTimelineNode({
             </div>
             
             {/* Status badge */}
-            <div className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyling.bg} ${statusStyling.text} border ${statusStyling.border}`}>
+            <div className={getStatusBadgeStyles(status)}>
               {status}
             </div>
           </div>
@@ -113,12 +94,12 @@ export function TreeTimelineNode({
         
         <CardContent className="pt-0">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-700 dark:text-gray-300">
+            <span className={timelineTextColors.secondary}>
               {rootEvent.payload?.type || 'card'} created
             </span>
             
             {hasChildEvents && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
+              <span className={`text-xs ${timelineTextColors.subtle}`}>
                 {childEvents.length} event{childEvents.length !== 1 ? 's' : ''}
               </span>
             )}
@@ -126,14 +107,14 @@ export function TreeTimelineNode({
           
           {/* Duration info */}
           {duration && (
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className={`mt-2 text-xs ${timelineTextColors.subtle}`}>
               Lifecycle: {formatDuration(duration)}
             </div>
           )}
           
           {/* Basic payload info */}
           {rootEvent.payload?.id && (
-            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+            <div className={`mt-2 text-xs ${timelineTextColors.subtle}`}>
               ID: <span className="font-mono">{rootEvent.payload.id.slice(0, 8)}...</span>
             </div>
           )}

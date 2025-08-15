@@ -2,108 +2,17 @@
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { 
-  Plus, 
-  ArrowRight, 
-  Edit, 
-  Trash2, 
-  Clock,
-  Info
-} from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { getEventConfig } from '@/lib/utils/timelineConstants';
+import { formatTime } from '@/lib/utils/timelineFormatters';
+import { getEventSummary, getPayloadDetails } from '@/lib/utils/timelineEvents';
 
-// Event type configurations
-const EVENT_TYPES = {
-  'card.created': {
-    icon: Plus,
-    label: 'Card Created',
-    color: 'emerald',
-    bgClass: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800',
-    iconClass: 'text-emerald-600 dark:text-emerald-400',
-    description: 'A new card was added to the conversation'
-  },
-  'card.moved': {
-    icon: ArrowRight,
-    label: 'Card Moved',
-    color: 'blue',
-    bgClass: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
-    iconClass: 'text-blue-600 dark:text-blue-400',
-    description: 'A card was moved between zones'
-  },
-  'card.updated': {
-    icon: Edit,
-    label: 'Card Updated',
-    color: 'amber',
-    bgClass: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
-    iconClass: 'text-amber-600 dark:text-amber-400',
-    description: 'Card content or properties were modified'
-  },
-  'card.deleted': {
-    icon: Trash2,
-    label: 'Card Deleted',
-    color: 'rose',
-    bgClass: 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800',
-    iconClass: 'text-rose-600 dark:text-rose-400',
-    description: 'A card was removed from the conversation'
-  }
-};
 
-// Format time helper
-function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit',
-    second: '2-digit'
-  });
-}
-
-// Get event summary text
-function getEventSummary(event) {
-  const { type, payload = {} } = event;
-  
-  switch (type) {
-    case 'card.created':
-      return `Created ${payload.type || 'card'} in ${payload.zone || 'unknown zone'}`;
-    
-    case 'card.moved':
-      return `Moved from ${payload.from || '?'} to ${payload.to || '?'}`;
-    
-    case 'card.updated':
-      const fields = payload.fields || Object.keys(payload).filter(k => k !== 'id');
-      return `Updated ${fields.length ? fields.join(', ') : 'properties'}`;
-    
-    case 'card.deleted':
-      return `Deleted from ${payload.zone || 'board'}`;
-    
-    default:
-      return type;
-  }
-}
-
-// Get detailed payload info for hover
-function getPayloadDetails(event) {
-  const { payload = {} } = event;
-  const details = [];
-  
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value !== null && value !== undefined && value !== '') {
-      details.push({ key, value: String(value) });
-    }
-  });
-  
-  return details;
-}
 
 export function TimelineNode({ event, isLeft = false, showTime = true }) {
   const [isHovered, setIsHovered] = useState(false);
   
-  const eventConfig = EVENT_TYPES[event.type] || {
-    icon: Info,
-    label: event.type,
-    color: 'gray',
-    bgClass: 'bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-800',
-    iconClass: 'text-gray-600 dark:text-gray-400',
-    description: 'Unknown event type'
-  };
+  const eventConfig = getEventConfig(event.type);
   
   const Icon = eventConfig.icon;
   const summary = getEventSummary(event);
