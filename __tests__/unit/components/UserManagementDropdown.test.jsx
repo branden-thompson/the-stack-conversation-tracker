@@ -8,13 +8,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { UserManagementDropdown } from '@/components/ui/user-management-dropdown';
 
-// Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-  unobserve: vi.fn(),
-}));
-
 describe('UserManagementDropdown', () => {
   const mockUsers = [
     {

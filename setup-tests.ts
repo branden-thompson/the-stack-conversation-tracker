@@ -34,6 +34,14 @@ vi.mock('next/image', () => ({
 // Mock environment variables
 process.env.NODE_ENV = 'test'
 
+// Ensure test database directory exists and is writable
+beforeAll(async () => {
+  // Mock fetch for tests that don't mock it explicitly
+  if (!global.fetch) {
+    global.fetch = vi.fn()
+  }
+})
+
 // Global test utilities
 global.ResizeObserver = vi.fn().mockImplementation(() => ({
   observe: vi.fn(),

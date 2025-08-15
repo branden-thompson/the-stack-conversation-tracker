@@ -8,13 +8,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
 
-// Mock ResizeObserver
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  disconnect: vi.fn(),
-  unobserve: vi.fn(),
-}));
-
 describe('UserProfileDialog', () => {
   const mockUsers = [
     {
