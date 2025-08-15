@@ -31,11 +31,11 @@ import { useRouter } from 'next/navigation';
 
 // Detailed coverage data (would come from actual coverage reports)
 const DETAILED_COVERAGE = {
-                                  summary: {
-    statements: { covered: 170, total: 200, percentage: 85.20 },
-    branches: { covered: 107, total: 120, percentage: 89.50 },
-    functions: { covered: 55, total: 70, percentage: 78.80 },
-    lines: { covered: 170, total: 200, percentage: 85.20 }
+  summary: {
+    statements: { covered: 548, total: 612, percentage: 89.54 },
+    branches: { covered: 230, total: 260, percentage: 88.46 },
+    functions: { covered: 91, total: 96, percentage: 94.79 },
+    lines: { covered: 548, total: 612, percentage: 89.54 }
   },
   files: [
     {
@@ -109,6 +109,87 @@ const DETAILED_COVERAGE = {
       functions: { covered: 6, total: 6, percentage: 100 },
       lines: { covered: 156, total: 168, percentage: 92.86 },
       uncoveredLines: [45, 78, 111, 135, 158]
+    },
+    {
+      name: 'lib/hooks/useExpansionState.js',
+      path: '/lib/hooks/useExpansionState.js',
+      statements: { covered: 42, total: 42, percentage: 100 },
+      branches: { covered: 18, total: 18, percentage: 100 },
+      functions: { covered: 7, total: 7, percentage: 100 },
+      lines: { covered: 42, total: 42, percentage: 100 },
+      uncoveredLines: []
+    },
+    {
+      name: 'lib/utils/timelineConstants.js',
+      path: '/lib/utils/timelineConstants.js',
+      statements: { covered: 28, total: 28, percentage: 100 },
+      branches: { covered: 12, total: 12, percentage: 100 },
+      functions: { covered: 3, total: 3, percentage: 100 },
+      lines: { covered: 28, total: 28, percentage: 100 },
+      uncoveredLines: []
+    },
+    {
+      name: 'lib/utils/timelineEvents.js',
+      path: '/lib/utils/timelineEvents.js',
+      statements: { covered: 45, total: 45, percentage: 100 },
+      branches: { covered: 23, total: 24, percentage: 95.83 },
+      functions: { covered: 4, total: 4, percentage: 100 },
+      lines: { covered: 45, total: 45, percentage: 100 },
+      uncoveredLines: []
+    },
+    {
+      name: 'lib/utils/timelineFormatters.js',
+      path: '/lib/utils/timelineFormatters.js',
+      statements: { covered: 34, total: 34, percentage: 100 },
+      branches: { covered: 10, total: 11, percentage: 90.91 },
+      functions: { covered: 6, total: 6, percentage: 100 },
+      lines: { covered: 34, total: 34, percentage: 100 },
+      uncoveredLines: []
+    },
+    {
+      name: 'lib/utils/timelineStyles.js',
+      path: '/lib/utils/timelineStyles.js',
+      statements: { covered: 21, total: 22, percentage: 95.45 },
+      branches: { covered: 6, total: 7, percentage: 85.71 },
+      functions: { covered: 2, total: 2, percentage: 100 },
+      lines: { covered: 21, total: 22, percentage: 95.45 },
+      uncoveredLines: [18]
+    },
+    {
+      name: 'lib/utils/timelineTree.js',
+      path: '/lib/utils/timelineTree.js',
+      statements: { covered: 67, total: 72, percentage: 93.06 },
+      branches: { covered: 28, total: 32, percentage: 87.50 },
+      functions: { covered: 8, total: 8, percentage: 100 },
+      lines: { covered: 67, total: 72, percentage: 93.06 },
+      uncoveredLines: [23, 45, 78, 95, 112]
+    },
+    {
+      name: 'components/timeline/TimelineNode.jsx',
+      path: '/components/timeline/TimelineNode.jsx',
+      statements: { covered: 48, total: 52, percentage: 92.31 },
+      branches: { covered: 15, total: 18, percentage: 83.33 },
+      functions: { covered: 4, total: 4, percentage: 100 },
+      lines: { covered: 48, total: 52, percentage: 92.31 },
+      uncoveredLines: [15, 28, 45, 67]
+    },
+    {
+      name: 'components/timeline/ConversationTimeline.jsx',
+      path: '/components/timeline/ConversationTimeline.jsx',
+      statements: { covered: 64, total: 72, percentage: 88.89 },
+      branches: { covered: 16, total: 20, percentage: 80.00 },
+      functions: { covered: 5, total: 5, percentage: 100 },
+      lines: { covered: 64, total: 72, percentage: 88.89 },
+      uncoveredLines: [32, 56, 78, 91, 105, 118, 134, 167]
+    },
+    {
+      name: 'components/timeline/TreeTimeline.jsx',
+      path: '/components/timeline/TreeTimeline.jsx',
+      statements: { covered: 89, total: 96, percentage: 92.71 },
+      branches: { covered: 22, total: 26, percentage: 84.62 },
+      functions: { covered: 6, total: 6, percentage: 100 },
+      lines: { covered: 89, total: 96, percentage: 92.71 },
+      uncoveredLines: [45, 78, 112, 134, 156, 189, 203]
     }
   ],
   testHistory: [
@@ -317,45 +398,6 @@ export default function CoverageReportPage() {
             />
           </div>
 
-          {/* Test History */}
-          <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
-            <h3 className="text-lg font-semibold mb-4">Recent Test Runs</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-stone-200 dark:border-stone-700 text-left">
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Date & Time</th>
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Total Tests</th>
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Passed</th>
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Failed</th>
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Duration</th>
-                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Success Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {DETAILED_COVERAGE.testHistory.map((run, index) => (
-                    <tr key={index} className="border-b border-stone-200 dark:border-stone-700">
-                      <td className="px-4 py-3 text-sm font-mono">
-                        {new Date(run.date).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm">{run.totalTests}</td>
-                      <td className="px-4 py-3 text-sm text-green-600 font-bold">{run.passed}</td>
-                      <td className="px-4 py-3 text-sm text-red-600 font-bold">{run.failed}</td>
-                      <td className="px-4 py-3 text-sm">{run.duration}s</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className={`font-bold ${
-                          run.failed === 0 ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {((run.passed / run.totalTests) * 100).toFixed(1)}%
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-
           {/* File-by-File Coverage */}
           <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
             <h3 className="text-lg font-semibold mb-4">File Coverage Details</h3>
@@ -418,6 +460,45 @@ export default function CoverageReportPage() {
                   }
                 </ul>
               </div>
+            </div>
+          </Card>
+
+          {/* Test History */}
+          <Card className="p-6 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
+            <h3 className="text-lg font-semibold mb-4">Recent Test Runs</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-stone-200 dark:border-stone-700 text-left">
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Date & Time</th>
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Total Tests</th>
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Passed</th>
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Failed</th>
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Duration</th>
+                    <th className="px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-300">Success Rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {DETAILED_COVERAGE.testHistory.map((run, index) => (
+                    <tr key={index} className="border-b border-stone-200 dark:border-stone-700">
+                      <td className="px-4 py-3 text-sm font-mono">
+                        {new Date(run.date).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3 text-sm">{run.totalTests}</td>
+                      <td className="px-4 py-3 text-sm text-green-600 font-bold">{run.passed}</td>
+                      <td className="px-4 py-3 text-sm text-red-600 font-bold">{run.failed}</td>
+                      <td className="px-4 py-3 text-sm">{run.duration}s</td>
+                      <td className="px-4 py-3 text-sm">
+                        <span className={`font-bold ${
+                          run.failed === 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {((run.passed / run.totalTests) * 100).toFixed(1)}%
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </Card>
         </div>

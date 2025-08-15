@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ConversationTimeline } from '@/components/timeline/ConversationTimeline';
 
-// Mock the TimelineNode component
+// Mock the child components
 vi.mock('@/components/timeline/TimelineNode', () => ({
   TimelineNode: ({ event, isLeft, showTime }) => (
     <div data-testid={`timeline-node-${event.id}`} data-is-left={isLeft} data-show-time={showTime}>
@@ -10,6 +10,30 @@ vi.mock('@/components/timeline/TimelineNode', () => ({
       <span>{event.payload?.id || 'no-id'}</span>
     </div>
   )
+}));
+
+vi.mock('@/components/timeline/TreeTimeline', () => ({
+  TreeTimeline: ({ conversation, events }) => (
+    <div data-testid="tree-timeline">
+      <span>Tree view for {conversation?.name}</span>
+      <span>{events?.length} events</span>
+    </div>
+  )
+}));
+
+// Mock the shared utilities
+vi.mock('@/lib/hooks/useExpansionState', () => ({
+  useExpansionState: () => ({
+    isExpanded: vi.fn(() => false),
+    toggleItem: vi.fn(),
+    expandAll: vi.fn(),
+    collapseAll: vi.fn()
+  })
+}));
+
+vi.mock('@/lib/utils/timelineFormatters', () => ({
+  formatTime: vi.fn(() => '12:00:00'),
+  formatDate: vi.fn(() => 'Jan 1, 2024')
 }));
 
 const mockConversation = {
@@ -43,89 +67,88 @@ const mockEvents = [
 ];
 
 describe('ConversationTimeline', () => {
-  it('renders conversation header with correct information', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} />);
+  it('renders tree timeline by default', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="tree" />);
     
-    expect(screen.getByText('Test Conversation')).toBeInTheDocument();
+    expect(screen.getByTestId('tree-timeline')).toBeInTheDocument();
+    expect(screen.getByText('Tree view for Test Conversation')).toBeInTheDocument();
     expect(screen.getByText('3 events')).toBeInTheDocument();
-    expect(screen.getByText('active')).toBeInTheDocument();
   });
 
-  it('renders all timeline events', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} />);
+  it('renders accordion list view when viewMode is list', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="list" />);
     
-    expect(screen.getByTestId('timeline-node-event-1')).toBeInTheDocument();
-    expect(screen.getByTestId('timeline-node-event-2')).toBeInTheDocument();
-    expect(screen.getByTestId('timeline-node-event-3')).toBeInTheDocument();
+    // Should render accordion header
+    expect(screen.getByText('Card')).toBeInTheDocument();
+    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Created')).toBeInTheDocument();
   });
 
-  it('alternates left/right positioning for events', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} />);
+  it('shows expand/collapse controls in list view', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="list" />);
     
-    // First event should be on the left (isLeft=true for even index)
-    expect(screen.getByTestId('timeline-node-event-1')).toHaveAttribute('data-is-left', 'true');
-    // Second event should be on the right (isLeft=false for odd index)  
-    expect(screen.getByTestId('timeline-node-event-2')).toHaveAttribute('data-is-left', 'false');
-    // Third event should be on the left again
-    expect(screen.getByTestId('timeline-node-event-3')).toHaveAttribute('data-is-left', 'true');
+    expect(screen.getByText('Expand All')).toBeInTheDocument();
+    expect(screen.getByText('Collapse All')).toBeInTheDocument();
   });
 
-  it('shows "No Conversation Selected" when conversation is null', () => {
-    render(<ConversationTimeline conversation={null} events={mockEvents} />);
+  it('shows welcome message when conversation is null', () => {
+    render(<ConversationTimeline conversation={null} events={mockEvents} viewMode="tree" />);
     
-    expect(screen.getByText('No Conversation Selected')).toBeInTheDocument();
-    expect(screen.getByText('Select a conversation to view its timeline')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to Timeline Explorer')).toBeInTheDocument();
+    expect(screen.getByText('Select a conversation from the dropdown above to begin')).toBeInTheDocument();
   });
 
-  it('shows "No Timeline Events" when events array is empty', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={[]} />);
+  it('shows empty timeline message when no events', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={[]} viewMode="list" />);
     
-    expect(screen.getByText('No Timeline Events')).toBeInTheDocument();
+    expect(screen.getByText('Timeline is Empty')).toBeInTheDocument();
     expect(screen.getByText('This conversation doesn\'t have any recorded events yet')).toBeInTheDocument();
   });
 
-  it('shows "No Timeline Events" when events is null', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={null} />);
+  it('handles null events gracefully', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={null} viewMode="list" />);
     
-    expect(screen.getByText('No Timeline Events')).toBeInTheDocument();
+    expect(screen.getByText('Timeline is Empty')).toBeInTheDocument();
   });
 
-  it('groups events by date correctly', () => {
-    const eventsOnDifferentDays = [
-      {
-        id: 'event-today',
-        type: 'card.created',
-        payload: { id: 'card-1', type: 'topic' },
-        at: Date.now()
-      },
-      {
-        id: 'event-yesterday',
-        type: 'card.moved', 
-        payload: { id: 'card-1', from: 'active', to: 'completed' },
-        at: Date.now() - 86400000 // 1 day ago
-      }
-    ];
-
-    render(<ConversationTimeline conversation={mockConversation} events={eventsOnDifferentDays} />);
+  it('displays card information in list view', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="list" />);
     
-    // Should show both events
-    expect(screen.getByTestId('timeline-node-event-today')).toBeInTheDocument();
-    expect(screen.getByTestId('timeline-node-event-yesterday')).toBeInTheDocument();
+    // Should show accordion headers
+    expect(screen.getByText('Card')).toBeInTheDocument();
+    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+    expect(screen.getByText('Events')).toBeInTheDocument();
+    expect(screen.getByText('Created')).toBeInTheDocument();
+    
+    // Should show card row with card info
+    expect(screen.getByText('topic (card-1)')).toBeInTheDocument();
   });
 
-  it('displays conversation status correctly', () => {
-    const pausedConversation = { ...mockConversation, status: 'paused' };
-    render(<ConversationTimeline conversation={pausedConversation} events={mockEvents} />);
+  it('can switch between tree and list views', () => {
+    const { rerender } = render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="tree" />);
     
-    expect(screen.getByText('paused')).toBeInTheDocument();
+    expect(screen.getByTestId('tree-timeline')).toBeInTheDocument();
+    
+    rerender(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="list" />);
+    
+    expect(screen.queryByTestId('tree-timeline')).not.toBeInTheDocument();
+    expect(screen.getByText('Card')).toBeInTheDocument(); // Accordion header
   });
 
-  it('passes showTime prop to TimelineNode components', () => {
-    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} />);
+  it('renders expand/collapse buttons in list view', () => {
+    render(<ConversationTimeline conversation={mockConversation} events={mockEvents} viewMode="list" />);
     
-    // All timeline nodes should have showTime=true
-    expect(screen.getByTestId('timeline-node-event-1')).toHaveAttribute('data-show-time', 'true');
-    expect(screen.getByTestId('timeline-node-event-2')).toHaveAttribute('data-show-time', 'true');
-    expect(screen.getByTestId('timeline-node-event-3')).toHaveAttribute('data-show-time', 'true');
+    const expandButton = screen.getByText('Expand All');
+    const collapseButton = screen.getByText('Collapse All');
+    
+    expect(expandButton).toBeInTheDocument();
+    expect(collapseButton).toBeInTheDocument();
+    
+    // Should be clickable
+    fireEvent.click(expandButton);
+    fireEvent.click(collapseButton);
   });
 });
