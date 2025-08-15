@@ -110,18 +110,19 @@ export function TimelineNode({ event, isLeft = false, showTime = true }) {
   const payloadDetails = getPayloadDetails(event);
 
   return (
-    <div className="relative">
+    <div className="relative group">
+      {/* Animated entrance and hover effects */}
       <Card 
-        className={`${eventConfig.bgClass} hover:shadow-md transition-all duration-200 cursor-pointer ${
-          isLeft ? 'text-right' : 'text-left'
-        }`}
+        className={`${eventConfig.bgClass} transition-all duration-300 ease-out cursor-pointer transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 ${
+          isLeft ? 'text-right animate-slide-in-right' : 'text-left animate-slide-in-left'
+        } ${isHovered ? 'ring-2 ring-opacity-50 ring-' + eventConfig.color + '-300 dark:ring-' + eventConfig.color + '-600' : ''}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <CardHeader className="pb-2">
           <div className={`flex items-center gap-2 ${isLeft ? 'flex-row-reverse' : 'flex-row'}`}>
-            <div className={`p-1.5 rounded-full ${eventConfig.bgClass}`}>
-              <Icon className={`w-4 h-4 ${eventConfig.iconClass}`} />
+            <div className={`p-1.5 rounded-full ${eventConfig.bgClass} transition-all duration-200 group-hover:scale-110 group-hover:shadow-md`}>
+              <Icon className={`w-4 h-4 ${eventConfig.iconClass} transition-transform duration-200 group-hover:scale-110`} />
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
@@ -153,11 +154,11 @@ export function TimelineNode({ event, isLeft = false, showTime = true }) {
         </CardContent>
       </Card>
 
-      {/* Hover tooltip with detailed information */}
+      {/* Enhanced hover tooltip with animations */}
       {isHovered && payloadDetails.length > 0 && (
-        <div className={`absolute z-10 ${
+        <div className={`absolute z-20 ${
           isLeft ? 'right-full mr-4' : 'left-full ml-4'
-        } top-0 w-64 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg p-3`}>
+        } top-0 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-xl p-4 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95 animate-fade-in-scale`}>
           <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
             Event Details
           </div>

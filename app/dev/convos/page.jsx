@@ -377,9 +377,9 @@ export default function DevConvos() {
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-2 h-full">
             {/* Timeline (left column) */}
-            <section className="min-h-0 flex flex-col border-r border-stone-200 dark:border-stone-700">
-              <div className="px-4 py-2 text-sm font-semibold">Timeline</div>
-              <div className="flex-1 overflow-auto px-4 pb-4">
+            <section className="h-full flex flex-col border-r border-stone-200 dark:border-stone-700">
+              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">Timeline</div>
+              <div className="flex-1 overflow-y-auto px-4 pb-4">
                 {selected ? (
                   timeline.length ? (
                     <ol className="relative ml-5">
@@ -417,9 +417,9 @@ export default function DevConvos() {
             </section>
 
             {/* Events (right column) */}
-            <section className="min-h-0 flex flex-col">
-              <div className="px-4 py-2 text-sm font-semibold">Events</div>
-              <div className="flex-1 overflow-auto">
+            <section className="h-full flex flex-col">
+              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">Events</div>
+              <div className="flex-1 overflow-y-auto">
                 {selected ? (
                   filtered.length ? (
                     <ul className="divide-y divide-stone-200 dark:divide-stone-800">
