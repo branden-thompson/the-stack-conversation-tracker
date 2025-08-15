@@ -25,7 +25,9 @@ export function ProfilePicture({
     sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
-    xl: 'w-16 h-16'
+    xl: 'w-16 h-16',
+    '50': 'w-[50px] h-[50px]',
+    '46': 'w-[46px] h-[46px]'
   };
 
   const iconSizes = {
@@ -33,7 +35,9 @@ export function ProfilePicture({
     sm: 'w-4 h-4', 
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
-    xl: 'w-8 h-8'
+    xl: 'w-8 h-8',
+    '50': 'w-6 h-6',
+    '46': 'w-6 h-6'
   };
 
   const handleImageError = () => {
@@ -101,7 +105,12 @@ export function ProfilePicture({
       {initials ? (
         <span className={cn(
           'font-medium',
-          size === 'xs' ? 'text-xs' : size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : 'text-base'
+          size === 'xs' ? 'text-xs' : 
+          size === 'sm' ? 'text-xs' : 
+          size === 'md' ? 'text-sm' : 
+          size === '50' ? 'text-lg' : 
+          size === '46' ? 'text-lg' : 
+          'text-base'
         )}>
           {initials}
         </span>

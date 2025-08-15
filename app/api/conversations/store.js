@@ -103,3 +103,20 @@ export function clearEvents(id) {
   S.eventsById[id] = [];
   return true;
 }
+
+// ---- Convenience functions for API routes ----
+export function startConversation(name) {
+  return createConversation(name);
+}
+
+export function pauseConversation(id) {
+  return patchConversation(id, { status: 'paused' });
+}
+
+export function resumeConversation(id) {
+  return patchConversation(id, { status: 'active' });
+}
+
+export function stopConversation(id) {
+  return patchConversation(id, { status: 'stopped' });
+}

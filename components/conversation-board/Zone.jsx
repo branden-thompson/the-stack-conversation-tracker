@@ -56,6 +56,9 @@ export function Zone({
     data: { type: 'zone', accepts: 'card' },
   });
 
+  // Debug logging (can be removed in production)
+  // console.log(`📍 Zone ${zoneId}: isDraggingCard=${isDraggingCard}, isOver=${isOver}, cards.length=${cards.length}`);
+
   const zoneConfig = ZONES?.[zoneId] ?? {
     title: titleOverride ?? 'Zone',
     description: '',
@@ -147,6 +150,16 @@ export function Zone({
     return (
       <div className="relative h-full w-full min-h-0 overflow-auto">
         <div ref={setNodeRef} className="absolute inset-0" />
+        {/* Enhanced drop feedback overlay when dragging */}
+        {isDraggingCard && (
+          <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-md shadow-md border border-gray-200 dark:border-gray-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Drop here</p>
+              </div>
+            </div>
+          </div>
+        )}
         {Object.entries(grouped).map(([key, stack]) => {
           const [x, y] = key.split('-').map(Number);
           return (
@@ -172,8 +185,20 @@ export function Zone({
           );
         })}
         {cards.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-400 dark:text-gray-500">
-            <p className="text-sm">Drop cards here</p>
+          <div className="absolute inset-2 flex items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+            <div className="text-center">
+              <p className="text-sm font-medium">Drop cards here</p>
+              <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
+            </div>
+          </div>
+        )}
+        
+        {/* Always show drop area when dragging, even if zone has cards */}
+        {isDraggingCard && cards.length > 0 && (
+          <div className="absolute bottom-2 left-2 right-2 bg-blue-100/80 dark:bg-blue-900/40 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg p-4 z-20">
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Drop here to add card</p>
+            </div>
           </div>
         )}
       </div>
@@ -187,6 +212,16 @@ export function Zone({
     return (
       <div className="relative h-full w-full min-h-0 overflow-auto">
         <div ref={setNodeRef} className="absolute inset-0" />
+        {/* Enhanced drop feedback overlay when dragging */}
+        {isDraggingCard && (
+          <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-md shadow-md border border-gray-200 dark:border-gray-600">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Drop here</p>
+              </div>
+            </div>
+          </div>
+        )}
         <div
           className="flex flex-wrap items-start content-start"
           style={{ gap: `${STACK_GAP_PX}px`, padding: `${STACK_GAP_PX}px` }}
@@ -228,8 +263,20 @@ export function Zone({
               );
             })
           ) : (
-            <div className="relative w-full h-[200px] border border-dashed rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-700">
-              <p className="text-sm">No cards yet</p>
+            <div className="relative w-full min-h-[200px] border-2 border-dashed rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-600 m-2">
+              <div className="text-center">
+                <p className="text-sm font-medium">Drop cards here</p>
+                <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
+              </div>
+            </div>
+          )}
+          
+          {/* Always show drop area when dragging, even if zone has cards */}
+          {isDraggingCard && hasStacks && (
+            <div className="absolute bottom-2 left-2 right-2 bg-blue-100/80 dark:bg-blue-900/40 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg p-4 z-20">
+              <div className="text-center">
+                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Drop here to add card</p>
+              </div>
             </div>
           )}
         </div>
@@ -240,12 +287,15 @@ export function Zone({
   return (
     <div
       className={cn(
-        'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden',
+        'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden transition-all duration-200',
         // zone surface w/ dark support
         'bg-white border-gray-200',
         'dark:bg-gray-900 dark:border-gray-700',
         zoneConfig.className,
-        isOver && 'ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900'
+        // Enhanced drop feedback
+        isOver && 'ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20',
+        // Improved mobile drop target visibility - make more prominent
+        isDraggingCard && !isOver && 'border-dashed border-blue-300 dark:border-blue-400 border-4 bg-blue-50/30 dark:bg-blue-900/10'
       )}
     >
       {/* Header */}
@@ -275,6 +325,16 @@ export function Zone({
       {/* Body */}
       <div className="relative flex-1 min-h-0">
         {effectiveOrganize ? renderOrganized() : renderFreeForm()}
+        
+        {/* Global drop indicator overlay - always visible when dragging */}
+        {isDraggingCard && (
+          <div className="absolute inset-0 bg-blue-500/40 border-4 border-dashed border-blue-600 rounded-lg z-50 flex items-center justify-center pointer-events-none">
+            <div className="bg-blue-600 text-white px-4 py-3 rounded-xl shadow-2xl font-bold text-lg animate-pulse">
+              🎯 DROP HERE - {titleOverride ?? zoneConfig.title}
+            </div>
+          </div>
+        )}
+        
       </div>
     </div>
   );

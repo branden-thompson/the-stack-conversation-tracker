@@ -12,7 +12,7 @@
 
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import { Zone } from './Zone';
 import { ConversationCard } from './ConversationCard';
@@ -29,6 +29,26 @@ const DEFAULT_LAYOUT = {
   bottomRowCols: { resolved: 50, unresolved: 50 },
 };
 
+// Custom hook to detect mobile layout
+function useResponsiveLayout() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      // Use a more aggressive mobile breakpoint - based on the screenshot, it looks like it's not triggering
+      const width = window.innerWidth;
+      console.log('Window width:', width, 'isMobile:', width < 640);
+      setIsMobile(width < 640); // sm breakpoint instead of md
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
+  
+  return isMobile;
+}
+
 export function BoardCanvas({
   layoutKey = 0,
   cards = [],
@@ -39,96 +59,168 @@ export function BoardCanvas({
   users = [],
 }) {
   const boardRef = useRef(null);
+  const isMobile = useResponsiveLayout();
 
   // Initialize DnD logic
   const dnd = useBoardDnD({ cards, onUpdateCard, getCardsByZone });
   const { activeCard, isDraggingCard, contextProps } = dnd;
 
+  // Debug logging for drag state (can be removed in production)
+  // console.log('🔴 BoardCanvas - isDraggingCard:', isDraggingCard, 'activeCard:', activeCard?.id || 'none', 'isMobile:', isMobile);
+
   return (
     <DndContext {...contextProps}>
       {/* Board Canvas */}
       <main ref={boardRef} className="flex-1 relative overflow-hidden">
-        <ResizablePanelGroup key={layoutKey} direction="vertical" className="h-full">
-          {/* Top Row */}
-          <ResizablePanel defaultSize={customLayout.rows.top} minSize={20}>
-            <ResizablePanelGroup direction="horizontal">
-              <ResizablePanel defaultSize={customLayout.topRowCols.active} minSize={20}>
-                <div className="h-full p-2">
-                  <Zone
-                    zoneId="active"
-                    cards={getCardsByZone().active || []}
-                    onUpdateCard={onUpdateCard}
-                    onDeleteCard={onDeleteCard}
-                    isDraggingCard={isDraggingCard}
-                    autoOrganize={true}
-                    showOrganizeButton={false}
-                    titleOverride="Active Conversation"
-                    users={users}
-                  />
-                </div>
-              </ResizablePanel>
+        {isMobile ? (
+          // Mobile Layout: Single column, scrollable
+          <div className="h-full overflow-y-auto">
+            <div className="flex flex-col min-h-full">
+              {/* Active Conversation - Primary focus on mobile */}
+              <div className="flex-shrink-0 p-2 min-h-[200px]">
+                <Zone
+                  zoneId="active"
+                  cards={getCardsByZone().active || []}
+                  onUpdateCard={onUpdateCard}
+                  onDeleteCard={onDeleteCard}
+                  isDraggingCard={!!activeCard}
+                  autoOrganize={true}
+                  showOrganizeButton={false}
+                  titleOverride="Active Conversation"
+                  users={users}
+                />
+              </div>
+              
+              {/* Parking Lot - Adequate drop space */}
+              <div className="flex-shrink-0 p-2 min-h-[180px]">
+                <Zone
+                  zoneId="parking"
+                  cards={getCardsByZone().parking || []}
+                  onUpdateCard={onUpdateCard}
+                  onDeleteCard={onDeleteCard}
+                  isDraggingCard={!!activeCard}
+                  autoOrganize={true}
+                  showOrganizeButton={false}
+                  titleOverride="Parking Lot"
+                  users={users}
+                />
+              </div>
+              
+              {/* Resolved - Adequate drop space */}
+              <div className="flex-shrink-0 p-2 min-h-[180px]">
+                <Zone
+                  zoneId="resolved"
+                  cards={getCardsByZone().resolved || []}
+                  onUpdateCard={onUpdateCard}
+                  onDeleteCard={onDeleteCard}
+                  isDraggingCard={!!activeCard}
+                  autoOrganize={true}
+                  showOrganizeButton={false}
+                  titleOverride="Resolved"
+                  users={users}
+                />
+              </div>
+              
+              {/* Unresolved - Adequate drop space */}
+              <div className="flex-shrink-0 p-2 min-h-[180px]">
+                <Zone
+                  zoneId="unresolved"
+                  cards={getCardsByZone().unresolved || []}
+                  onUpdateCard={onUpdateCard}
+                  onDeleteCard={onDeleteCard}
+                  isDraggingCard={!!activeCard}
+                  autoOrganize={true}
+                  showOrganizeButton={false}
+                  titleOverride="Unresolved"
+                  users={users}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Desktop Layout: Resizable grid
+          <ResizablePanelGroup key={layoutKey} direction="vertical" className="h-full">
+            {/* Top Row */}
+            <ResizablePanel defaultSize={customLayout.rows.top} minSize={20}>
+              <ResizablePanelGroup direction="horizontal">
+                <ResizablePanel defaultSize={customLayout.topRowCols.active} minSize={20}>
+                  <div className="h-full p-2">
+                    <Zone
+                      zoneId="active"
+                      cards={getCardsByZone().active || []}
+                      onUpdateCard={onUpdateCard}
+                      onDeleteCard={onDeleteCard}
+                      isDraggingCard={!!activeCard}
+                      autoOrganize={true}
+                      showOrganizeButton={false}
+                      titleOverride="Active Conversation"
+                      users={users}
+                    />
+                  </div>
+                </ResizablePanel>
 
-              <ResizableHandle withHandle />
+                <ResizableHandle withHandle />
 
-              <ResizablePanel defaultSize={customLayout.topRowCols.parking} minSize={15}>
-                <div className="h-full p-2">
-                  <Zone
-                    zoneId="parking"
-                    cards={getCardsByZone().parking || []}
-                    onUpdateCard={onUpdateCard}
-                    onDeleteCard={onDeleteCard}
-                    isDraggingCard={isDraggingCard}
-                    autoOrganize={false}
-                    showOrganizeButton={true}
-                    titleOverride="Parking Lot"
-                    users={users}
-                  />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
+                <ResizablePanel defaultSize={customLayout.topRowCols.parking} minSize={15}>
+                  <div className="h-full p-2">
+                    <Zone
+                      zoneId="parking"
+                      cards={getCardsByZone().parking || []}
+                      onUpdateCard={onUpdateCard}
+                      onDeleteCard={onDeleteCard}
+                      isDraggingCard={!!activeCard}
+                      autoOrganize={false}
+                      showOrganizeButton={true}
+                      titleOverride="Parking Lot"
+                      users={users}
+                    />
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
 
-          <ResizableHandle withHandle />
+            <ResizableHandle withHandle />
 
-          {/* Bottom Row */}
-          <ResizablePanel defaultSize={customLayout.rows.bottom} minSize={15}>
-            <ResizablePanelGroup direction="horizontal">
-              <ResizablePanel defaultSize={customLayout.bottomRowCols.resolved} minSize={15}>
-                <div className="h-full p-2">
-                  <Zone
-                    zoneId="resolved"
-                    cards={getCardsByZone().resolved || []}
-                    onUpdateCard={onUpdateCard}
-                    onDeleteCard={onDeleteCard}
-                    isDraggingCard={isDraggingCard}
-                    autoOrganize={false}
-                    showOrganizeButton={true}
-                    titleOverride="Resolved"
-                    users={users}
-                  />
-                </div>
-              </ResizablePanel>
+            {/* Bottom Row */}
+            <ResizablePanel defaultSize={customLayout.rows.bottom} minSize={15}>
+              <ResizablePanelGroup direction="horizontal">
+                <ResizablePanel defaultSize={customLayout.bottomRowCols.resolved} minSize={15}>
+                  <div className="h-full p-2">
+                    <Zone
+                      zoneId="resolved"
+                      cards={getCardsByZone().resolved || []}
+                      onUpdateCard={onUpdateCard}
+                      onDeleteCard={onDeleteCard}
+                      isDraggingCard={!!activeCard}
+                      autoOrganize={false}
+                      showOrganizeButton={true}
+                      titleOverride="Resolved"
+                      users={users}
+                    />
+                  </div>
+                </ResizablePanel>
 
-              <ResizableHandle withHandle />
+                <ResizableHandle withHandle />
 
-              <ResizablePanel defaultSize={customLayout.bottomRowCols.unresolved} minSize={15}>
-                <div className="h-full p-2">
-                  <Zone
-                    zoneId="unresolved"
-                    cards={getCardsByZone().unresolved || []}
-                    onUpdateCard={onUpdateCard}
-                    onDeleteCard={onDeleteCard}
-                    isDraggingCard={isDraggingCard}
-                    autoOrganize={false}
-                    showOrganizeButton={true}
-                    titleOverride="Unresolved"
-                    users={users}
-                  />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+                <ResizablePanel defaultSize={customLayout.bottomRowCols.unresolved} minSize={15}>
+                  <div className="h-full p-2">
+                    <Zone
+                      zoneId="unresolved"
+                      cards={getCardsByZone().unresolved || []}
+                      onUpdateCard={onUpdateCard}
+                      onDeleteCard={onDeleteCard}
+                      isDraggingCard={!!activeCard}
+                      autoOrganize={false}
+                      showOrganizeButton={true}
+                      titleOverride="Unresolved"
+                      users={users}
+                    />
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </main>
 
       {/* Drag Overlay (no snap-back) */}

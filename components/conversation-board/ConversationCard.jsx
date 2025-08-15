@@ -23,35 +23,59 @@ import {
   User,
   UserCheck,
   UserPlus,
+  MoreVertical,
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
 import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 
-const CONTROL_RAIL_WIDTH = 44;
-const RAIL_BTN_SIZE = 36;
+// Responsive control rail width - smaller when collapsed
+const getControlRailWidth = (screenWidth) => screenWidth < 640 ? 32 : 44;
+const getRailBtnSize = (screenWidth) => screenWidth < 640 ? 32 : 36;
 const RAIL_GAP = 8;
 const RAIL_TOP_BOTTOM = 8;
 const RAIL_BUTTON_COUNT = 5;
 
+// Calculate minimum rail height (using desktop size as base)
 const RAIL_MIN_HEIGHT =
   RAIL_TOP_BOTTOM * 2 +
-  RAIL_BTN_SIZE * RAIL_BUTTON_COUNT +
+  getRailBtnSize(1024) * RAIL_BUTTON_COUNT +
   RAIL_GAP * (RAIL_BUTTON_COUNT - 1);
 
-const HEADER_MIN = 48;
-const FOOTER_MIN = 50;
+// Responsive section heights
+const getHeaderMinHeight = (screenWidth) => screenWidth < 640 ? 36 : 48;
+const getFooterMinHeight = (screenWidth) => screenWidth < 640 ? 40 : 50;
 const CONTENT_VERTICAL_PADDING = 24;
 
-const BASE_MIN_CARD_HEIGHT = Math.max(
-  CARD_DIMENSIONS?.height ?? 160,
-  RAIL_MIN_HEIGHT + HEADER_MIN + FOOTER_MIN
-);
+// Base card height - responsive to screen size
+const getBaseMinCardHeight = (screenWidth) => {
+  if (screenWidth < 640) {
+    // Mobile: much smaller minimum height since control rail is collapsed
+    return 120;
+  }
+  return Math.max(
+    CARD_DIMENSIONS?.height ?? 160,
+    RAIL_MIN_HEIGHT + getHeaderMinHeight(screenWidth) + getFooterMinHeight(screenWidth)
+  );
+};
 
-const MIN_CARD_CORE_WIDTH = 275;
+// Responsive card width constants
+const RESPONSIVE_CARD_WIDTHS = {
+  // Mobile: smaller cards for better mobile experience
+  mobile: { min: 220, max: 240 },
+  // Small tablets: slightly larger
+  tablet: { min: 245, max: 265 },
+  // Desktop: current preferred size
+  desktop: { min: 275, max: 275 },
+  // Large screens: can be slightly wider if needed
+  large: { min: 275, max: 300 }
+};
+
+// Current breakpoint-based widths (will be dynamically set based on screen size)
+const MIN_CARD_CORE_WIDTH = 220; // Smallest allowable
 const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 320, MIN_CARD_CORE_WIDTH);
 
-// fixed per your preference
+// Default max width (will be overridden by responsive logic)
 const MAX_CARD_WIDTH = 275;
 
 /** Labels */
@@ -77,6 +101,42 @@ const TYPE_LABEL = {
   opinion: 'OPINION',
 };
 
+// Custom hook for responsive card sizing
+function useResponsiveCardWidth() {
+  const [screenSize, setScreenSize] = useState('desktop');
+  const [screenWidth, setScreenWidth] = useState(1024);
+  
+  useEffect(() => {
+    const updateScreenSize = () => {
+      const width = window.innerWidth;
+      setScreenWidth(width);
+      
+      if (width < 640) {
+        setScreenSize('mobile');
+      } else if (width < 1024) {
+        setScreenSize('tablet');  
+      } else if (width < 1440) {
+        setScreenSize('desktop');
+      } else {
+        setScreenSize('large');
+      }
+    };
+
+    // Set initial size
+    updateScreenSize();
+    
+    // Listen for resize events
+    window.addEventListener('resize', updateScreenSize);
+    return () => window.removeEventListener('resize', updateScreenSize);
+  }, []);
+
+  return {
+    ...RESPONSIVE_CARD_WIDTHS[screenSize],
+    screenWidth,
+    railWidth: getControlRailWidth(screenWidth)
+  };
+}
+
 export function ConversationCard({
   card,
   onUpdate,
@@ -91,7 +151,14 @@ export function ConversationCard({
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(card.content ?? '');
   const [showAssignmentMenu, setShowAssignmentMenu] = useState(false);
+  const [showControlMenu, setShowControlMenu] = useState(false);
   const inputRef = useRef(null);
+  const controlMenuRef = useRef(null);
+  
+  // Get responsive card dimensions
+  const responsiveWidth = useResponsiveCardWidth();
+  const CONTROL_RAIL_WIDTH = responsiveWidth.railWidth;
+  const RAIL_BTN_SIZE = getRailBtnSize(responsiveWidth.screenWidth);
 
   const typeKey = card.type || 'topic';
   const cardType = CARD_TYPES[typeKey] || CARD_TYPES.topic;
@@ -107,10 +174,10 @@ export function ConversationCard({
     position: isStacked ? 'relative' : 'relative',
     zIndex: isDragging ? 1000 : isStacked ? stackPosition + 1 : 1,
     opacity: isDragging ? 0 : 1,
-    minWidth: MIN_CARD_WIDTH,
+    minWidth: responsiveWidth.min,
     width: 'max-content',
-    maxWidth: MAX_CARD_WIDTH,
-    minHeight: BASE_MIN_CARD_HEIGHT,
+    maxWidth: responsiveWidth.max,
+    minHeight: getBaseMinCardHeight(responsiveWidth.screenWidth),
     transition: isDragging ? 'none' : 'box-shadow 150ms ease, border-color 150ms ease',
     willChange: isDragging ? 'transform' : 'auto',
     contain: 'layout paint style',
@@ -159,6 +226,18 @@ export function ConversationCard({
     return () => document.removeEventListener('click', handleClickOutside);
   }, [showAssignmentMenu]);
 
+  // Close control menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (controlMenuRef.current && !controlMenuRef.current.contains(event.target)) {
+        setShowControlMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const moveToZone = async (targetZone) => {
     if (!targetZone || targetZone === zoneId) return;
     await onUpdate?.(card.id, {
@@ -171,6 +250,7 @@ export function ConversationCard({
 
   const handleAssignUser = async (userId) => {
     setShowAssignmentMenu(false);
+    setShowControlMenu(false);
     await onUpdate?.(card.id, {
       assignedToUserId: userId === 'none' ? null : userId,
       updatedAt: Date.now(),
@@ -208,7 +288,10 @@ export function ConversationCard({
   
   const CONTENT_MIN_HEIGHT = Math.max(
     0,
-    BASE_MIN_CARD_HEIGHT - HEADER_MIN - FOOTER_MIN - CONTENT_VERTICAL_PADDING
+    getBaseMinCardHeight(responsiveWidth.screenWidth) - 
+    getHeaderMinHeight(responsiveWidth.screenWidth) - 
+    getFooterMinHeight(responsiveWidth.screenWidth) - 
+    CONTENT_VERTICAL_PADDING
   );
 
   return (
@@ -222,13 +305,15 @@ export function ConversationCard({
       )}
       {...attributes}
     >
-      {/* Right rail controls */}
-      <div
-        className="absolute top-2 right-2 flex flex-col items-center gap-2"
-        style={{ width: CONTROL_RAIL_WIDTH }}
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
+      {/* Right rail controls - Responsive: Full rail on large screens, collapsed menu on small */}
+      {responsiveWidth.screenWidth >= 640 ? (
+        // Full control rail for larger screens
+        <div
+          className="absolute top-2 right-2 flex flex-col items-center gap-2"
+          style={{ width: CONTROL_RAIL_WIDTH }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
         <Button
           size="icon"
           variant="ghost"
@@ -237,7 +322,7 @@ export function ConversationCard({
           className="rounded-md border bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           onClick={() => onDelete?.(card.id)}
         >
-          <CloseIcon className="w-4 h-4" />
+          <CloseIcon className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -248,7 +333,7 @@ export function ConversationCard({
           className="rounded-full bg-green-500 hover:bg-green-600 text-white shadow-sm"
           onClick={() => moveToZone('resolved')}
         >
-          <ThumbsUp className="w-4 h-4" />
+          <ThumbsUp className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -259,7 +344,7 @@ export function ConversationCard({
           className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
           onClick={() => moveToZone('unresolved')}
         >
-          <ThumbsDown className="w-4 h-4" />
+          <ThumbsDown className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -270,7 +355,7 @@ export function ConversationCard({
           className="rounded-full bg-slate-700 hover:bg-slate-800 text-white shadow-sm"
           onClick={() => moveToZone('parking')}
         >
-          <Timer className="w-4 h-4" />
+          <Timer className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         {/* User Assignment Button */}
@@ -288,7 +373,7 @@ export function ConversationCard({
             )}
             onClick={() => setShowAssignmentMenu(!showAssignmentMenu)}
           >
-            <UserPlus className="w-4 h-4" />
+            <UserPlus className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
           </Button>
           
           {/* Assignment Dropdown */}
@@ -323,28 +408,147 @@ export function ConversationCard({
             </div>
           )}
         </div>
-      </div>
+        </div>
+      ) : (
+        // Collapsed control menu for small screens
+        <div
+          ref={controlMenuRef}
+          className="absolute top-2 right-2"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Card actions"
+            title="Card actions"
+            className="rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600"
+            onClick={() => setShowControlMenu(!showControlMenu)}
+          >
+            <MoreVertical className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </Button>
+
+          {/* Collapsed Control Menu */}
+          {showControlMenu && (
+            <div className="absolute top-10 right-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[160px]">
+              <div className="p-1">
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                  onClick={() => {
+                    onDelete?.(card.id);
+                    setShowControlMenu(false);
+                  }}
+                >
+                  <CloseIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                  Delete
+                </button>
+
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                  onClick={() => {
+                    moveToZone('resolved');
+                    setShowControlMenu(false);
+                  }}
+                >
+                  <ThumbsUp className="w-4 h-4 text-green-600" />
+                  Mark Resolved
+                </button>
+
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                  onClick={() => {
+                    moveToZone('unresolved');
+                    setShowControlMenu(false);
+                  }}
+                >
+                  <ThumbsDown className="w-4 h-4 text-red-600" />
+                  Mark Unresolved
+                </button>
+
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                  onClick={() => {
+                    moveToZone('parking');
+                    setShowControlMenu(false);
+                  }}
+                >
+                  <Timer className="w-4 h-4 text-slate-600" />
+                  Move to Parking Lot
+                </button>
+
+                {/* Separator */}
+                <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+
+                {/* User Assignment in Menu */}
+                {assignedToUser ? (
+                  <div className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ProfilePicture
+                        src={assignedToUser.profilePicture}
+                        name={assignedToUser.name}
+                        size="xs"
+                      />
+                      <span className="font-medium">
+                        Assigned to: {assignedToUser.name}
+                        {assignedToUser.isSystemUser && <span className="opacity-60"> (System)</span>}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                    No assignment
+                  </div>
+                )}
+
+                {/* Assignment options */}
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
+                  onClick={() => handleAssignUser('none')}
+                >
+                  Clear assignment
+                </button>
+
+                {users.map((user) => (
+                  <button
+                    key={user.id}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                    onClick={() => handleAssignUser(user.id)}
+                  >
+                    <ProfilePicture
+                      src={user.profilePicture}
+                      name={user.name}
+                      size="xs"
+                    />
+                    <span>Assign to: {user.name}</span>
+                    {user.isSystemUser && <span className="text-xs opacity-60">(System)</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Header (drag handle) */}
       <div
         className="flex items-center justify-between pl-2 pr-2 pt-2"
-        style={{ paddingRight: CONTROL_RAIL_WIDTH + 8, minHeight: HEADER_MIN }}
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 8), minHeight: getHeaderMinHeight(responsiveWidth.screenWidth) }}
         {...dragHandleProps}
       >
         <div className="flex items-center gap-2">
-          <GripVertical className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-          <span className="font-extrabold tracking-wide text-gray-900 dark:text-gray-100 text-lg">
+          <GripVertical className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
+          <span className="font-extrabold tracking-wide text-gray-900 dark:text-gray-100 text-sm sm:text-base lg:text-lg">
             {TYPE_LABEL[typeKey] || 'TOPIC'}
           </span>
         </div>
         <div className="w-4 h-4" />
       </div>
 
-      {/* Content */}
+      {/* Content - Responsive padding */}
       <div
-        className="px-4 py-3 flex-1"
+        className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 flex-1"
         style={{
-          paddingRight: CONTROL_RAIL_WIDTH + 12,
+          paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 12),
           minHeight: CONTENT_MIN_HEIGHT,
         }}
         onDoubleClick={handleEdit}
@@ -359,7 +563,7 @@ export function ConversationCard({
               onKeyDown={handleKeyDown}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                'w-full max-w-[46ch] p-2 text-base rounded-md border resize-none',
+                'w-full max-w-[46ch] p-1 sm:p-2 text-sm sm:text-base rounded-md border resize-none',
                 'focus:outline-none focus:ring-1',
                 // Light mode input
                 'bg-white/90 border-gray-300 text-gray-800',
@@ -372,7 +576,7 @@ export function ConversationCard({
               placeholder="Enter card content..."
             />
           ) : (
-            <div className="w-full max-w-[46ch] text-lg text-center leading-relaxed whitespace-pre-wrap break-words px-2 text-gray-800 dark:text-gray-100">
+            <div className="w-full max-w-[46ch] text-sm sm:text-base lg:text-lg text-center leading-relaxed whitespace-pre-wrap break-words px-1 sm:px-2 text-gray-800 dark:text-gray-100">
               {content && content.trim().length > 0 ? (
                 content
               ) : (
@@ -386,15 +590,15 @@ export function ConversationCard({
         </div>
       </div>
 
-      {/* Footer */}
+      {/* Footer - Responsive padding */}
       <div
-        className="px-3 pb-3 pt-1 text-sm mt-auto"
-        style={{ paddingRight: CONTROL_RAIL_WIDTH + 8, minHeight: FOOTER_MIN }}
+        className="px-2 sm:px-3 pb-2 sm:pb-3 pt-1 text-sm mt-auto"
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 8), minHeight: getFooterMinHeight(responsiveWidth.screenWidth) }}
       >
         <div className="flex flex-col items-start gap-1 text-gray-700 dark:text-gray-300">
           <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            <span className="text-[12px]">{dateText}</span>
+            <Calendar className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
+            <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>{dateText}</span>
           </div>
           
           {/* Created by user */}
@@ -406,9 +610,9 @@ export function ConversationCard({
                 size="xs"
               />
             ) : (
-              <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <User className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
             )}
-            <span className="text-[12px]">
+            <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>
               Created by: {createdByUser ? (
                 <span className="font-medium">
                   {createdByUser.name}
@@ -430,7 +634,7 @@ export function ConversationCard({
                 name={assignedToUser.name}
                 size="xs"
               />
-              <span className="text-[12px]">
+              <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>
                 Assigned to: <span className="font-medium">
                   {assignedToUser.name}
                   {assignedToUser.isSystemUser && <span className="opacity-60"> (System)</span>}

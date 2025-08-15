@@ -93,9 +93,9 @@ export function UserManagementDropdown({
                   {currentUser.isSystemUser && (
                     <Crown className="w-3 h-3 opacity-60" />
                   )}
-                  {currentUser.preferences?.theme && (
-                    <span className="text-xs opacity-60 capitalize">
-                      ({currentUser.preferences.theme})
+                  {currentUser.isSystemUser && (
+                    <span className="text-xs opacity-60">
+                      (System)
                     </span>
                   )}
                 </div>
@@ -126,12 +126,12 @@ export function UserManagementDropdown({
                 {user.isSystemUser && (
                   <Crown className="w-3 h-3 opacity-60" />
                 )}
+                {user.isSystemUser && (
+                  <span className="text-xs opacity-60 ml-auto">
+                    (System)
+                  </span>
+                )}
               </div>
-              {user.preferences?.theme && (
-                <span className="text-xs opacity-60 capitalize ml-auto">
-                  {user.preferences.theme}
-                </span>
-              )}
             </div>
           </SelectItem>
         ))}

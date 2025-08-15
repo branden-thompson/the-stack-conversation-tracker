@@ -1,5 +1,21 @@
 {
-  "cards": [],
+  "cards": [
+    {
+      "id": "m0caIZg3kpb3SQMiOZ5Wk",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 550.65234375,
+        "y": 440.70703125
+      },
+      "stackOrder": 0,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T21:04:17.253Z",
+      "updatedAt": "2025-08-15T21:06:40.647Z"
+    }
+  ],
   "users": [
     {
       "id": "system",
@@ -16,14 +32,14 @@
       "id": "spf6lSu8SSOxZIOsYlYVd",
       "name": "Branden",
       "isSystemUser": false,
-      "profilePicture": null,
+      "profilePicture": "/uploads/profile-pictures/spf6lSu8SSOxZIOsYlYVd-1755280669052.png",
       "preferences": {
         "theme": "system",
         "notifications": true,
         "defaultCardType": "topic"
       },
       "createdAt": "2025-08-15T17:19:59.480Z",
-      "updatedAt": "2025-08-15T17:19:59.480Z"
+      "updatedAt": "2025-08-15T17:57:53.154Z"
     }
   ],
   "conversations": []
