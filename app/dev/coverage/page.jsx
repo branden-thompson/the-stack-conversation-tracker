@@ -31,11 +31,11 @@ import { useRouter } from 'next/navigation';
 
 // Detailed coverage data (would come from actual coverage reports)
 const DETAILED_COVERAGE = {
-                      summary: {
-    statements: { covered: 185, total: 212, percentage: 87.45 },
-    branches: { covered: 123, total: 135, percentage: 91.20 },
-    functions: { covered: 64, total: 78, percentage: 82.15 },
-    lines: { covered: 185, total: 212, percentage: 87.45 }
+                        summary: {
+    statements: { covered: 170, total: 200, percentage: 85.20 },
+    branches: { covered: 107, total: 120, percentage: 89.50 },
+    functions: { covered: 55, total: 70, percentage: 78.80 },
+    lines: { covered: 170, total: 200, percentage: 85.20 }
   },
   files: [
     {
@@ -247,7 +247,8 @@ const DETAILED_COVERAGE = {
     }
   ],
   testHistory: [
-                                                                                                                    { date: '2025-08-15T21:46:32.625Z', totalTests: 423, passed: 397, failed: 26, duration: 6.26 },
+                                                                                                                        { date: '2025-08-15T23:49:10.224Z', totalTests: 423, passed: 356, failed: 67, duration: 0 },
+    { date: '2025-08-15T21:46:32.625Z', totalTests: 423, passed: 397, failed: 26, duration: 6.26 },
     { date: '2025-08-15T21:25:22.585Z', totalTests: 397, passed: 324, failed: 73, duration: 0 },
     { date: '2025-08-15T17:54:30.464Z', totalTests: 397, passed: 322, failed: 75, duration: 0 },
     { date: '2025-08-15T17:40:49.036Z', totalTests: 397, passed: 321, failed: 76, duration: 0 },
