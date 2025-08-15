@@ -1,7 +1,7 @@
 /**
  * ConversationCard
  * - Dark-mode placeholder text now uses high-contrast colors across all types
- * - MAX_CARD_WIDTH = 340
+ * - MAX_CARD_WIDTH = 275
  * - Preserves drag, stacking visuals, centered content, footer anchoring
  * - Displays user relationships (created by, assigned to) in footer
  * - Supports both new user system and legacy person field for backward compatibility
@@ -47,11 +47,11 @@ const BASE_MIN_CARD_HEIGHT = Math.max(
   RAIL_MIN_HEIGHT + HEADER_MIN + FOOTER_MIN
 );
 
-const MIN_CARD_CORE_WIDTH = 340;
+const MIN_CARD_CORE_WIDTH = 275;
 const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 320, MIN_CARD_CORE_WIDTH);
 
 // fixed per your preference
-const MAX_CARD_WIDTH = 340;
+const MAX_CARD_WIDTH = 275;
 
 /** Labels */
 const TYPE_LABEL = {
