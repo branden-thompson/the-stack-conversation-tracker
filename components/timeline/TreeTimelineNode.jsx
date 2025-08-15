@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { getCardDisplayName, getCardCurrentStatus, getCardLifecycleDuration } from '@/lib/utils/timelineTree';
 import { formatTime, formatDuration } from '@/lib/utils/timelineFormatters';
-import { timelineTextColors, getStatusBadgeStyles, expansionButtonStyles } from '@/lib/utils/timelineStyles';
+import { timelineTextColors, getStatusBadgeStyles, expansionButtonStyles, getHoverRingStyles, timelineCardStyles, microInteractions, cardDepth, timelineAnimations } from '@/lib/utils/timelineStyles';
 
 
 // Get status styling - Card creation events should always be green
@@ -39,11 +39,11 @@ export function TreeTimelineNode({
 
   return (
     <div className="relative">
-      {/* Main Card Creation Node */}
+      {/* Enhanced Main Card Creation Node */}
       <Card 
-        className={`${statusStyling.bg} ${statusStyling.border} transition-all duration-300 ease-out cursor-pointer transform hover:scale-105 hover:shadow-lg hover:-translate-y-1 animate-slide-in-left max-w-sm ${
-          isHovered ? 'ring-2 ring-opacity-50 ring-emerald-300 dark:ring-emerald-600' : ''
-        }`}
+        className={`${statusStyling.bg} ${statusStyling.border} ${timelineCardStyles.base} ${timelineCardStyles.hoverEnhanced} ${timelineAnimations.slideInLeft} max-w-sm group ${cardDepth.base} hover:${cardDepth.hover} ${
+          isHovered ? getHoverRingStyles('emerald', true, 'strong') : ''
+        } ${microInteractions.magnetic}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => hasChildEvents && onToggleExpand && onToggleExpand()}
@@ -67,9 +67,11 @@ export function TreeTimelineNode({
               </button>
             )}
             
-            {/* Card creation icon */}
-            <div className="p-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 transition-all duration-200 group-hover:scale-110 group-hover:shadow-md">
-              <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400 transition-transform duration-200 group-hover:scale-110" />
+            {/* Enhanced Card creation icon with micro-interactions */}
+            <div className="p-1.5 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20 transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg group-hover:rotate-3 border border-emerald-200/50 dark:border-emerald-700/50">
+              <Plus className="w-4 h-4 text-emerald-600 dark:text-emerald-400 transition-all duration-300 group-hover:scale-110 group-hover:text-emerald-700 dark:group-hover:text-emerald-300" />
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 rounded-full bg-emerald-400 dark:bg-emerald-300 opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm" />
             </div>
             
             <div className="flex-1 min-w-0">

@@ -6,6 +6,7 @@ import { Clock } from 'lucide-react';
 import { getEventConfig } from '@/lib/utils/timelineConstants';
 import { formatTime } from '@/lib/utils/timelineFormatters';
 import { getEventSummary, getPayloadDetails } from '@/lib/utils/timelineEvents';
+import { timelineCardStyles, microInteractions, getHoverRingStyles, cardDepth, getStaggeredDelay } from '@/lib/utils/timelineStyles';
 
 
 
@@ -47,18 +48,20 @@ export function CardSubBranch({
                 <div className="absolute left-[-32px] top-4 w-8 h-px bg-gray-400 dark:bg-gray-500" />
               )}
 
-              {/* Sub-event card */}
+              {/* Enhanced Sub-event card with staggered animation */}
               <Card 
-                className={`${eventConfig.bgClass} transition-all duration-200 ease-out cursor-pointer hover:shadow-md hover:-translate-y-0.5 animate-slide-in-right ${
-                  isHovered ? `ring-2 ring-opacity-50 ring-${eventConfig.color}-300 dark:ring-${eventConfig.color}-600` : ''
-                } max-w-xs`}
+                className={`${eventConfig.bgClass} ${timelineCardStyles.base} hover:shadow-lg hover:-translate-y-1 hover:scale-[1.03] animate-slide-in-right ${
+                  isHovered ? getHoverRingStyles(eventConfig.color, true, 'normal') : ''
+                } max-w-xs ${microInteractions.magnetic} ${cardDepth.base} hover:${cardDepth.hover}`}
+                style={getStaggeredDelay(index, 150)}
                 onMouseEnter={() => setHoveredEventId(event.id)}
                 onMouseLeave={() => setHoveredEventId(null)}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center gap-2">
-                    <div className={`p-1 rounded-full ${eventConfig.bgClass} transition-all duration-200 hover:scale-110`}>
-                      <Icon className={`w-3 h-3 ${eventConfig.iconClass}`} />
+                    <div className={`p-1 rounded-full ${eventConfig.bgClass} border border-${eventConfig.color}-200 dark:border-${eventConfig.color}-700 transition-all duration-300 hover:scale-125 hover:shadow-md hover:rotate-6 group`}>
+                      <Icon className={`w-3 h-3 ${eventConfig.iconClass} transition-all duration-300 group-hover:scale-110`} />
+                      <div className={`absolute inset-0 rounded-full bg-${eventConfig.color}-400 dark:bg-${eventConfig.color}-300 opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h5 className="font-medium text-xs text-gray-900 dark:text-gray-100">

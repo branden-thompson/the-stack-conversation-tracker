@@ -100,24 +100,39 @@ export function TreeTimeline({ conversation, events }) {
     <div>
       {/* Tree Visualization */}
       <div className="relative">
-        {/* Main trunk line */}
-        <div className="absolute left-1/2 transform -translate-x-0.5 w-2 bg-gradient-to-b from-green-300 via-emerald-400 to-green-300 dark:from-green-700 dark:via-emerald-600 dark:to-green-700 top-0 bottom-0 rounded-full">
-          {/* Animated growth indicator */}
-          <div className="absolute inset-0 w-full bg-gradient-to-b from-green-400 to-emerald-600 rounded-full opacity-60 animate-pulse" />
-          {/* Flowing sap effect */}
-          <div className="absolute inset-0 w-full">
-            <div className="w-full h-12 bg-gradient-to-b from-transparent via-green-400 to-transparent rounded-full animate-bounce-subtle opacity-40" />
+        {/* Enhanced Main trunk line with multiple animation layers */}
+        <div className="absolute left-1/2 transform -translate-x-0.5 w-3 top-0 bottom-0">
+          {/* Base trunk with gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-green-300 via-emerald-400 to-green-300 dark:from-green-700 dark:via-emerald-600 dark:to-green-700 rounded-full shadow-lg" />
+          
+          {/* Growth pulse animation */}
+          <div className="absolute inset-0 bg-gradient-to-b from-green-400 to-emerald-600 rounded-full opacity-60 animate-pulse" />
+          
+          {/* Flowing energy effect */}
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="w-full h-8 bg-gradient-to-b from-transparent via-emerald-200 to-transparent dark:via-emerald-400 rounded-full animate-bounce-subtle opacity-50" style={{animationDelay: '0s'}} />
+            <div className="w-full h-6 bg-gradient-to-b from-transparent via-green-300 to-transparent dark:via-green-400 rounded-full animate-bounce-subtle opacity-40" style={{animationDelay: '1s'}} />
           </div>
+          
+          {/* Subtle glow effect */}
+          <div className="absolute inset-0 bg-emerald-400 dark:bg-emerald-500 rounded-full blur-sm opacity-20 animate-pulse" style={{animationDelay: '2s'}} />
         </div>
         
         {/* Card branches grouped by date */}
         {Array.from(branchesByDate.entries()).map(([dateString, dayBranches], dateIndex) => (
           <div key={dateString} className="mb-16">
-            {/* Date separator */}
+            {/* Enhanced Date separator with animations */}
             <div className="flex items-center justify-center mb-8">
-              <div className="relative z-20 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 shadow-lg backdrop-blur-sm animate-fade-in">
-                <div className="absolute inset-0 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-full" />
-                <span className="relative">{formatDate(dayBranches[0].rootEvent.at)}</span>
+              <div className="relative z-20 group">
+                {/* Expanding ring effect */}
+                <div className="absolute inset-0 bg-emerald-200 dark:bg-emerald-800 rounded-full animate-ping opacity-20" style={{animationDelay: `${dateIndex * 0.5}s`}} />
+                
+                {/* Main date badge */}
+                <div className="relative bg-white dark:bg-gray-800 border border-emerald-300 dark:border-emerald-600 rounded-full px-8 py-4 text-sm font-semibold shadow-xl backdrop-blur-sm animate-fade-in hover:scale-105 transition-all duration-300" style={{animationDelay: `${dateIndex * 0.2}s`}}>
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 via-green-50 to-emerald-50 dark:from-emerald-900/30 dark:via-green-900/20 dark:to-emerald-900/30 rounded-full" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10 rounded-full animate-pulse" />
+                  <span className="relative text-emerald-800 dark:text-emerald-200">{formatDate(dayBranches[0].rootEvent.at)}</span>
+                </div>
               </div>
             </div>
             
@@ -152,15 +167,23 @@ export function TreeTimeline({ conversation, events }) {
                     </div>
                   </div>
                   
-                  {/* Trunk node at intersection */}
-                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-12 z-30">
+                  {/* Enhanced Trunk node at intersection */}
+                  <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-12 z-30 group">
                     <div className="relative">
-                      {/* Pulsing ring effect */}
-                      <div className="absolute inset-0 w-8 h-8 -translate-x-1 -translate-y-1 border-2 border-green-400 dark:border-green-300 rounded-full animate-ping opacity-40" />
-                      {/* Main trunk node */}
-                      <div className="w-6 h-6 bg-white dark:bg-gray-800 border-2 border-green-500 dark:border-green-400 rounded-full shadow-lg relative z-10 transition-all duration-300 hover:scale-125 hover:shadow-xl" />
-                      {/* Inner glow */}
-                      <div className="absolute inset-1.5 w-3 h-3 bg-green-400 dark:bg-green-300 rounded-full animate-pulse" />
+                      {/* Multiple pulsing ring effects */}
+                      <div className="absolute inset-0 w-10 h-10 -translate-x-2 -translate-y-2 border border-emerald-400 dark:border-emerald-300 rounded-full animate-ping opacity-30" style={{animationDelay: '0s'}} />
+                      <div className="absolute inset-0 w-8 h-8 -translate-x-1 -translate-y-1 border-2 border-green-400 dark:border-green-300 rounded-full animate-ping opacity-40" style={{animationDelay: '0.5s'}} />
+                      <div className="absolute inset-0 w-6 h-6 border border-emerald-300 dark:border-emerald-400 rounded-full animate-ping opacity-20" style={{animationDelay: '1s'}} />
+                      
+                      {/* Main trunk node with enhanced styling */}
+                      <div className="w-6 h-6 bg-gradient-to-br from-white to-emerald-50 dark:from-gray-800 dark:to-emerald-900/30 border-2 border-emerald-500 dark:border-emerald-400 rounded-full shadow-xl relative z-10 transition-all duration-300 group-hover:scale-125 group-hover:shadow-2xl group-hover:border-emerald-400 dark:group-hover:border-emerald-300" />
+                      
+                      {/* Animated inner core */}
+                      <div className="absolute inset-1.5 w-3 h-3 bg-gradient-to-br from-emerald-400 to-green-500 dark:from-emerald-300 dark:to-green-400 rounded-full animate-pulse" />
+                      <div className="absolute inset-2 w-2 h-2 bg-white dark:bg-emerald-100 rounded-full animate-pulse" style={{animationDelay: '0.7s'}} />
+                      
+                      {/* Hover glow effect */}
+                      <div className="absolute inset-0 w-6 h-6 bg-emerald-400 dark:bg-emerald-300 rounded-full blur-md opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
                     </div>
                   </div>
                   
