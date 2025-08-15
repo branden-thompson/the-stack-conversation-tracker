@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { BoardCanvas } from './BoardCanvas';
 import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
+import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
 import { useCards } from '@/lib/hooks/useCards';
 import { useUsers } from '@/lib/hooks/useUsers';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
@@ -70,6 +71,9 @@ function BoardInner({
   users,
   currentUser,
   onUserSelect,
+  onCreateUser,
+  onEditUser,
+  onManageUsers,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -193,6 +197,9 @@ function BoardInner({
           users={users}
           currentUser={currentUser}
           onUserSelect={onUserSelect}
+          onCreateUser={onCreateUser}
+          onEditUser={onEditUser}
+          onManageUsers={onManageUsers}
         />
 
         {/* Board Canvas */}
@@ -251,6 +258,10 @@ function BoardInner({
 }
 
 export default function Board() {
+  const [userProfileOpen, setUserProfileOpen] = useState(false);
+  const [userProfileMode, setUserProfileMode] = useState('create');
+  const [editingUser, setEditingUser] = useState(null);
+
   const {
     cards,
     loading,
@@ -266,26 +277,84 @@ export default function Board() {
     users,
     currentUser,
     switchUser,
+    createUser,
+    updateUser,
+    deleteUser,
   } = useUsers();
 
   const handleUserSelect = (selectedUser) => {
     switchUser(selectedUser.id);
   };
 
+  const handleCreateUser = (userData) => {
+    // Open dialog in create mode
+    setEditingUser(null);
+    setUserProfileMode('create');
+    setUserProfileOpen(true);
+  };
+
+  const handleEditUser = (user) => {
+    // Open dialog in edit mode
+    setEditingUser(user);
+    setUserProfileMode('edit');
+    setUserProfileOpen(true);
+  };
+
+  const handleManageUsers = () => {
+    // For now, open create dialog - later this could be a dedicated management page
+    handleCreateUser();
+  };
+
+  const handleUserSave = async (userData, userId) => {
+    if (userId) {
+      // Update existing user
+      await updateUser(userId, userData);
+    } else {
+      // Create new user
+      await createUser(userData);
+    }
+  };
+
+  const handleUserDelete = async (userId) => {
+    await deleteUser(userId);
+    // If we deleted the current user, switch to system
+    if (userId === currentUser?.id) {
+      switchUser('system');
+    }
+  };
+
   return (
-    <BoardInner
-      cards={cards}
-      loading={loading}
-      error={error}
-      createCard={createCard}
-      updateCard={updateCard}
-      deleteCard={deleteCard}
-      getCardsByZone={getCardsByZone}
-      refreshCards={refreshCards}
-      users={users}
-      currentUser={currentUser}
-      onUserSelect={handleUserSelect}
-    />
+    <>
+      <BoardInner
+        cards={cards}
+        loading={loading}
+        error={error}
+        createCard={createCard}
+        updateCard={updateCard}
+        deleteCard={deleteCard}
+        getCardsByZone={getCardsByZone}
+        refreshCards={refreshCards}
+        users={users}
+        currentUser={currentUser}
+        onUserSelect={handleUserSelect}
+        onCreateUser={handleCreateUser}
+        onEditUser={handleEditUser}
+        onManageUsers={handleManageUsers}
+      />
+
+      {/* User Profile Dialog */}
+      <UserProfileDialog
+        open={userProfileOpen}
+        onOpenChange={setUserProfileOpen}
+        user={editingUser}
+        users={users}
+        currentUserId={currentUser?.id}
+        cards={cards}
+        mode={userProfileMode}
+        onUserSave={handleUserSave}
+        onUserDelete={handleUserDelete}
+      />
+    </>
   );
 }
 

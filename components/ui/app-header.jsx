@@ -17,7 +17,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { UserSelector } from '@/components/ui/user-selector';
+import { UserManagementDropdown } from '@/components/ui/user-management-dropdown';
 import { 
   Plus, 
   RefreshCw, 
@@ -58,6 +58,9 @@ export function AppHeader({
   users = [],
   currentUser = null,
   onUserSelect,
+  onCreateUser,
+  onEditUser,
+  onManageUsers,
   
   // Customization
   title = "The Stack",
@@ -106,12 +109,15 @@ export function AppHeader({
               {/* Divider */}
               <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
 
-              {/* User Selector */}
+              {/* User Management Dropdown */}
               <div className="mr-3">
-                <UserSelector
+                <UserManagementDropdown
                   users={users}
                   currentUserId={currentUser?.id}
                   onUserSelect={onUserSelect}
+                  onCreateUser={onCreateUser}
+                  onEditUser={onEditUser}
+                  onManageUsers={onManageUsers}
                   placeholder="Select user..."
                   size="sm"
                 />

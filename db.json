@@ -102,6 +102,19 @@
       },
       "createdAt": "2025-08-15T15:24:14.525Z",
       "updatedAt": "2025-08-15T15:24:14.525Z"
+    },
+    {
+      "id": "spf6lSu8SSOxZIOsYlYVd",
+      "name": "Branden",
+      "isSystemUser": false,
+      "profilePicture": null,
+      "preferences": {
+        "theme": "system",
+        "notifications": true,
+        "defaultCardType": "topic"
+      },
+      "createdAt": "2025-08-15T17:19:59.480Z",
+      "updatedAt": "2025-08-15T17:19:59.480Z"
     }
   ],
   "conversations": []
