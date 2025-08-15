@@ -11,6 +11,7 @@ import { BoardCanvas } from './BoardCanvas';
 import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
 import { useCards } from '@/lib/hooks/useCards';
+import { useUsers } from '@/lib/hooks/useUsers';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { CARD_TYPES } from '@/lib/utils/constants';
@@ -62,6 +63,10 @@ function BoardInner({
   deleteCard,
   getCardsByZone,
   refreshCards,
+  // User context
+  users,
+  currentUser,
+  onUserClick,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -182,6 +187,8 @@ function BoardInner({
           onConversationResumeOrStart={onResumeOrStart}
           onConversationPause={onPause}
           onConversationStop={onStop}
+          currentUser={currentUser}
+          onUserClick={onUserClick}
         />
 
         {/* Board Canvas */}
@@ -191,6 +198,7 @@ function BoardInner({
           getCardsByZone={getCardsByZone}
           onUpdateCard={wrappedUpdateCard}
           onDeleteCard={handleDelete}
+          users={users}
         />
 
         {/* Dialogs */}
@@ -250,6 +258,17 @@ export default function Board() {
     refreshCards,
   } = useCards();
 
+  const {
+    users,
+    currentUser,
+    switchUser,
+  } = useUsers();
+
+  const handleUserClick = () => {
+    // For now, just log - in Step 3 we'll add user switching UI
+    console.log('User clicked:', currentUser);
+  };
+
   return (
     <BoardInner
       cards={cards}
@@ -260,6 +279,9 @@ export default function Board() {
       deleteCard={deleteCard}
       getCardsByZone={getCardsByZone}
       refreshCards={refreshCards}
+      users={users}
+      currentUser={currentUser}
+      onUserClick={handleUserClick}
     />
   );
 }

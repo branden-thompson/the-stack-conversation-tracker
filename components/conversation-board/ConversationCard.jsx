@@ -3,6 +3,8 @@
  * - Dark-mode placeholder text now uses high-contrast colors across all types
  * - MAX_CARD_WIDTH = 340
  * - Preserves drag, stacking visuals, centered content, footer anchoring
+ * - Displays user relationships (created by, assigned to) in footer
+ * - Supports both new user system and legacy person field for backward compatibility
  */
 
 'use client';
@@ -19,6 +21,7 @@ import {
   Timer,
   Calendar,
   User,
+  UserCheck,
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
 import { cn } from '@/lib/utils';
@@ -80,6 +83,8 @@ export function ConversationCard({
   stackPosition = 0,
   zoneId,
   draggableEnabled = true,
+  // User context for display
+  users = [],
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(card.content ?? '');
@@ -166,7 +171,18 @@ export function ConversationCard({
     }
   }, [createdTs]);
 
-  const person = (card.person && String(card.person).trim()) || 'system';
+  // Helper functions to get user information
+  const getUser = (userId) => {
+    if (!userId) return null;
+    return users.find(user => user.id === userId) || null;
+  };
+
+  const createdByUser = getUser(card.createdByUserId);
+  const assignedToUser = getUser(card.assignedToUserId);
+  
+  // Fallback to old person field for cards created before user system
+  const legacyPerson = (card.person && String(card.person).trim()) || null;
+  
   const CONTENT_MIN_HEIGHT = Math.max(
     0,
     BASE_MIN_CARD_HEIGHT - HEADER_MIN - FOOTER_MIN - CONTENT_VERTICAL_PADDING
@@ -306,10 +322,36 @@ export function ConversationCard({
             <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <span className="text-[12px]">{dateText}</span>
           </div>
+          
+          {/* Created by user */}
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            <span className="text-[12px] capitalize">{person}</span>
+            <span className="text-[12px]">
+              Created by: {createdByUser ? (
+                <span className="font-medium">
+                  {createdByUser.name}
+                  {createdByUser.isSystemUser && <span className="opacity-60"> (System)</span>}
+                </span>
+              ) : legacyPerson ? (
+                <span className="capitalize font-medium">{legacyPerson}</span>
+              ) : (
+                <span className="opacity-60">Unknown</span>
+              )}
+            </span>
           </div>
+
+          {/* Assigned to user (if exists) */}
+          {assignedToUser && (
+            <div className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-[12px]">
+                Assigned to: <span className="font-medium">
+                  {assignedToUser.name}
+                  {assignedToUser.isSystemUser && <span className="opacity-60"> (System)</span>}
+                </span>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

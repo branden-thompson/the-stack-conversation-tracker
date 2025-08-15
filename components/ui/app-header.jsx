@@ -6,6 +6,7 @@
  * - Hamburger menu button
  * - App title and description
  * - Theme toggle
+ * - Current user context display
  * - App control buttons (Help, Reset, Refresh, New Card)
  * - Real-time conversation status display
  * - Conversation controls (Start/Resume, Pause, Stop)
@@ -25,7 +26,8 @@ import {
   Play, 
   Pause as PauseIcon, 
   Square, 
-  Clock3 
+  Clock3,
+  User
 } from 'lucide-react';
 
 const TOOLBAR_H = 40;
@@ -52,11 +54,16 @@ export function AppHeader({
   onConversationResumeOrStart,
   onConversationStop,
   
+  // User context
+  currentUser = null,
+  onUserClick,
+  
   // Customization
   title = "The Stack",
   subtitle = "Conversation tracking and facilitation",
   showConversationControls = true,
   showAppActions = true,
+  showUserContext = true,
 }) {
   const actionBtnClass = `h-[${TOOLBAR_H}px] leading-none`;
 
@@ -92,6 +99,35 @@ export function AppHeader({
           <div className="flex items-center gap-2">
             <ThemeToggle />
           </div>
+
+          {showUserContext && currentUser && (
+            <>
+              {/* Divider */}
+              <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
+
+              {/* Current User Display */}
+              <div 
+                className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
+                onClick={onUserClick}
+                title={`Current user: ${currentUser.name}${currentUser.isSystemUser ? ' (System)' : ''}`}
+              >
+                <User className="w-4 h-4 mr-2 opacity-80" />
+                <div className="flex flex-col leading-tight">
+                  <span className="font-medium">
+                    {currentUser.name}
+                    {currentUser.isSystemUser && (
+                      <span className="ml-1 text-xs opacity-60">(System)</span>
+                    )}
+                  </span>
+                  {currentUser.preferences?.theme && (
+                    <span className="text-xs opacity-60 capitalize">
+                      {currentUser.preferences.theme} theme
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           {showAppActions && (
             <>

@@ -49,6 +49,7 @@ export function Zone({
   autoOrganize = false,
   showOrganizeButton = true,
   titleOverride,
+  users = [],
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: zoneId,
@@ -163,6 +164,7 @@ export function Zone({
                     onUpdateCard={onUpdateCard}
                     onDeleteCard={onDeleteCard}
                     draggableEnabled={true}
+                    users={users}
                   />
                 </div>
               ))}
@@ -216,6 +218,7 @@ export function Zone({
                             onUpdateCard={onUpdateCard}
                             onDeleteCard={onDeleteCard}
                             draggableEnabled={true}
+                            users={users}
                           />
                         </div>
                       );
@@ -290,6 +293,7 @@ function CardWrapper({
   onUpdateCard,
   onDeleteCard,
   draggableEnabled,
+  users = [],
 }) {
   return (
     <ConversationCard
@@ -300,6 +304,7 @@ function CardWrapper({
       stackPosition={stackIndex}
       zoneId={zoneId}
       draggableEnabled={draggableEnabled}
+      users={users}
     />
   );
 }

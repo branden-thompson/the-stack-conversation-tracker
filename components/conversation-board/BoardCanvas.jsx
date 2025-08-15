@@ -36,6 +36,7 @@ export function BoardCanvas({
   onUpdateCard,
   onDeleteCard,
   customLayout = DEFAULT_LAYOUT,
+  users = [],
 }) {
   const boardRef = useRef(null);
 
@@ -62,6 +63,7 @@ export function BoardCanvas({
                     autoOrganize={true}
                     showOrganizeButton={false}
                     titleOverride="Active Conversation"
+                    users={users}
                   />
                 </div>
               </ResizablePanel>
@@ -79,6 +81,7 @@ export function BoardCanvas({
                     autoOrganize={false}
                     showOrganizeButton={true}
                     titleOverride="Parking Lot"
+                    users={users}
                   />
                 </div>
               </ResizablePanel>
@@ -101,6 +104,7 @@ export function BoardCanvas({
                     autoOrganize={false}
                     showOrganizeButton={true}
                     titleOverride="Resolved"
+                    users={users}
                   />
                 </div>
               </ResizablePanel>
@@ -118,6 +122,7 @@ export function BoardCanvas({
                     autoOrganize={false}
                     showOrganizeButton={true}
                     titleOverride="Unresolved"
+                    users={users}
                   />
                 </div>
               </ResizablePanel>
@@ -130,7 +135,7 @@ export function BoardCanvas({
       <DragOverlay dropAnimation={null}>
         {activeCard ? (
           <div style={{ cursor: 'grabbing' }}>
-            <ConversationCard card={activeCard} onUpdate={() => {}} onDelete={() => {}} />
+            <ConversationCard card={activeCard} onUpdate={() => {}} onDelete={() => {}} users={users} />
           </div>
         ) : null}
       </DragOverlay>

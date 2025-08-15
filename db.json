@@ -1,5 +1,96 @@
 {
-  "cards": [],
+  "cards": [
+    {
+      "id": "HkydTRjBd5COcUzjCkthK",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:25.943Z",
+      "updatedAt": "2025-08-15T15:39:25.943Z"
+    },
+    {
+      "id": "w-SVYEJ3ZsHP01CLW5GW1",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:33.046Z",
+      "updatedAt": "2025-08-15T15:39:33.046Z"
+    },
+    {
+      "id": "VfVJc8v1hvBsmdzjb_nJe",
+      "type": "question",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:34.768Z",
+      "updatedAt": "2025-08-15T15:39:34.768Z"
+    },
+    {
+      "id": "v3SXp37RHu2j2N3VLh5eT",
+      "type": "accusation",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:36.077Z",
+      "updatedAt": "2025-08-15T15:39:36.077Z"
+    },
+    {
+      "id": "kcXeekTtunVdwqfkoc72f",
+      "type": "fact",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:37.378Z",
+      "updatedAt": "2025-08-15T15:39:37.378Z"
+    },
+    {
+      "id": "3Hbec1jUIsgviO5YGSEDB",
+      "type": "guess",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "createdByUserId": "system",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-15T15:39:39.137Z",
+      "updatedAt": "2025-08-15T15:39:39.137Z"
+    }
+  ],
   "users": [
     {
       "id": "system",
