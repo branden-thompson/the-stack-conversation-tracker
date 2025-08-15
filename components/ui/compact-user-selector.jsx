@@ -30,7 +30,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { User, Crown, Plus, Edit3, Users, Sun, Moon, Laptop } from 'lucide-react';
+import { User, Crown, Plus, Edit3, Users, Sun, Moon, Laptop, LogOut } from 'lucide-react';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -42,6 +42,7 @@ export function CompactUserSelector({
   onCreateUser,
   onEditUser,
   onManageUsers,
+  onLogout,
   className,
   disabled = false,
   showManagementActions = true,
@@ -279,6 +280,23 @@ export function CompactUserSelector({
                     <Users className="w-4 h-4" />
                     <span>Manage All Users</span>
                   </button>
+                )}
+
+                {/* Logout Button */}
+                {onLogout && (
+                  <>
+                    <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                    <button
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2"
+                      onClick={() => {
+                        setIsOpen(false);
+                        onLogout();
+                      }}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </>
                 )}
               </>
             )}

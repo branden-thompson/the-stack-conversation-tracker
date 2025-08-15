@@ -36,8 +36,8 @@ const INITIAL_TEST_STATE = {
   lastRun: null,
   results: {
     unit: {
-      total: 175,
-      passed: 175,
+      total: 201,
+      passed: 201,
       failed: 0,
       duration: '0.00s',
       files: [
@@ -100,12 +100,24 @@ const INITIAL_TEST_STATE = {
                 "tests": 9,
                 "passed": 9,
                 "failed": 0
+        },
+        {
+                "name": "responsive-layout.test.jsx",
+                "tests": 13,
+                "passed": 13,
+                "failed": 0
+        },
+        {
+                "name": "drag-drop-visual.test.jsx",
+                "tests": 13,
+                "passed": 13,
+                "failed": 0
         }
 ]
     },
     integration: {
-      total: 81,
-      passed: 81,
+      total: 107,
+      passed: 107,
       failed: 0,
       duration: '0.00s',
       files: [
@@ -132,15 +144,27 @@ const INITIAL_TEST_STATE = {
                 "tests": 12,
                 "passed": 12,
                 "failed": 0
+        },
+        {
+                "name": "users.test.js",
+                "tests": 14,
+                "passed": 14,
+                "failed": 0
+        },
+        {
+                "name": "auth.test.js",
+                "tests": 12,
+                "passed": 12,
+                "failed": 0
         }
 ]
     }
   },
   coverage: {
-    statements: 85.20,
-    branches: 89.50,
-    functions: 78.80,
-    lines: 85.20,
+    statements: 87.45,
+    branches: 91.20,
+    functions: 82.15,
+    lines: 87.45,
     files: {
       'lib/hooks/useCards.js': { statements: 97.86, branches: 94.11, functions: 100, lines: 97.86 },
       'lib/hooks/useConversationControls.js': { statements: 100, branches: 89.13, functions: 100, lines: 100 },
@@ -158,7 +182,11 @@ const INITIAL_TEST_STATE = {
       'components/timeline/TreeTimeline.jsx': { statements: 92.71, branches: 84.62, functions: 100, lines: 92.71 },
       'app/api/cards/route.js': { statements: 95.24, branches: 92.31, functions: 100, lines: 95.24 },
       'app/api/conversations/[id]/events/route.js': { statements: 100, branches: 85.71, functions: 100, lines: 100 },
-      'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 }
+      'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 },
+      'lib/auth/session.js': { statements: 95.24, branches: 87.50, functions: 100, lines: 95.24 },
+      'lib/auth/permissions.js': { statements: 100, branches: 94.44, functions: 100, lines: 100 },
+      'components/ui/compact-user-selector.jsx': { statements: 89.66, branches: 78.57, functions: 100, lines: 89.66 },
+      'components/ui/conversation-controls.jsx': { statements: 100, branches: 85.71, functions: 100, lines: 100 }
     }
   }
 };

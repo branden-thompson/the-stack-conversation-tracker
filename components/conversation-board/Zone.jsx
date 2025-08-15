@@ -263,7 +263,7 @@ export function Zone({
               );
             })
           ) : (
-            <div className="relative w-full min-h-[200px] border-2 border-dashed rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-600 m-2">
+            <div className="absolute inset-2 flex items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
               <div className="text-center">
                 <p className="text-sm font-medium">Drop cards here</p>
                 <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
