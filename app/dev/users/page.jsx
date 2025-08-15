@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
+import { ProfilePicture } from '@/components/ui/profile-picture';
 import { useUsers } from '@/lib/hooks/useUsers';
 import { useCards } from '@/lib/hooks/useCards';
 import { 
@@ -170,14 +171,17 @@ export default function UserManagementPage() {
               <div key={user.id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="flex-shrink-0">
-                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                        {user.isSystemUser ? (
-                          <Crown className="w-5 h-5 text-yellow-600" />
-                        ) : (
-                          <User className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                        )}
-                      </div>
+                    <div className="flex-shrink-0 relative">
+                      <ProfilePicture
+                        src={user.profilePicture}
+                        name={user.name}
+                        size="md"
+                      />
+                      {user.isSystemUser && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                          <Crown className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">

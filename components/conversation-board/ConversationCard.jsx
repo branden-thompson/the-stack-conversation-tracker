@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
 import { cn } from '@/lib/utils';
+import { ProfilePicture } from '@/components/ui/profile-picture';
 
 const CONTROL_RAIL_WIDTH = 44;
 const RAIL_BTN_SIZE = 36;
@@ -309,7 +310,11 @@ export function ConversationCard({
                     className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
                     onClick={() => handleAssignUser(user.id)}
                   >
-                    <User className="w-3 h-3" />
+                    <ProfilePicture
+                      src={user.profilePicture}
+                      name={user.name}
+                      size="xs"
+                    />
                     <span>{user.name}</span>
                     {user.isSystemUser && <span className="text-xs opacity-60">(System)</span>}
                   </button>
@@ -394,7 +399,15 @@ export function ConversationCard({
           
           {/* Created by user */}
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            {createdByUser ? (
+              <ProfilePicture
+                src={createdByUser.profilePicture}
+                name={createdByUser.name}
+                size="xs"
+              />
+            ) : (
+              <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+            )}
             <span className="text-[12px]">
               Created by: {createdByUser ? (
                 <span className="font-medium">
@@ -412,7 +425,11 @@ export function ConversationCard({
           {/* Assigned to user (if exists) */}
           {assignedToUser && (
             <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <ProfilePicture
+                src={assignedToUser.profilePicture}
+                name={assignedToUser.name}
+                size="xs"
+              />
               <span className="text-[12px]">
                 Assigned to: <span className="font-medium">
                   {assignedToUser.name}

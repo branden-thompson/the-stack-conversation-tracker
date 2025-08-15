@@ -41,6 +41,8 @@ import {
   Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ProfilePictureUpload } from '@/components/ui/profile-picture-upload';
+import { ProfilePicture } from '@/components/ui/profile-picture';
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'System Default' },
@@ -71,6 +73,7 @@ export function UserProfileDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errors, setErrors] = useState({});
+  const [uploadMessage, setUploadMessage] = useState('');
 
   const isCreateMode = mode === 'create' || !user;
   const isViewMode = mode === 'view';
@@ -188,6 +191,32 @@ export function UserProfileDialog({
     }
   };
 
+  // Profile picture handlers
+  const handleProfilePictureUploadSuccess = (profilePicturePath, updatedUser) => {
+    setUploadMessage('Profile picture uploaded successfully!');
+    setTimeout(() => setUploadMessage(''), 3000);
+    
+    // Update the user data if callback provided
+    if (onUserSave && updatedUser) {
+      onUserSave(updatedUser, updatedUser.id);
+    }
+  };
+
+  const handleProfilePictureUploadError = (error) => {
+    setErrors({ profilePicture: error });
+    setTimeout(() => setErrors(prev => ({ ...prev, profilePicture: undefined })), 5000);
+  };
+
+  const handleProfilePictureRemoveSuccess = (updatedUser) => {
+    setUploadMessage('Profile picture removed successfully!');
+    setTimeout(() => setUploadMessage(''), 3000);
+    
+    // Update the user data if callback provided
+    if (onUserSave && updatedUser) {
+      onUserSave(updatedUser, updatedUser.id);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -253,6 +282,43 @@ export function UserProfileDialog({
                     <p className="text-sm text-red-500">{errors.name}</p>
                   )}
                 </div>
+
+                {/* Profile Picture Upload */}
+                {!isCreateMode && user && (
+                  <div className="space-y-3">
+                    <Label>Profile Picture</Label>
+                    <div className="flex flex-col items-center gap-4">
+                      {isViewMode ? (
+                        <ProfilePicture
+                          src={user.profilePicture}
+                          name={user.name}
+                          size="xl"
+                        />
+                      ) : (
+                        <ProfilePictureUpload
+                          userId={user.id}
+                          currentProfilePicture={user.profilePicture}
+                          onUploadSuccess={handleProfilePictureUploadSuccess}
+                          onUploadError={handleProfilePictureUploadError}
+                          onRemoveSuccess={handleProfilePictureRemoveSuccess}
+                          size="lg"
+                        />
+                      )}
+                      
+                      {/* Upload success/error messages */}
+                      {uploadMessage && (
+                        <p className="text-sm text-green-600 dark:text-green-400">
+                          {uploadMessage}
+                        </p>
+                      )}
+                      {errors.profilePicture && (
+                        <p className="text-sm text-red-500">
+                          {errors.profilePicture}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {!isCreateMode && user && (
                   <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">

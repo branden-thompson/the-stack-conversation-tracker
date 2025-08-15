@@ -24,6 +24,7 @@ import {
   SelectSeparator,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { ProfilePicture } from '@/components/ui/profile-picture';
 
 export function UserManagementDropdown({
   users = [],
@@ -77,21 +78,32 @@ export function UserManagementDropdown({
     >
       <SelectTrigger className={cn("w-fit min-w-[180px]", className)} size={size}>
         <div className="flex items-center gap-2">
-          <User className="w-4 h-4 opacity-70" />
           <SelectValue placeholder={placeholder}>
-            {currentUser && (
+            {currentUser ? (
               <div className="flex items-center gap-2">
-                <span className="font-medium">
-                  {currentUser.name}
-                  {currentUser.isSystemUser && (
-                    <Crown className="w-3 h-3 ml-1 inline opacity-60" />
-                  )}
-                </span>
-                {currentUser.preferences?.theme && (
-                  <span className="text-xs opacity-60 capitalize">
-                    ({currentUser.preferences.theme})
+                <ProfilePicture
+                  src={currentUser.profilePicture}
+                  name={currentUser.name}
+                  size="sm"
+                />
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">
+                    {currentUser.name}
                   </span>
-                )}
+                  {currentUser.isSystemUser && (
+                    <Crown className="w-3 h-3 opacity-60" />
+                  )}
+                  {currentUser.preferences?.theme && (
+                    <span className="text-xs opacity-60 capitalize">
+                      ({currentUser.preferences.theme})
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 opacity-70" />
+                <span>{placeholder}</span>
               </div>
             )}
           </SelectValue>
@@ -102,6 +114,11 @@ export function UserManagementDropdown({
         {users.map((user) => (
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2 w-full">
+              <ProfilePicture
+                src={user.profilePicture}
+                name={user.name}
+                size="sm"
+              />
               <div className="flex items-center gap-1.5 flex-1">
                 <span className="font-medium">
                   {user.name}
@@ -185,16 +202,25 @@ export function UserSelectorWithManagement({
       >
         <SelectTrigger className="w-fit min-w-[140px]" size="sm">
           <div className="flex items-center gap-2">
-            <User className="w-4 h-4 opacity-70" />
             <SelectValue placeholder="User">
-              {currentUser && (
-                <div className="flex items-center gap-1">
+              {currentUser ? (
+                <div className="flex items-center gap-1.5">
+                  <ProfilePicture
+                    src={currentUser.profilePicture}
+                    name={currentUser.name}
+                    size="xs"
+                  />
                   <span className="font-medium">
                     {currentUser.name}
                     {currentUser.isSystemUser && (
                       <Crown className="w-3 h-3 ml-1 inline opacity-60" />
                     )}
                   </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <User className="w-4 h-4 opacity-70" />
+                  <span>User</span>
                 </div>
               )}
             </SelectValue>
@@ -204,6 +230,11 @@ export function UserSelectorWithManagement({
           {users.map((user) => (
             <SelectItem key={user.id} value={user.id}>
               <div className="flex items-center gap-1.5">
+                <ProfilePicture
+                  src={user.profilePicture}
+                  name={user.name}
+                  size="xs"
+                />
                 <span className="text-sm">
                   {user.name}
                 </span>

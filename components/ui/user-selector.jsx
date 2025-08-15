@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ProfilePicture } from '@/components/ui/profile-picture';
 import { cn } from '@/lib/utils';
 
 export function UserSelector({
@@ -48,21 +49,32 @@ export function UserSelector({
     >
       <SelectTrigger className={cn("w-fit min-w-[180px]", className)} size={size}>
         <div className="flex items-center gap-2">
-          <User className="w-4 h-4 opacity-70" />
           <SelectValue placeholder={placeholder}>
-            {currentUser && (
+            {currentUser ? (
               <div className="flex items-center gap-2">
-                <span className="font-medium">
-                  {currentUser.name}
-                  {currentUser.isSystemUser && (
-                    <Crown className="w-3 h-3 ml-1 inline opacity-60" />
-                  )}
-                </span>
-                {currentUser.preferences?.theme && (
-                  <span className="text-xs opacity-60 capitalize">
-                    ({currentUser.preferences.theme})
+                <ProfilePicture
+                  src={currentUser.profilePicture}
+                  name={currentUser.name}
+                  size="sm"
+                />
+                <div className="flex items-center gap-1">
+                  <span className="font-medium">
+                    {currentUser.name}
                   </span>
-                )}
+                  {currentUser.isSystemUser && (
+                    <Crown className="w-3 h-3 opacity-60" />
+                  )}
+                  {currentUser.preferences?.theme && (
+                    <span className="text-xs opacity-60 capitalize">
+                      ({currentUser.preferences.theme})
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 opacity-70" />
+                <span>{placeholder}</span>
               </div>
             )}
           </SelectValue>
@@ -72,6 +84,11 @@ export function UserSelector({
         {users.map((user) => (
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-2 w-full">
+              <ProfilePicture
+                src={user.profilePicture}
+                name={user.name}
+                size="sm"
+              />
               <div className="flex items-center gap-1.5 flex-1">
                 <span className="font-medium">
                   {user.name}
@@ -125,15 +142,26 @@ export function CompactUserSelector({
     >
       <SelectTrigger className={cn("w-fit min-w-[120px]", className)} size="sm">
         <div className="flex items-center gap-1.5">
-          <User className="w-3 h-3 opacity-70" />
           <SelectValue placeholder="User">
-            {currentUser && (
-              <span className="text-sm">
-                {currentUser.name}
-                {currentUser.isSystemUser && (
-                  <Crown className="w-2.5 h-2.5 ml-1 inline opacity-60" />
-                )}
-              </span>
+            {currentUser ? (
+              <div className="flex items-center gap-1.5">
+                <ProfilePicture
+                  src={currentUser.profilePicture}
+                  name={currentUser.name}
+                  size="xs"
+                />
+                <span className="text-sm">
+                  {currentUser.name}
+                  {currentUser.isSystemUser && (
+                    <Crown className="w-2.5 h-2.5 ml-1 inline opacity-60" />
+                  )}
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <User className="w-3 h-3 opacity-70" />
+                <span className="text-sm">User</span>
+              </div>
             )}
           </SelectValue>
         </div>
@@ -142,6 +170,11 @@ export function CompactUserSelector({
         {users.map((user) => (
           <SelectItem key={user.id} value={user.id}>
             <div className="flex items-center gap-1.5">
+              <ProfilePicture
+                src={user.profilePicture}
+                name={user.name}
+                size="xs"
+              />
               <span className="text-sm">
                 {user.name}
               </span>
