@@ -1,3 +1,17 @@
 {
-  "cards": []
+  "cards": [],
+  "users": [
+    {
+      "id": "system",
+      "name": "System",
+      "isSystemUser": true,
+      "profilePicture": "/system-avatar.png",
+      "preferences": {
+        "theme": "system"
+      },
+      "createdAt": "2025-08-15T15:24:14.525Z",
+      "updatedAt": "2025-08-15T15:24:14.525Z"
+    }
+  ],
+  "conversations": []
 }
