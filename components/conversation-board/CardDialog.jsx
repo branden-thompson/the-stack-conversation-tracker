@@ -1,6 +1,6 @@
 /**
  * CardDialog Component
- * Modal to create a new card. Now supports assigning a person (data only).
+ * Modal to create a new card. Now supports user assignment.
  */
 
 'use client';
@@ -14,19 +14,17 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
+import { UserSelector } from '@/components/ui/user-selector';
 import { CARD_TYPES } from '@/lib/utils/constants';
-import { usePeople } from '@/lib/hooks/usePeople';
+import { User, Crown } from 'lucide-react';
 
-export function CardDialog({ open, onOpenChange, onCreateCard }) {
+export function CardDialog({ open, onOpenChange, onCreateCard, users = [], currentUser = null }) {
   const [type, setType] = useState('topic');
   const [content, setContent] = useState('');
-  const [assignee, setAssignee] = useState(''); // free text; defaults to 'system' if empty
+  const [assignedUserId, setAssignedUserId] = useState(''); // User ID for assignment
   const [submitting, setSubmitting] = useState(false);
-
-  const { people, createPerson, findByName } = usePeople();
 
   const typeOptions = useMemo(() => {
     const keys = Object.keys(CARD_TYPES || {});
@@ -46,28 +44,16 @@ export function CardDialog({ open, onOpenChange, onCreateCard }) {
 
     setSubmitting(true);
     try {
-      // Resolve person safely
-      let personName = assignee?.trim();
-      if (!personName) {
-        personName = 'system'; // safe default
-      }
-
-      // Ensure person exists (create if not found)
-      const existing = findByName(personName);
-      if (!existing && personName.toLowerCase() !== 'system') {
-        await createPerson(personName);
-      }
-
       await onCreateCard?.({
         type,
         content: content?.trim() || '',
-        person: personName, // <-- attach person (string) to card payload
+        assignedUserId: assignedUserId || null,
       });
 
       // reset
       setType('topic');
       setContent('');
-      setAssignee('');
+      setAssignedUserId('');
       handleClose();
     } catch (err) {
       // keep dialog open; you could surface an error toast here
@@ -114,21 +100,37 @@ export function CardDialog({ open, onOpenChange, onCreateCard }) {
             />
           </div>
 
-          {/* Assignee */}
+          {/* Current User Info */}
+          {currentUser && (
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Creating as:</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <User className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium">
+                  {currentUser.name}
+                  {currentUser.isSystemUser && (
+                    <Crown className="w-3 h-3 ml-1 inline opacity-60" />
+                  )}
+                </span>
+                {currentUser.preferences?.theme && (
+                  <span className="text-xs text-gray-500 capitalize">
+                    ({currentUser.preferences.theme})
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Assignment */}
           <div className="space-y-2">
-            <Label>Assigned to (person)</Label>
-            <Input
-              placeholder="e.g. Alex (leave blank to default to 'system')"
-              value={assignee}
-              onChange={(e) => setAssignee(e.target.value)}
-              list="people-list"
+            <Label>Assign to user (optional)</Label>
+            <UserSelector
+              users={users}
+              currentUserId={assignedUserId}
+              onUserSelect={(user) => setAssignedUserId(user.id)}
+              placeholder="No assignment"
+              className="w-full"
             />
-            {/* Simple datalist for quick pick of existing names */}
-            <datalist id="people-list">
-              {people.map(p => (
-                <option key={p.id} value={p.name} />
-              ))}
-            </datalist>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

@@ -38,8 +38,9 @@ const TYPE_KEYS = {
   opinion: resolveCardType(['opinion'], 'opinion'),
 };
 
-function buildNewCardPayload(type) {
+function buildNewCardPayload(type, currentUser = null) {
   const now = Date.now();
+  const creatorId = currentUser?.id || 'system';
   return {
     type,
     content: '',
@@ -48,8 +49,10 @@ function buildNewCardPayload(type) {
     stackOrder: 0,
     createdAt: now,
     updatedAt: now,
-    createdBy: 'system',
-    person: 'system',
+    createdByUserId: creatorId,
+    // Keep legacy field for backward compatibility
+    createdBy: currentUser?.name || 'system',
+    person: currentUser?.name || 'system',
   };
 }
 
@@ -66,7 +69,7 @@ function BoardInner({
   // User context
   users,
   currentUser,
-  onUserClick,
+  onUserSelect,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,7 +104,7 @@ function BoardInner({
 
   // ---- Card helpers that also emit conversation events ----
   async function handleCreate(type) {
-    const payload = buildNewCardPayload(type);
+    const payload = buildNewCardPayload(type, currentUser);
     const newCard = await createCard(payload);
     try {
       if (conv.activeId) {
@@ -187,8 +190,9 @@ function BoardInner({
           onConversationResumeOrStart={onResumeOrStart}
           onConversationPause={onPause}
           onConversationStop={onStop}
+          users={users}
           currentUser={currentUser}
-          onUserClick={onUserClick}
+          onUserSelect={onUserSelect}
         />
 
         {/* Board Canvas */}
@@ -205,20 +209,20 @@ function BoardInner({
         <CardDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
+          users={users}
+          currentUser={currentUser}
           onCreateCard={async (data) => {
-            const person = (data?.person && data.person.trim()) ? data.person.trim() : 'system';
             const type = data?.type || TYPE_KEYS.topic;
-            const payload = {
-              type,
-              content: data?.content || '',
-              zone: 'active',
-              position: { x: 10, y: 60 },
-              stackOrder: 0,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-              createdBy: 'system',
-              person,
-            };
+            const payload = buildNewCardPayload(type, currentUser);
+            
+            // Override with dialog data if provided
+            if (data?.content) {
+              payload.content = data.content;
+            }
+            if (data?.assignedUserId) {
+              payload.assignedToUserId = data.assignedUserId;
+            }
+            
             const newCard = await createCard(payload);
             try {
               if (conv.activeId) {
@@ -264,9 +268,8 @@ export default function Board() {
     switchUser,
   } = useUsers();
 
-  const handleUserClick = () => {
-    // For now, just log - in Step 3 we'll add user switching UI
-    console.log('User clicked:', currentUser);
+  const handleUserSelect = (selectedUser) => {
+    switchUser(selectedUser.id);
   };
 
   return (
@@ -281,7 +284,7 @@ export default function Board() {
       refreshCards={refreshCards}
       users={users}
       currentUser={currentUser}
-      onUserClick={handleUserClick}
+      onUserSelect={handleUserSelect}
     />
   );
 }

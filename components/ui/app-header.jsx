@@ -17,6 +17,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { UserSelector } from '@/components/ui/user-selector';
 import { 
   Plus, 
   RefreshCw, 
@@ -26,8 +27,7 @@ import {
   Play, 
   Pause as PauseIcon, 
   Square, 
-  Clock3,
-  User
+  Clock3
 } from 'lucide-react';
 
 const TOOLBAR_H = 40;
@@ -55,8 +55,9 @@ export function AppHeader({
   onConversationStop,
   
   // User context
+  users = [],
   currentUser = null,
-  onUserClick,
+  onUserSelect,
   
   // Customization
   title = "The Stack",
@@ -100,31 +101,20 @@ export function AppHeader({
             <ThemeToggle />
           </div>
 
-          {showUserContext && currentUser && (
+          {showUserContext && users.length > 0 && (
             <>
               {/* Divider */}
               <span className={`h-6 w-px bg-gray-200 dark:bg-gray-700 ${DIVIDER_MX}`} />
 
-              {/* Current User Display */}
-              <div 
-                className="flex items-center text-sm text-gray-800 dark:text-gray-100 mr-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
-                onClick={onUserClick}
-                title={`Current user: ${currentUser.name}${currentUser.isSystemUser ? ' (System)' : ''}`}
-              >
-                <User className="w-4 h-4 mr-2 opacity-80" />
-                <div className="flex flex-col leading-tight">
-                  <span className="font-medium">
-                    {currentUser.name}
-                    {currentUser.isSystemUser && (
-                      <span className="ml-1 text-xs opacity-60">(System)</span>
-                    )}
-                  </span>
-                  {currentUser.preferences?.theme && (
-                    <span className="text-xs opacity-60 capitalize">
-                      {currentUser.preferences.theme} theme
-                    </span>
-                  )}
-                </div>
+              {/* User Selector */}
+              <div className="mr-3">
+                <UserSelector
+                  users={users}
+                  currentUserId={currentUser?.id}
+                  onUserSelect={onUserSelect}
+                  placeholder="Select user..."
+                  size="sm"
+                />
               </div>
             </>
           )}

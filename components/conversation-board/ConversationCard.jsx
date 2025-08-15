@@ -22,6 +22,7 @@ import {
   Calendar,
   User,
   UserCheck,
+  UserPlus,
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,7 @@ const CONTROL_RAIL_WIDTH = 44;
 const RAIL_BTN_SIZE = 36;
 const RAIL_GAP = 8;
 const RAIL_TOP_BOTTOM = 8;
-const RAIL_BUTTON_COUNT = 4;
+const RAIL_BUTTON_COUNT = 5;
 
 const RAIL_MIN_HEIGHT =
   RAIL_TOP_BOTTOM * 2 +
@@ -88,6 +89,7 @@ export function ConversationCard({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(card.content ?? '');
+  const [showAssignmentMenu, setShowAssignmentMenu] = useState(false);
   const inputRef = useRef(null);
 
   const typeKey = card.type || 'topic';
@@ -144,12 +146,32 @@ export function ConversationCard({
     }
   }, [isEditing]);
 
+  // Close assignment menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showAssignmentMenu && !event.target.closest('.assignment-menu-container')) {
+        setShowAssignmentMenu(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showAssignmentMenu]);
+
   const moveToZone = async (targetZone) => {
     if (!targetZone || targetZone === zoneId) return;
     await onUpdate?.(card.id, {
       zone: targetZone,
       stackOrder: 0,
       position: card.position ?? { x: 10, y: 60 },
+      updatedAt: Date.now(),
+    });
+  };
+
+  const handleAssignUser = async (userId) => {
+    setShowAssignmentMenu(false);
+    await onUpdate?.(card.id, {
+      assignedToUserId: userId === 'none' ? null : userId,
       updatedAt: Date.now(),
     });
   };
@@ -249,6 +271,53 @@ export function ConversationCard({
         >
           <Timer className="w-4 h-4" />
         </Button>
+
+        {/* User Assignment Button */}
+        <div className="relative assignment-menu-container">
+          <Button
+            size="icon"
+            variant="ghost"
+            aria-label="Assign User"
+            title={assignedToUser ? `Assigned to: ${assignedToUser.name}` : "Assign to user"}
+            className={cn(
+              "rounded-full shadow-sm",
+              assignedToUser 
+                ? "bg-blue-500 hover:bg-blue-600 text-white" 
+                : "bg-gray-300 hover:bg-gray-400 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300"
+            )}
+            onClick={() => setShowAssignmentMenu(!showAssignmentMenu)}
+          >
+            <UserPlus className="w-4 h-4" />
+          </Button>
+          
+          {/* Assignment Dropdown */}
+          {showAssignmentMenu && (
+            <div className="absolute top-0 right-10 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[160px]">
+              <div className="p-1">
+                {/* No assignment option */}
+                <button
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
+                  onClick={() => handleAssignUser('none')}
+                >
+                  <span className="text-gray-500">No assignment</span>
+                </button>
+                
+                {/* User options */}
+                {users.map((user) => (
+                  <button
+                    key={user.id}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
+                    onClick={() => handleAssignUser(user.id)}
+                  >
+                    <User className="w-3 h-3" />
+                    <span>{user.name}</span>
+                    {user.isSystemUser && <span className="text-xs opacity-60">(System)</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Header (drag handle) */}
