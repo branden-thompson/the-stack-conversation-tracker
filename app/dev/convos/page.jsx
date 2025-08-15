@@ -182,7 +182,7 @@ export default function DevConvos() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 text-stone-900 dark:text-stone-100">
+      <div className="flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 text-stone-900 dark:text-stone-100 min-h-0">
       {/* LEFT: conversations list */}
       <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
         <div className="p-3 border-b border-stone-200 dark:border-stone-700">
@@ -289,7 +289,7 @@ export default function DevConvos() {
       </div>
 
       {/* RIGHT: details + filters up top, middle split (timeline/events), emit bar fixed at bottom */}
-      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden min-h-0">
         {/* Details */}
         <div className="p-4 border-b border-stone-200 dark:border-stone-700">
           {selected ? (
@@ -374,12 +374,12 @@ export default function DevConvos() {
         </div>
 
         {/* MIDDLE: split horizontally into Timeline (left) and Events (right); both scroll */}
-        <div className="flex-1 overflow-hidden">
-          <div className="grid grid-cols-2 h-full">
+        <div className="flex-1 overflow-hidden min-h-0">
+          <div className="grid grid-cols-2 h-full min-h-0">
             {/* Timeline (left column) */}
-            <section className="h-full flex flex-col border-r border-stone-200 dark:border-stone-700">
-              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">Timeline</div>
-              <div className="flex-1 overflow-y-auto px-4 pb-4">
+            <section className="h-full flex flex-col border-r border-stone-200 dark:border-stone-700 min-h-0">
+              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 flex-shrink-0">Timeline</div>
+              <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
                 {selected ? (
                   timeline.length ? (
                     <ol className="relative ml-5">
@@ -417,9 +417,9 @@ export default function DevConvos() {
             </section>
 
             {/* Events (right column) */}
-            <section className="h-full flex flex-col">
-              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">Events</div>
-              <div className="flex-1 overflow-y-auto">
+            <section className="h-full flex flex-col min-h-0">
+              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 flex-shrink-0">Events</div>
+              <div className="flex-1 overflow-y-auto min-h-0">
                 {selected ? (
                   filtered.length ? (
                     <ul className="divide-y divide-stone-200 dark:divide-stone-800">
