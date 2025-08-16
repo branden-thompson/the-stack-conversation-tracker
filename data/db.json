@@ -1,0 +1,53 @@
+{
+  "cards": [],
+  "users": [
+    {
+      "id": "system",
+      "name": "System",
+      "isSystemUser": true,
+      "profilePicture": "/system-avatar.png",
+      "preferences": {
+        "theme": "system",
+        "animationsEnabled": true
+      },
+      "createdAt": "2025-08-15T15:24:14.525Z",
+      "updatedAt": "2025-08-15T21:44:31.298Z",
+      "email": "system@example.com",
+      "passwordHash": "$2b$12$pf/y0VhIHAoc0SiUOc9MQufZAgLvfiXVGjlDRsoM0ymqzn0FomTXm",
+      "role": "admin",
+      "isActive": true,
+      "emailVerified": true,
+      "loginAttempts": 0,
+      "lockedUntil": null,
+      "twoFactorEnabled": false,
+      "invitedBy": null,
+      "inviteToken": null,
+      "inviteExpiresAt": null,
+      "lastLoginAt": null
+    },
+    {
+      "id": "spf6lSu8SSOxZIOsYlYVd",
+      "name": "Branden",
+      "isSystemUser": false,
+      "profilePicture": "/uploads/profile-pictures/spf6lSu8SSOxZIOsYlYVd-1755280669052.png",
+      "preferences": {
+        "animationsEnabled": true
+      },
+      "createdAt": "2025-08-15T17:19:59.480Z",
+      "updatedAt": "2025-08-16T18:04:30.442Z",
+      "email": "branden@example.com",
+      "passwordHash": "$2b$12$jnRcZmvsuta6//NEbfUbwOUo69vV.BHvxN38wgtqGx2cpXsTg0nVy",
+      "role": "participant",
+      "isActive": true,
+      "emailVerified": true,
+      "loginAttempts": 0,
+      "lockedUntil": null,
+      "twoFactorEnabled": false,
+      "invitedBy": null,
+      "inviteToken": null,
+      "inviteExpiresAt": null,
+      "lastLoginAt": null
+    }
+  ],
+  "conversations": []
+}

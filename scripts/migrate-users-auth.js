@@ -14,7 +14,7 @@ import path from 'path';
 
 // Direct database access for migration
 async function getDatabase() {
-  const dbPath = path.join(process.cwd(), 'db.json');
+  const dbPath = path.join(process.cwd(), 'data/db.json');
   const adapter = new JSONFile(dbPath);
   const db = new Low(adapter, { users: [], cards: [], conversations: [] });
   await db.read();

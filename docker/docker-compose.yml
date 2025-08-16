@@ -1,6 +1,9 @@
 services:
   app:
-    build: .
+    container_name: conversation-tracker-app
+    build: 
+      context: ..
+      dockerfile: docker/dockerfile
     ports:
       - "3001:3000"  # Changed to avoid conflicts
     environment:
@@ -10,10 +13,11 @@ services:
       - api
 
   api:
+    container_name: conversation-tracker-api
     image: clue/json-server
     platform: linux/amd64  # Specify platform to avoid warnings
     volumes:
-      - ./db.json:/data/db.json:ro
-      - ./routes.json:/data/routes.json:ro
+      - ../data/db.json:/data/db.json:ro
+      - ../routes.json:/data/routes.json:ro
     ports:
       - "5051:80"  # Changed to avoid conflicts

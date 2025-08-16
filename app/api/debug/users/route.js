@@ -2,11 +2,11 @@
  * Debug endpoint to check user state
  */
 
-import { getUsers } from '@/lib/db/database.js';
+import { getAllUsers } from '@/lib/db/database.js';
 
 export async function GET() {
   try {
-    const users = await getUsers();
+    const users = await getAllUsers();
     
     return Response.json({
       success: true,

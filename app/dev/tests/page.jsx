@@ -134,6 +134,13 @@ const INITIAL_TEST_STATE = {
                 "failed": 0
         }
 ]
+    },
+    uiRegression: {
+      total: 0,
+      passed: 0,
+      failed: 0,
+      duration: '0.00s',
+      files: []
     }
   },
   coverage: {
@@ -164,6 +171,9 @@ const INITIAL_TEST_STATE = {
 };
 
 function TestResultsCard({ title, results, icon: Icon }) {
+  if (!results) {
+    results = { total: 0, passed: 0, failed: 0, duration: '0.00s', files: [] };
+  }
   const successRate = results.total > 0 ? (results.passed / results.total) * 100 : 0;
   const isSuccess = results.failed === 0 && results.total > 0;
   

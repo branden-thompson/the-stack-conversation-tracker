@@ -2,6 +2,14 @@
 
 A Next.js web application designed to help track and manage conversation evolution in real-time. It's a sophisticated digital conversation board that combines visual organization with detailed event tracking.
 
+## 📚 Documentation
+
+> **For Developers & AI Agents:** Please check the `/docs/` folder for comprehensive documentation.
+> 
+> **Start Here:** `/docs/00-START-HERE.md` - Quick guide to navigate all documentation
+> 
+> **AI Agents:** Always read `/docs/00-START-HERE.md` first for context-aware instructions
+
 ## Core Functionality
 
 ### 1. Visual Conversation Board
