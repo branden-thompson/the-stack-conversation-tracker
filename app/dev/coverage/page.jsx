@@ -31,7 +31,7 @@ import { useRouter } from 'next/navigation';
 
 // Detailed coverage data (would come from actual coverage reports)
 const DETAILED_COVERAGE = {
-                                                summary: {
+                                                  summary: {
     statements: { covered: 170, total: 200, percentage: 85.20 },
     branches: { covered: 107, total: 120, percentage: 89.50 },
     functions: { covered: 55, total: 70, percentage: 78.80 },
@@ -247,7 +247,8 @@ const DETAILED_COVERAGE = {
     }
   ],
   testHistory: [
-                                                                                                                                                                        { date: '2025-08-16T20:57:38.539Z', totalTests: 454, passed: 364, failed: 90, duration: 0 },
+                                                                                                                                                                            { date: '2025-08-16T21:39:33.665Z', totalTests: 454, passed: 357, failed: 97, duration: 0 },
+    { date: '2025-08-16T20:57:38.539Z', totalTests: 454, passed: 364, failed: 90, duration: 0 },
     { date: '2025-08-16T18:36:55.310Z', totalTests: 454, passed: 366, failed: 88, duration: 0 },
     { date: '2025-08-16T16:55:19.315Z', totalTests: 423, passed: 352, failed: 71, duration: 0 },
     { date: '2025-08-16T04:38:53.196Z', totalTests: 423, passed: 350, failed: 73, duration: 0 },
