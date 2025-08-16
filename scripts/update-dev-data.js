@@ -11,6 +11,7 @@ import { exec } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
 import { promisify } from 'util';
 import path from 'path';
+import { updateCoverageDataFile } from './update-coverage-data.js';
 
 const execAsync = promisify(exec);
 
@@ -235,93 +236,15 @@ async function updateTestsPage(testResults, coverage, breakdown) {
   }
 }
 
-async function updateCoveragePage(testResults, coverage) {
-  console.log('📊 Updating coverage page...');
+async function updateCoverageData(testResults, coverage) {
+  console.log('📊 Updating coverage data file...');
   
-  const coveragePagePath = path.join(process.cwd(), 'app/dev/coverage/page.jsx');
-  
-  // === BUFFER OVERFLOW PREVENTION ===
-  let content;
-  try {
-    content = await readFile(coveragePagePath, 'utf8');
-    
-    // Check file size before processing
-    if (content.length > 2000000) { // 2MB limit
-      throw new Error(`Coverage page file too large: ${content.length} bytes`);
-    }
-    
-    if (content.length === 0) {
-      throw new Error('Coverage page file is empty');
-    }
-  } catch (error) {
-    console.error('❌ Error reading coverage page:', error.message);
-    return;
-  }
-  
-  // Calculate new summary based on coverage
-  const totalLines = Math.round(coverage.lines > 0 ? 200 : 180);
-  const coveredLines = Math.round(totalLines * (coverage.statements / 100));
-  
-  const newSummary = `  summary: {
-    statements: { covered: ${coveredLines}, total: ${totalLines}, percentage: ${coverage.statements.toFixed(2)} },
-    branches: { covered: ${Math.round(totalLines * 0.6 * (coverage.branches / 100))}, total: ${Math.round(totalLines * 0.6)}, percentage: ${coverage.branches.toFixed(2)} },
-    functions: { covered: ${Math.round(totalLines * 0.35 * (coverage.functions / 100))}, total: ${Math.round(totalLines * 0.35)}, percentage: ${coverage.functions.toFixed(2)} },
-    lines: { covered: ${coveredLines}, total: ${totalLines}, percentage: ${coverage.lines.toFixed(2)} }
-  },`;
-
-  // Add new test history entry
-  const now = new Date().toISOString();
-  const newHistoryEntry = `    { date: '${now}', totalTests: ${testResults.totalTests}, passed: ${testResults.passedTests}, failed: ${testResults.failedTests}, duration: ${parseFloat(testResults.duration)} },`;
-  
-  // Replace summary (only once)
-  let updatedContent = content.replace(
-    /summary:\s*\{[\s\S]*?\},\s*files:/,
-    newSummary.replace(/,$/, '') + ',\n  files:'
-  );
-  
-  updatedContent = updatedContent.replace(
-    /(testHistory: \[\s*)/,
-    `$1${newHistoryEntry}\n    `
-  );
-  
-  // === SAFETY CHECKS ===
-  if (updatedContent === content) {
-    console.warn('⚠️  No changes detected in coverage page content');
-    return;
-  }
-  
-  if (updatedContent.length > 2000000) { // 2MB limit
-    console.error('❌ Updated coverage content too large, aborting write');
-    return;
-  }
-  
-  if (updatedContent.length < 1000) { // Sanity check
-    console.error('❌ Updated coverage content suspiciously small, aborting write');
-    return;
-  }
-  
-  // === PREVENT RUNAWAY HISTORY ===
-  // Count test history entries to prevent unbounded growth
-  const historyCount = (updatedContent.match(/{ date: '/g) || []).length;
-  if (historyCount > 50) {
-    console.warn('⚠️  Too many history entries (${historyCount}), trimming to last 30');
-    // Keep only the most recent 30 entries
-    const historyMatch = updatedContent.match(/(testHistory: \[\s*)([\s\S]*?)(\s*\])/);
-    if (historyMatch) {
-      const entries = historyMatch[2].split('\n').filter(line => line.trim().startsWith('{ date:'));
-      const trimmedEntries = entries.slice(0, 30).join('\n');
-      updatedContent = updatedContent.replace(
-        /(testHistory: \[\s*)[\s\S]*?(\s*\])/,
-        `$1${trimmedEntries}$2`
-      );
-    }
-  }
-  
-  try {
-    await writeFile(coveragePagePath, updatedContent);
-    console.log('✅ Coverage page updated successfully');
-  } catch (error) {
-    console.error('❌ Error writing coverage page:', error.message);
+  // Use the data file approach
+  const success = await updateCoverageDataFile(testResults, coverage);
+  if (success) {
+    console.log('✅ Coverage data updated successfully');
+  } else {
+    console.error('❌ Failed to update coverage data file');
   }
 }
 
@@ -350,7 +273,7 @@ async function main() {
     
     await Promise.all([
       updateTestsPage(testResults, coverage, breakdown),
-      updateCoveragePage(testResults, coverage)
+      updateCoverageData(testResults, coverage)
     ]);
     
     console.log('\n✅ Dev pages updated successfully!');
@@ -367,4 +290,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { extractTestResults, extractCoverageData, updateTestsPage, updateCoveragePage };
+export { extractTestResults, extractCoverageData, updateTestsPage, updateCoverageData };

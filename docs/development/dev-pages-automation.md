@@ -1,6 +1,6 @@
 # Dev Pages Automation
 
-This document explains how the `/dev/tests/` and `/dev/coverage/` pages are automatically kept up-to-date with real test results and coverage data.
+This document explains how the `/dev/tests/` page and coverage data file are automatically kept up-to-date with real test results and coverage data.
 
 ## Overview
 
@@ -34,17 +34,19 @@ The system includes a `post-commit` git hook that:
 ## What Gets Updated
 
 ### `/dev/tests/page.jsx`
+- **Test Status Banner**: Real-time test execution status
 - **INITIAL_TEST_STATE**: Real test counts and results
 - **Unit Tests**: Count, pass/fail status, file breakdown
 - **Integration Tests**: API and database test results
 - **Coverage Summary**: Overall percentages for statements, branches, functions, lines
-- **File Coverage**: Individual file coverage metrics
+- **File Coverage**: Individual file coverage metrics with grouped views
+- **Test History Chart**: Visual representation of test runs over time
 
-### `/dev/coverage/page.jsx`
+### `/data/coverage-data.js`
 - **Summary Metrics**: Calculated from actual coverage data
 - **Test History**: Automatic entries with timestamps and results
 - **File Details**: Per-file coverage breakdowns
-- **Coverage Insights**: High/low coverage file lists
+- **File Groups**: Logical grouping of files by functional area
 
 ## Data Sources
 
@@ -66,9 +68,10 @@ The automation script extracts data from:
 ## Files Involved
 
 - `scripts/update-dev-data.js` - Main automation script
+- `scripts/update-coverage-data.js` - Coverage data file updater
 - `.git/hooks/post-commit` - Git hook for automatic updates
-- `app/dev/tests/page.jsx` - Test dashboard page
-- `app/dev/coverage/page.jsx` - Coverage report page
+- `app/dev/tests/page.jsx` - Unified test & coverage dashboard
+- `data/coverage-data.js` - Centralized coverage data file
 - `package.json` - NPM scripts for running automation
 
 ## Example Dev Page Data

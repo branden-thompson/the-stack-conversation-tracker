@@ -127,15 +127,7 @@ export function LeftTray({
                   onClick={() => { router.push('/dev/tests'); onClose(); }}
                 >
                   <TestTube className="w-4 h-4 mr-2" />
-                  Test Dashboard
-                </Button>
-                <Button 
-                  variant={pathname === '/dev/coverage' ? 'default' : 'outline'}
-                  className="w-full justify-start" 
-                  onClick={() => { router.push('/dev/coverage'); onClose(); }}
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Coverage Report
+                  Test & Coverage
                 </Button>
                 <Button 
                   variant={pathname === '/dev/convos' ? 'default' : 'outline'}
