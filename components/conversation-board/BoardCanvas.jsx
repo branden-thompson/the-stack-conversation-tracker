@@ -37,7 +37,6 @@ function useResponsiveLayout() {
     const checkIsMobile = () => {
       // Use a more aggressive mobile breakpoint - based on the screenshot, it looks like it's not triggering
       const width = window.innerWidth;
-      console.log('Window width:', width, 'isMobile:', width < 640);
       setIsMobile(width < 640); // sm breakpoint instead of md
     };
     
@@ -57,6 +56,7 @@ export function BoardCanvas({
   onDeleteCard,
   customLayout = DEFAULT_LAYOUT,
   users = [],
+  animationsEnabled = true,
 }) {
   const boardRef = useRef(null);
   const isMobile = useResponsiveLayout();
@@ -66,7 +66,6 @@ export function BoardCanvas({
   const { activeCard, isDraggingCard, contextProps } = dnd;
 
   // Debug logging for drag state (can be removed in production)
-  // console.log('🔴 BoardCanvas - isDraggingCard:', isDraggingCard, 'activeCard:', activeCard?.id || 'none', 'isMobile:', isMobile);
 
   return (
     <DndContext {...contextProps}>
@@ -88,6 +87,7 @@ export function BoardCanvas({
                   showOrganizeButton={false}
                   titleOverride="Active Conversation"
                   users={users}
+                  animationsEnabled={animationsEnabled}
                 />
               </div>
               
@@ -103,6 +103,7 @@ export function BoardCanvas({
                   showOrganizeButton={false}
                   titleOverride="Parking Lot"
                   users={users}
+                  animationsEnabled={animationsEnabled}
                 />
               </div>
               
@@ -118,6 +119,7 @@ export function BoardCanvas({
                   showOrganizeButton={false}
                   titleOverride="Resolved"
                   users={users}
+                  animationsEnabled={animationsEnabled}
                 />
               </div>
               
@@ -133,6 +135,7 @@ export function BoardCanvas({
                   showOrganizeButton={false}
                   titleOverride="Unresolved"
                   users={users}
+                  animationsEnabled={animationsEnabled}
                 />
               </div>
             </div>
@@ -155,6 +158,7 @@ export function BoardCanvas({
                       showOrganizeButton={false}
                       titleOverride="Active Conversation"
                       users={users}
+                      animationsEnabled={animationsEnabled}
                     />
                   </div>
                 </ResizablePanel>
@@ -173,6 +177,7 @@ export function BoardCanvas({
                       showOrganizeButton={true}
                       titleOverride="Parking Lot"
                       users={users}
+                      animationsEnabled={animationsEnabled}
                     />
                   </div>
                 </ResizablePanel>
@@ -196,6 +201,7 @@ export function BoardCanvas({
                       showOrganizeButton={true}
                       titleOverride="Resolved"
                       users={users}
+                      animationsEnabled={animationsEnabled}
                     />
                   </div>
                 </ResizablePanel>
@@ -214,6 +220,7 @@ export function BoardCanvas({
                       showOrganizeButton={true}
                       titleOverride="Unresolved"
                       users={users}
+                      animationsEnabled={animationsEnabled}
                     />
                   </div>
                 </ResizablePanel>

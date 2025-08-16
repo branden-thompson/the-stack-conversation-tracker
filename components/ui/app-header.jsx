@@ -30,7 +30,8 @@ import {
   Pause as PauseIcon, 
   Square, 
   MoreHorizontal,
-  MessageCircle
+  MessageCircle,
+  Sparkles // For animations toggle
 } from 'lucide-react';
 import { UI_HEIGHTS } from '@/lib/utils/ui-constants';
 
@@ -65,6 +66,10 @@ export function AppHeader({
   onCreateUser,
   onEditUser,
   onManageUsers,
+  
+  // Animation preferences
+  animationsEnabled = true,
+  onAnimationsToggle,
   
   // Guest mode
   isGuestMode = false,
@@ -414,6 +419,40 @@ export function AppHeader({
                   onEditUser={onEditUser}
                   onManageUsers={onManageUsers}
                   themeControls={themeControls}
+                  additionalPreferences={[
+                    // Animations toggle
+                    <div key="animations" className="space-y-2">
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                        Animations
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant={animationsEnabled ? 'default' : 'outline'}
+                          size="sm"
+                          className="h-8 px-2 text-xs flex-1"
+                          onClick={() => onAnimationsToggle?.(true)}
+                          disabled={!onAnimationsToggle}
+                        >
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          On
+                        </Button>
+                        <Button
+                          variant={!animationsEnabled ? 'default' : 'outline'}
+                          size="sm"
+                          className="h-8 px-2 text-xs flex-1"
+                          onClick={() => onAnimationsToggle?.(false)}
+                          disabled={!onAnimationsToggle}
+                        >
+                          Off
+                        </Button>
+                      </div>
+                      {!animationsEnabled && (
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                          Cards always show face up
+                        </p>
+                      )}
+                    </div>
+                  ]}
                 />
               </div>
             </>

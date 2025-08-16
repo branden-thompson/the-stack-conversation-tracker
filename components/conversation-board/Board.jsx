@@ -4,7 +4,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BoardCanvas } from './BoardCanvas';
@@ -85,6 +85,16 @@ function BoardInner({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
+  
+  // Animation preferences - default to true, sync with current user preferences
+  const [animationsEnabled, setAnimationsEnabled] = useState(() => {
+    return currentUser?.preferences?.animationsEnabled !== false;
+  });
+  
+  // Sync animations state when user changes
+  useEffect(() => {
+    setAnimationsEnabled(currentUser?.preferences?.animationsEnabled !== false);
+  }, [currentUser]);
 
   // Conversation controls and state
   const conversationControls = useConversationControls();
@@ -92,6 +102,34 @@ function BoardInner({
 
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
+  
+  // Handle animations toggle
+  const handleAnimationsToggle = useCallback(async (enabled) => {
+    setAnimationsEnabled(enabled);
+    
+    // Update user preferences if logged in
+    if (currentUser && !isGuestMode) {
+      try {
+        await fetch(`/api/users/${currentUser.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            preferences: {
+              ...currentUser.preferences,
+              animationsEnabled: enabled
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to update animation preference:', error);
+      }
+    }
+    
+    // Update guest preferences if in guest mode
+    if (isGuestMode && updateGuestPreferences) {
+      updateGuestPreferences({ animationsEnabled: enabled });
+    }
+  }, [currentUser, isGuestMode, updateGuestPreferences]);
 
   const resetLayout = useCallback(() => {
     setLayoutKey((k) => k + 1);
@@ -124,7 +162,6 @@ function BoardInner({
           zone: newCard?.zone,
         });
       } else {
-        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
       }
     } catch (err) {
       console.error('[Conv Events] Error logging event:', err);
@@ -138,7 +175,6 @@ function BoardInner({
       if (conv.activeId) {
         await conv.logEvent(conv.activeId, 'card.deleted', { id, zone: card?.zone });
       } else {
-        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
       }
     } catch (err) {
       console.error('[Conv Events] Error logging event:', err);
@@ -150,7 +186,6 @@ function BoardInner({
     const updated = await updateCard(id, updates);
     try {
       if (!conv.activeId) {
-        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
         return updated;
       }
 
@@ -219,6 +254,9 @@ function BoardInner({
           onCreateUser={onCreateUser}
           onEditUser={onEditUser}
           onManageUsers={onManageUsers}
+          // Animation preferences
+          animationsEnabled={animationsEnabled}
+          onAnimationsToggle={handleAnimationsToggle}
           // Guest mode props
           isGuestMode={isGuestMode}
           sessionTimeRemaining={sessionTimeRemaining}
@@ -235,6 +273,7 @@ function BoardInner({
           onUpdateCard={wrappedUpdateCard}
           onDeleteCard={handleDelete}
           users={users}
+          animationsEnabled={animationsEnabled}
         />
 
         {/* Dialogs */}
@@ -264,8 +303,7 @@ function BoardInner({
                   zone: newCard?.zone,
                 });
               } else {
-                console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
-              }
+                      }
             } catch (err) {
               console.error('[Conv Events] Error logging event:', err);
             }
@@ -320,9 +358,6 @@ export default function Board() {
   } = useGuestUsers();
 
   const handleUserSelect = (selectedUser) => {
-    console.log('=== BOARD HANDLEUSERSELECT ===');
-    console.log('selectedUser received:', selectedUser);
-    console.log('Calling switchUser with ID:', selectedUser.id);
     switchUser(selectedUser.id);
   };
 

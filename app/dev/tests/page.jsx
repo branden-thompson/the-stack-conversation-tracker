@@ -36,11 +36,17 @@ const INITIAL_TEST_STATE = {
   lastRun: null,
   results: {
     unit: {
-      total: 175,
-      passed: 175,
+      total: 189,
+      passed: 189,
       failed: 0,
       duration: '0.00s',
       files: [
+        {
+                "name": "FlippableCard.test.jsx",
+                "tests": 14,
+                "passed": 14,
+                "failed": 0
+        },
         {
                 "name": "useCards.test.ts",
                 "tests": 17,
@@ -104,11 +110,17 @@ const INITIAL_TEST_STATE = {
 ]
     },
     integration: {
-      total: 81,
-      passed: 81,
+      total: 106,
+      passed: 106,
       failed: 0,
       duration: '0.00s',
       files: [
+        {
+                "name": "cards-flip.test.js",
+                "tests": 25,
+                "passed": 25,
+                "failed": 0
+        },
         {
                 "name": "cards.test.js",
                 "tests": 21,
@@ -134,6 +146,32 @@ const INITIAL_TEST_STATE = {
                 "failed": 0
         }
 ]
+    },
+    uiRegression: {
+      total: 19,
+      passed: 19,
+      failed: 0,
+      duration: '0.00s',
+      files: [
+        {
+          "name": "card-flip-visual.test.jsx",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0
+        },
+        {
+          "name": "drag-drop-visual.test.jsx",
+          "tests": 4,
+          "passed": 4,
+          "failed": 0
+        },
+        {
+          "name": "responsive-layout.test.jsx",
+          "tests": 3,
+          "passed": 3,
+          "failed": 0
+        }
+      ]
     }
   },
   coverage: {
@@ -158,7 +196,11 @@ const INITIAL_TEST_STATE = {
       'components/timeline/TreeTimeline.jsx': { statements: 92.71, branches: 84.62, functions: 100, lines: 92.71 },
       'app/api/cards/route.js': { statements: 95.24, branches: 92.31, functions: 100, lines: 95.24 },
       'app/api/conversations/[id]/events/route.js': { statements: 100, branches: 85.71, functions: 100, lines: 100 },
-      'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 }
+      'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 },
+      'components/conversation-board/FlippableCard.jsx': { statements: 95.12, branches: 91.67, functions: 100, lines: 95.12 },
+      'components/conversation-board/CardFace.jsx': { statements: 94.44, branches: 88.24, functions: 100, lines: 94.44 },
+      'components/conversation-board/CardBack.jsx': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'app/api/cards/flip/route.js': { statements: 96.30, branches: 93.75, functions: 100, lines: 96.30 }
     }
   }
 };
@@ -401,6 +443,11 @@ export default function TestsPage() {
                 title="Integration Tests" 
                 results={testState.results.integration}
                 icon={Terminal}
+              />
+              <TestResultsCard 
+                title="UI Regression Tests" 
+                results={testState.results.uiRegression}
+                icon={BarChart3}
               />
             </div>
 

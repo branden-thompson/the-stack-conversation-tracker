@@ -63,10 +63,6 @@ export function CompactUserSelector({
       : users.find(user => user.id === currentUserId)
   );
   
-  // Log provisioned guest info
-  if (provisionedGuest) {
-    console.log('CompactUserSelector - provisioned guest:', provisionedGuest.name, 'has avatar?', !!provisionedGuest.profilePicture);
-  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -81,9 +77,6 @@ export function CompactUserSelector({
   }, []);
 
   const handleUserSelect = (userId) => {
-    console.log('=== COMPACT USER SELECTOR ===');
-    console.log('handleUserSelect called with userId:', userId);
-    console.log('Available users:', users.map(u => ({id: u.id, name: u.name, isSystemUser: u.isSystemUser})));
     
     if (userId.startsWith('action:')) {
       const action = userId.replace('action:', '');
@@ -106,7 +99,6 @@ export function CompactUserSelector({
     } else {
       // Handle guest mode selection
       if (userId === 'guest') {
-        console.log('Guest mode selected, provisioned guest:', provisionedGuest);
         if (onUserSelect) {
           // Use provisioned guest if available (has avatar), otherwise fallback
           const guestUser = provisionedGuest || { id: 'guest', name: 'Guest Mode', isGuest: true };
@@ -115,14 +107,10 @@ export function CompactUserSelector({
       } else {
         // Handle regular user selection
         const selectedUser = users.find(user => user.id === userId);
-        console.log('Looking for user with ID:', userId);
-        console.log('Found selectedUser:', selectedUser);
         
         if (selectedUser && onUserSelect) {
-          console.log('Calling onUserSelect with:', selectedUser);
           onUserSelect(selectedUser);
         } else {
-          console.warn('User not found or onUserSelect missing:', {selectedUser, onUserSelect: !!onUserSelect});
         }
       }
     }

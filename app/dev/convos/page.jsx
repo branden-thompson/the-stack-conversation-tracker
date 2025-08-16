@@ -30,6 +30,7 @@ const typeColor = (type) => {
     case 'card.moved':   return 'bg-sky-500';
     case 'card.updated': return 'bg-amber-500';
     case 'card.deleted': return 'bg-rose-500';
+    case 'card.flipped': return 'bg-pink-500';
     default:             return 'bg-stone-400';
   }
 };
@@ -40,6 +41,7 @@ const typeLabel = (type) => {
     case 'card.moved':   return 'Card moved';
     case 'card.updated': return 'Card updated';
     case 'card.deleted': return 'Card deleted';
+    case 'card.flipped': return 'Card flipped';
     default:             return type;
   }
 };
@@ -57,6 +59,9 @@ const summarizePayload = (type, payload = {}) => {
   }
   if (type === 'card.deleted') {
     return `id: ${payload.id ?? '—'}`;
+  }
+  if (type === 'card.flipped') {
+    return `id: ${payload.cardId ?? '—'} • ${payload.from ?? '—'} → ${payload.flippedTo ?? '—'} • by: ${payload.flippedBy ?? '—'}`;
   }
   return Object.keys(payload).length ? JSON.stringify(payload) : '—';
 };
@@ -373,6 +378,7 @@ export default function DevConvos() {
             <option value="card.moved">card.moved</option>
             <option value="card.updated">card.updated</option>
             <option value="card.deleted">card.deleted</option>
+            <option value="card.flipped">card.flipped</option>
           </select>
           <input
             className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 flex-1"
@@ -493,6 +499,18 @@ export default function DevConvos() {
               onClick={() => logEvent(selected.id, 'card.deleted', { id: 'demo' })}
             >
               Emit: card.deleted
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => logEvent(selected.id, 'card.flipped', { 
+                cardId: 'demo', 
+                flippedBy: 'user',
+                zone: 'active',
+                from: 'faceUp',
+                flippedTo: 'faceDown'
+              })}
+            >
+              Emit: card.flipped
             </Button>
           </div>
         )}

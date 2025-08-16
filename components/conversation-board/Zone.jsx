@@ -51,14 +51,13 @@ export function Zone({
   showOrganizeButton = true,
   titleOverride,
   users = [],
+  animationsEnabled = true,
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: zoneId,
     data: { type: 'zone', accepts: 'card' },
   });
 
-  // Debug logging (can be removed in production)
-  // console.log(`📍 Zone ${zoneId}: isDraggingCard=${isDraggingCard}, isOver=${isOver}, cards.length=${cards.length}`);
 
   const zoneConfig = ZONES?.[zoneId] ?? {
     title: titleOverride ?? 'Zone',
@@ -179,6 +178,7 @@ export function Zone({
                     onDeleteCard={onDeleteCard}
                     draggableEnabled={true}
                     users={users}
+                    animationsEnabled={animationsEnabled}
                   />
                 </div>
               ))}
@@ -255,6 +255,7 @@ export function Zone({
                             onDeleteCard={onDeleteCard}
                             draggableEnabled={true}
                             users={users}
+                            animationsEnabled={animationsEnabled}
                           />
                         </div>
                       );
@@ -355,6 +356,7 @@ function CardWrapper({
   onDeleteCard,
   draggableEnabled,
   users = [],
+  animationsEnabled = true,
 }) {
   return (
     <ConversationCard
@@ -366,6 +368,7 @@ function CardWrapper({
       zoneId={zoneId}
       draggableEnabled={draggableEnabled}
       users={users}
+      animationsEnabled={animationsEnabled}
     />
   );
 }
