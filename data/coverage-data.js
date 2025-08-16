@@ -63,7 +63,7 @@ export const FILE_GROUPS = {
 
 // Detailed coverage data
 export const COVERAGE_DATA = {
-  summary: {
+    summary: {
     statements: { covered: 170, total: 200, percentage: 85.20 },
     branches: { covered: 107, total: 120, percentage: 89.50 },
     functions: { covered: 55, total: 70, percentage: 78.80 },
@@ -280,67 +280,37 @@ export const COVERAGE_DATA = {
   ],
   // Test history - Auto-updated by post-commit hook
   testHistory: [
-    // Most recent runs with current coverage
+    { date: '2025-08-16T23:24:21.882Z', totalTests: 454, passed: 364, failed: 90, duration: 0, 
     { date: '2025-08-16T21:39:33.665Z', totalTests: 454, passed: 357, failed: 97, duration: 0, 
-      coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-16T20:57:38.539Z', totalTests: 454, passed: 364, failed: 90, duration: 0,
-      coverage: { statements: 85.0, branches: 89.2, functions: 78.5, lines: 85.0 } },
     { date: '2025-08-16T18:36:55.310Z', totalTests: 454, passed: 366, failed: 88, duration: 0,
-      coverage: { statements: 84.8, branches: 89.0, functions: 78.2, lines: 84.8 } },
     { date: '2025-08-16T16:55:19.315Z', totalTests: 423, passed: 352, failed: 71, duration: 0,
-      coverage: { statements: 84.5, branches: 88.8, functions: 78.0, lines: 84.5 } },
     { date: '2025-08-16T04:38:53.196Z', totalTests: 423, passed: 350, failed: 73, duration: 0,
-      coverage: { statements: 84.2, branches: 88.5, functions: 77.8, lines: 84.2 } },
     { date: '2025-08-16T04:31:32.008Z', totalTests: 423, passed: 350, failed: 73, duration: 0,
-      coverage: { statements: 84.0, branches: 88.2, functions: 77.5, lines: 84.0 } },
     { date: '2025-08-16T04:12:18.553Z', totalTests: 423, passed: 351, failed: 72, duration: 0,
-      coverage: { statements: 83.8, branches: 88.0, functions: 77.2, lines: 83.8 } },
     { date: '2025-08-16T03:54:11.626Z', totalTests: 423, passed: 350, failed: 73, duration: 0,
-      coverage: { statements: 83.5, branches: 87.8, functions: 77.0, lines: 83.5 } },
     { date: '2025-08-16T03:43:09.185Z', totalTests: 423, passed: 351, failed: 72, duration: 0,
-      coverage: { statements: 83.2, branches: 87.5, functions: 76.8, lines: 83.2 } },
     { date: '2025-08-16T03:12:05.671Z', totalTests: 423, passed: 351, failed: 72, duration: 0,
-      coverage: { statements: 83.0, branches: 87.2, functions: 76.5, lines: 83.0 } },
     { date: '2025-08-16T00:59:39.445Z', totalTests: 423, passed: 351, failed: 72, duration: 0,
-      coverage: { statements: 82.8, branches: 87.0, functions: 76.2, lines: 82.8 } },
     { date: '2025-08-16T00:48:43.777Z', totalTests: 423, passed: 355, failed: 68, duration: 0,
-      coverage: { statements: 82.5, branches: 86.8, functions: 76.0, lines: 82.5 } },
     { date: '2025-08-16T00:40:19.450Z', totalTests: 423, passed: 338, failed: 85, duration: 0,
-      coverage: { statements: 82.2, branches: 86.5, functions: 75.8, lines: 82.2 } },
     { date: '2025-08-15T23:49:10.224Z', totalTests: 423, passed: 356, failed: 67, duration: 0,
-      coverage: { statements: 82.0, branches: 86.2, functions: 75.5, lines: 82.0 } },
     { date: '2025-08-15T21:46:32.625Z', totalTests: 423, passed: 397, failed: 26, duration: 6.26,
-      coverage: { statements: 81.8, branches: 86.0, functions: 75.2, lines: 81.8 } },
     { date: '2025-08-15T21:25:22.585Z', totalTests: 397, passed: 324, failed: 73, duration: 0,
-      coverage: { statements: 81.5, branches: 85.8, functions: 75.0, lines: 81.5 } },
     { date: '2025-08-15T17:54:30.464Z', totalTests: 397, passed: 322, failed: 75, duration: 0,
-      coverage: { statements: 81.2, branches: 85.5, functions: 74.8, lines: 81.2 } },
     { date: '2025-08-15T17:40:49.036Z', totalTests: 397, passed: 321, failed: 76, duration: 0,
-      coverage: { statements: 81.0, branches: 85.2, functions: 74.5, lines: 81.0 } },
     { date: '2025-08-15T17:27:57.562Z', totalTests: 397, passed: 323, failed: 74, duration: 0,
-      coverage: { statements: 80.8, branches: 85.0, functions: 74.2, lines: 80.8 } },
     { date: '2025-08-15T17:20:38.405Z', totalTests: 397, passed: 328, failed: 69, duration: 0,
-      coverage: { statements: 80.5, branches: 84.8, functions: 74.0, lines: 80.5 } },
     { date: '2025-08-15T15:50:39.306Z', totalTests: 334, passed: 308, failed: 26, duration: 0,
-      coverage: { statements: 80.2, branches: 84.5, functions: 73.8, lines: 80.2 } },
     { date: '2025-08-15T15:40:16.369Z', totalTests: 319, passed: 295, failed: 24, duration: 0,
-      coverage: { statements: 80.0, branches: 84.2, functions: 73.5, lines: 80.0 } },
     { date: '2025-08-15T15:32:18.067Z', totalTests: 312, passed: 291, failed: 21, duration: 0,
-      coverage: { statements: 79.8, branches: 84.0, functions: 73.2, lines: 79.8 } },
     { date: '2025-08-15T15:24:44.005Z', totalTests: 275, passed: 275, failed: 0, duration: 0,
-      coverage: { statements: 79.5, branches: 83.8, functions: 73.0, lines: 79.5 } },
     { date: '2025-08-15T14:55:14.474Z', totalTests: 239, passed: 239, failed: 0, duration: 0,
-      coverage: { statements: 79.2, branches: 83.5, functions: 72.8, lines: 79.2 } },
     { date: '2025-08-15T14:35:54.750Z', totalTests: 183, passed: 174, failed: 9, duration: 0,
-      coverage: { statements: 79.0, branches: 83.2, functions: 72.5, lines: 79.0 } },
     { date: '2025-08-15T02:42:06.999Z', totalTests: 183, passed: 174, failed: 9, duration: 0,
-      coverage: { statements: 78.8, branches: 83.0, functions: 72.2, lines: 78.8 } },
     { date: '2025-08-15T02:23:50.232Z', totalTests: 183, passed: 174, failed: 9, duration: 0,
-      coverage: { statements: 78.5, branches: 82.8, functions: 72.0, lines: 78.5 } },
     { date: '2025-08-15T01:25:20.270Z', totalTests: 183, passed: 179, failed: 4, duration: 0,
-      coverage: { statements: 78.2, branches: 82.5, functions: 71.8, lines: 78.2 } },
-    { date: '2025-08-15T01:21:25.320Z', totalTests: 183, passed: 179, failed: 4, duration: 0,
-      coverage: { statements: 78.0, branches: 82.2, functions: 71.5, lines: 78.0 } }
+
   ]
 };
 

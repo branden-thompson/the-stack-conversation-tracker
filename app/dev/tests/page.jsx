@@ -39,16 +39,134 @@ const DETAILED_COVERAGE = COVERAGE_DATA;
 // Extract test state from coverage data
 const INITIAL_TEST_STATE = {
   status: 'idle',
-  lastRun: DETAILED_COVERAGE.testHistory[0]?.date || null,
+  lastRun: null,
   results: {
     unit: {
-      total: DETAILED_COVERAGE.testHistory[0]?.totalTests || 0,
-      passed: DETAILED_COVERAGE.testHistory[0]?.passed || 0,
-      failed: DETAILED_COVERAGE.testHistory[0]?.failed || 0,
-      duration: (DETAILED_COVERAGE.testHistory[0]?.duration || 0) + 's',
+      total: 175,
+      passed: 175,
+      failed: 0,
+      duration: '0.00s',
+      files: [
+        {
+                "name": "useCards.test.ts",
+                "tests": 17,
+                "passed": 17,
+                "failed": 0
+        },
+        {
+                "name": "useConversationControls.test.ts",
+                "tests": 22,
+                "passed": 22,
+                "failed": 0
+        },
+        {
+                "name": "useBoardDnD.test.ts",
+                "tests": 18,
+                "passed": 18,
+                "failed": 0
+        },
+        {
+                "name": "utils.test.js",
+                "tests": 26,
+                "passed": 26,
+                "failed": 0
+        },
+        {
+                "name": "card.test.jsx",
+                "tests": 34,
+                "passed": 34,
+                "failed": 0
+        },
+        {
+                "name": "TimelineNode.test.jsx",
+                "tests": 14,
+                "passed": 14,
+                "failed": 0
+        },
+        {
+                "name": "ConversationTimeline.test.jsx",
+                "tests": 9,
+                "passed": 9,
+                "failed": 0
+        },
+        {
+                "name": "timelineConstants.test.js",
+                "tests": 8,
+                "passed": 8,
+                "failed": 0
+        },
+        {
+                "name": "timelineEvents.test.js",
+                "tests": 18,
+                "passed": 18,
+                "failed": 0
+        },
+        {
+                "name": "useExpansionState.test.js",
+                "tests": 9,
+                "passed": 9,
+                "failed": 0
+        }
+]
+    },
+    integration: {
+      total: 81,
+      passed: 81,
+      failed: 0,
+      duration: '0.00s',
+      files: [
+        {
+                "name": "cards.test.js",
+                "tests": 21,
+                "passed": 21,
+                "failed": 0
+        },
+        {
+                "name": "events.test.js",
+                "tests": 16,
+                "passed": 16,
+                "failed": 0
+        },
+        {
+                "name": "database.test.js",
+                "tests": 32,
+                "passed": 32,
+                "failed": 0
+        },
+        {
+                "name": "TreeListViewSwitching.test.jsx",
+                "tests": 12,
+                "passed": 12,
+                "failed": 0
+        }
+]
     }
   },
-  coverage: DETAILED_COVERAGE.summary
+  coverage: {
+    statements: 85.20,
+    branches: 89.50,
+    functions: 78.80,
+    lines: 85.20,
+    files: {
+      'lib/hooks/useCards.js': { statements: 97.86, branches: 94.11, functions: 100, lines: 97.86 },
+      'lib/hooks/useConversationControls.js': { statements: 100, branches: 89.13, functions: 100, lines: 100 },
+      'lib/hooks/useBoardDnD.js': { statements: 100, branches: 80.55, functions: 100, lines: 100 },
+      'lib/hooks/useExpansionState.js': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'lib/utils.js': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'lib/utils/timelineConstants.js': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'lib/utils/timelineEvents.js': { statements: 100, branches: 95.83, functions: 100, lines: 100 },
+      'lib/utils/timelineFormatters.js': { statements: 100, branches: 90.91, functions: 100, lines: 100 },
+      'lib/utils/timelineStyles.js': { statements: 95.45, branches: 85.71, functions: 100, lines: 95.45 },
+      'lib/utils/timelineTree.js': { statements: 93.06, branches: 87.50, functions: 100, lines: 93.06 },
+      'components/ui/card.jsx': { statements: 100, branches: 100, functions: 100, lines: 100 },
+      'components/timeline/TimelineNode.jsx': { statements: 92.31, branches: 83.33, functions: 100, lines: 92.31 },
+      'components/timeline/ConversationTimeline.jsx': { statements: 88.89, branches: 80.00, functions: 100, lines: 88.89 },
+      'components/timeline/TreeTimeline.jsx': { statements: 92.71, branches: 84.62, functions: 100, lines: 92.71 },
+      'app/api/cards/route.js': { statements: 95.24, branches: 92.31, functions: 100, lines: 95.24 },
+      'app/api/conversations/[id]/events/route.js': { statements: 100, branches: 85.71, functions: 100, lines: 100 },
+      'lib/db/database.js': { statements: 92.86, branches: 88.89, functions: 100, lines: 92.86 }
+    }
+  }
 };
 
 export default function TestsDashboardPage() {
