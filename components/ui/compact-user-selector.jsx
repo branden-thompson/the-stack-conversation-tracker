@@ -34,7 +34,7 @@ import { User, Crown, Plus, Edit3, Users, Sun, Moon, Laptop, LogOut } from 'luci
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { PROFILE_PICTURE_SIZES, Z_INDEX_CLASSES } from '@/lib/utils/ui-constants';
+import { PROFILE_PICTURE_SIZES, Z_INDEX_CLASSES, USER_SELECTOR } from '@/lib/utils/ui-constants';
 
 export function CompactUserSelector({
   users = [],
@@ -136,7 +136,7 @@ export function CompactUserSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px] rounded-full border-2 border-gray-200 dark:border-gray-600`,
+          `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px] rounded-full border-2 border-gray-400 dark:border-gray-600`,
           "hover:border-blue-400 dark:hover:border-blue-500 transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
           "flex items-center justify-center relative",
@@ -183,12 +183,17 @@ export function CompactUserSelector({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-[60px] right-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[200px] max-w-[280px]">
+        <div 
+          className="absolute top-[60px] right-0 z-50 bg-gray-100 dark:bg-gray-950 border border-gray-400 dark:border-gray-600 rounded-md shadow-lg"
+          style={{ 
+            minWidth: `${USER_SELECTOR.dropdownMinWidth}px`,
+            maxWidth: `${USER_SELECTOR.dropdownMaxWidth}px`
+          }}>
           <div className="p-1">
             {/* Current user header */}
             {currentUser && (
               <>
-                <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
+                <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-400 dark:border-gray-600">
                   Current: {currentUser.name}
                   {currentUser.isSystemUser && <span className="text-xs opacity-60 ml-1">(System)</span>}
                   {currentUser.isGuest && <span className="text-xs opacity-60 ml-1">(Guest)</span>}
@@ -198,7 +203,7 @@ export function CompactUserSelector({
 
             {/* User Preferences Section */}
             {currentUser && showUserPreferences && (themeControls || additionalPreferences.length > 0) && (
-              <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+              <div className="p-3 border-b border-gray-400 dark:border-gray-600">
                 {/* Theme Controls */}
                 {themeControls && (
                   <div className="space-y-2">
@@ -262,7 +267,7 @@ export function CompactUserSelector({
               <button
                 key={user.id}
                 className={cn(
-                  "w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm",
+                  "w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm",
                   "flex items-center gap-2",
                   user.id === currentUserId && "bg-blue-50 dark:bg-blue-900/20"
                 )}
@@ -296,10 +301,10 @@ export function CompactUserSelector({
             )}
 
             {/* Guest Mode Option */}
-            <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+            <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
             <button
               className={cn(
-                "w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm",
+                "w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm",
                 "flex items-center gap-2",
                 currentUserId === 'guest' && "bg-orange-50 dark:bg-orange-900/20"
               )}
@@ -330,11 +335,11 @@ export function CompactUserSelector({
             {showManagementActions && (
               <>
                 {/* Separator */}
-                <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
 
                 {onCreateUser && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm text-blue-600 dark:text-blue-400 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-blue-600 dark:text-blue-400 flex items-center gap-2"
                     onClick={() => handleUserSelect('action:create-user')}
                   >
                     <Plus className="w-4 h-4" />
@@ -344,7 +349,7 @@ export function CompactUserSelector({
 
                 {currentUser && onEditUser && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm text-green-600 dark:text-green-400 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-green-600 dark:text-green-400 flex items-center gap-2"
                     onClick={() => handleUserSelect('action:edit-current')}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -354,7 +359,7 @@ export function CompactUserSelector({
 
                 {onManageUsers && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm text-purple-600 dark:text-purple-400 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-purple-600 dark:text-purple-400 flex items-center gap-2"
                     onClick={() => handleUserSelect('action:manage-users')}
                   >
                     <Users className="w-4 h-4" />
@@ -365,9 +370,9 @@ export function CompactUserSelector({
                 {/* Logout Button */}
                 {onLogout && (
                   <>
-                    <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+                    <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
                     <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2"
                       onClick={() => {
                         setIsOpen(false);
                         onLogout();
