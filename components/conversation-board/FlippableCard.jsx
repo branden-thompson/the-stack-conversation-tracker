@@ -32,8 +32,6 @@ export function FlippableCard({
   handleAssignUser,
   moveToZone,
   dragHandleProps,
-  showAssignMenu,
-  setShowAssignMenu,
   users,
   controlRailWidth,
   contentMinHeight,
@@ -205,8 +203,6 @@ export function FlippableCard({
               moveToZone={moveToZone}
               onFlip={() => handleFlip('user')}
               dragHandleProps={dragHandleProps}
-              showAssignMenu={showAssignMenu}
-              setShowAssignMenu={setShowAssignMenu}
               users={users}
               screenWidth={screenWidth}
               controlRailWidth={controlRailWidth}
@@ -215,7 +211,6 @@ export function FlippableCard({
               createdByUser={createdByUser}
               assignedToUser={assignedToUser}
               inputRef={inputRef}
-              typeColors={typeColors}
             />
           </div>
         </div>
@@ -232,7 +227,10 @@ export function FlippableCard({
             transform: 'rotateY(180deg)',
           }}
         >
-          <div className="rounded-xl border-2 shadow-sm overflow-hidden w-full h-full bg-white dark:bg-gray-900">
+          <div className={cn(
+            'rounded-xl border-2 shadow-sm overflow-hidden w-full h-full',
+            typeColors?.container // Apply same border colors as face
+          )}>
             <CardBack
               card={card}
               onFlip={() => handleFlip('user')}

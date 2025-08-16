@@ -7,64 +7,7 @@
 'use client';
 
 import { RotateCw } from 'lucide-react';
-import { CARD_TYPES } from '@/lib/utils/constants';
-
-// Type labels - comprehensive mapping for all variations
-const TYPE_LABEL = {
-  topic: 'TOPIC',
-  conversation: 'TOPIC',
-  conversation_topic: 'TOPIC',
-  question: 'QUESTION',
-  open_question: 'QUESTION',
-  'open-question': 'QUESTION',
-  accusation: 'ACCUSATION',
-  claim: 'ACCUSATION',
-  allegation: 'ACCUSATION',
-  fact: 'FACT',
-  factual: 'FACT',
-  factual_statement: 'FACT',
-  'factual-statement': 'FACT',
-  objective_fact: 'FACT',
-  'objective-fact': 'FACT',
-  objective: 'FACT',
-  statement: 'FACT',
-  guess: 'GUESS',
-  opinion: 'OPINION',
-};
-
-// Type colors for the back - matching CardFace colors from constants
-const TYPE_COLORS = {
-  topic: {
-    bg: 'bg-white dark:bg-gray-800',
-    border: 'border-gray-300 dark:border-gray-600',
-    text: 'text-gray-800 dark:text-gray-100',
-  },
-  question: {
-    bg: 'bg-blue-50 dark:bg-blue-900',
-    border: 'border-blue-300 dark:border-blue-600',
-    text: 'text-blue-900 dark:text-blue-100',
-  },
-  accusation: {
-    bg: 'bg-red-50 dark:bg-red-900',
-    border: 'border-red-300 dark:border-red-600',
-    text: 'text-red-900 dark:text-red-100',
-  },
-  fact: {
-    bg: 'bg-yellow-50 dark:bg-yellow-900',
-    border: 'border-yellow-300 dark:border-yellow-600',
-    text: 'text-yellow-900 dark:text-yellow-100',
-  },
-  guess: {
-    bg: 'bg-purple-50 dark:bg-purple-900',
-    border: 'border-purple-300 dark:border-purple-600',
-    text: 'text-purple-900 dark:text-purple-100',
-  },
-  opinion: {
-    bg: 'bg-pink-50 dark:bg-pink-900',
-    border: 'border-pink-300 dark:border-pink-600',
-    text: 'text-pink-900 dark:text-pink-100',
-  },
-};
+import { getTypeLabel, getTypeColors } from '@/lib/utils/card-type-constants';
 
 export function CardBack({ 
   card, 
@@ -74,29 +17,8 @@ export function CardBack({
   maxWidth,
   minHeight,
 }) {
-  const typeKey = card?.type?.toLowerCase() || 'topic';
-  const typeLabel = TYPE_LABEL[typeKey] || TYPE_LABEL.topic;
-  
-  // Map the type to its base category for colors
-  const getBaseType = (key) => {
-    if (TYPE_LABEL[key]) {
-      const label = TYPE_LABEL[key];
-      // Map label back to base type for colors
-      switch(label) {
-        case 'TOPIC': return 'topic';
-        case 'QUESTION': return 'question';
-        case 'ACCUSATION': return 'accusation';
-        case 'FACT': return 'fact';
-        case 'GUESS': return 'guess';
-        case 'OPINION': return 'opinion';
-        default: return 'topic';
-      }
-    }
-    return 'topic';
-  };
-  
-  const baseType = getBaseType(typeKey);
-  const colors = TYPE_COLORS[baseType] || TYPE_COLORS.topic;
+  const typeLabel = getTypeLabel(card?.type);
+  const colors = getTypeColors(card?.type);
   
   return (
     <div 

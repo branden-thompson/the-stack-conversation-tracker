@@ -15,30 +15,46 @@ import {
   ThumbsDown,
   Timer,
   Calendar,
-  User,
   UserCheck,
   UserPlus,
-  MoreVertical,
   RotateCw, // Flip icon
 } from 'lucide-react';
 import { 
-  CARD_CONTROL_RAIL,
   BREAKPOINTS,
   getResponsiveCardHeights,
   getControlRailDimensions,
 } from '@/lib/utils/ui-constants';
+import { getTypeLabel } from '@/lib/utils/card-type-constants';
 import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 
-// Type labels
-const TYPE_LABEL = {
-  topic: 'TOPIC',
-  question: 'QUESTION',
-  accusation: 'ACCUSATION',
-  fact: 'FACT',
-  guess: 'GUESS',
-  opinion: 'OPINION',
-};
+/**
+ * Helper function to get the next user in the assignment cycle
+ * Cycles through: none -> user1 -> user2 -> ... -> none
+ */
+function getNextAssignedUser(currentUser, users) {
+  if (!currentUser) {
+    // If no one assigned, assign to first user
+    if (users.length > 0) {
+      return users[0].id;
+    }
+    return null;
+  }
+  
+  // Find current user index
+  const currentIndex = users.findIndex(u => u.id === currentUser.id);
+  
+  if (currentIndex === users.length - 1) {
+    // If last user, clear assignment
+    return 'none';
+  } else if (currentIndex >= 0) {
+    // Assign to next user
+    return users[currentIndex + 1].id;
+  }
+  
+  // Fallback: clear assignment
+  return 'none';
+}
 
 export function CardFace({
   card,
@@ -53,8 +69,6 @@ export function CardFace({
   moveToZone,
   onFlip, // New prop for flip functionality
   dragHandleProps,
-  showAssignMenu,
-  setShowAssignMenu,
   users = [],
   screenWidth,
   controlRailWidth,
@@ -63,7 +77,6 @@ export function CardFace({
   createdByUser,
   assignedToUser,
   inputRef,
-  typeColors,
 }) {
   const typeKey = card?.type?.toLowerCase() || 'topic';
   const headerMinHeight = getResponsiveCardHeights(screenWidth).header;
@@ -135,14 +148,20 @@ export function CardFace({
           </Button>
         </div>
         
-        {/* Assignment menu button */}
-        <div className="relative">
+        {/* Assignment button - cycles through users */}
+        <div className="relative group">
           <Button
             variant="ghost"
             size="icon"
             className="hover:bg-blue-500/10 dark:hover:bg-blue-500/20"
-            onClick={() => setShowAssignMenu(!showAssignMenu)}
+            onClick={() => {
+              const nextUserId = getNextAssignedUser(assignedToUser, users);
+              if (nextUserId !== null) {
+                handleAssignUser(nextUserId);
+              }
+            }}
             style={{ width: railBtnSize, height: railBtnSize }}
+            title={assignedToUser ? `Assigned to: ${assignedToUser.name}\nClick to change` : 'Click to assign user'}
           >
             {assignedToUser ? (
               <UserCheck className={screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
@@ -151,36 +170,11 @@ export function CardFace({
             )}
           </Button>
           
-          {/* Assignment dropdown menu */}
-          {showAssignMenu && (
-            <div className="absolute bottom-full right-0 mb-2 z-50">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 min-w-[200px]">
-                <div className="px-3 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
-                  Assign To
-                </div>
-                
-                <button
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm"
-                  onClick={() => handleAssignUser('none')}
-                >
-                  Clear assignment
-                </button>
-                
-                {users.map((user) => (
-                  <button
-                    key={user.id}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2"
-                    onClick={() => handleAssignUser(user.id)}
-                  >
-                    <ProfilePicture
-                      src={user.profilePicture}
-                      name={user.name}
-                      size="xs"
-                    />
-                    <span>Assign to: {user.name}</span>
-                    {user.isSystemUser && <span className="text-xs opacity-60">(System)</span>}
-                  </button>
-                ))}
+          {/* Tooltip showing current assignment - positioned to the left to avoid clipping */}
+          {assignedToUser && (
+            <div className="absolute bottom-full right-full mr-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <div className="bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                {assignedToUser.name}
               </div>
             </div>
           )}
@@ -196,7 +190,7 @@ export function CardFace({
         <div className="flex items-center gap-2">
           <GripVertical className={`${screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
           <span className="font-extrabold tracking-wide text-gray-900 dark:text-gray-100 text-sm sm:text-base lg:text-lg">
-            {TYPE_LABEL[typeKey] || 'TOPIC'}
+            {getTypeLabel(card?.type)}
           </span>
         </div>
         <div className="w-4 h-4" />

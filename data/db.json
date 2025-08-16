@@ -1,5 +1,70 @@
 {
-  "cards": [],
+  "cards": [
+    {
+      "id": "veC-ksOVUBNhI8QEolj_g",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-16T21:04:48.144Z",
+      "updatedAt": "2025-08-16T21:37:38.868Z"
+    },
+    {
+      "id": "DwMxT6vC9nD9V0zTzAZCh",
+      "type": "accusation",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-16T21:04:49.025Z",
+      "updatedAt": "2025-08-16T21:37:37.476Z"
+    },
+    {
+      "id": "ojHW3SQJFMEzo5tmAdU5V",
+      "type": "fact",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-16T21:04:50.498Z",
+      "updatedAt": "2025-08-16T21:37:36.250Z"
+    },
+    {
+      "id": "8lqxqtacP8803e6yLN2Uy",
+      "type": "guess",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-16T21:04:52.969Z",
+      "updatedAt": "2025-08-16T21:38:53.945Z"
+    }
+  ],
   "users": [
     {
       "id": "system",

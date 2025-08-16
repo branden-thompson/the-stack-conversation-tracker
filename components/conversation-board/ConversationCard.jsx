@@ -14,29 +14,17 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Button } from '@/components/ui/button';
 import {
-  GripVertical,
-  X as CloseIcon,
-  ThumbsUp,
-  ThumbsDown,
-  Timer,
-  Calendar,
-  User,
-  UserCheck,
-  UserPlus,
   MoreVertical,
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
+import { getTypeColors } from '@/lib/utils/card-type-constants';
 import { 
   CARD_RESPONSIVE_WIDTHS,
-  CARD_HEIGHTS,
   CARD_LAYOUT,
-  CARD_CONTROL_RAIL,
-  UI_HEIGHTS,
   BREAKPOINTS,
   getResponsiveCardWidth,
   getResponsiveCardHeights,
   getControlRailDimensions,
-  getMinRailHeight,
   getBaseMinCardHeight
 } from '@/lib/utils/ui-constants';
 import { cn } from '@/lib/utils';
@@ -55,28 +43,6 @@ const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 320, CARD_LAYOUT.minCo
 // Default max width (will be overridden by responsive logic)
 const MAX_CARD_WIDTH = CARD_LAYOUT.maxWidth;
 
-/** Labels */
-const TYPE_LABEL = {
-  topic: 'TOPIC',
-  conversation: 'TOPIC',
-  conversation_topic: 'TOPIC',
-  question: 'QUESTION',
-  open_question: 'QUESTION',
-  'open-question': 'QUESTION',
-  accusation: 'ACCUSATION',
-  claim: 'ACCUSATION',
-  allegation: 'ACCUSATION',
-  fact: 'FACT',
-  factual: 'FACT',
-  factual_statement: 'FACT',
-  'factual-statement': 'FACT',
-  objective_fact: 'FACT',
-  'objective-fact': 'FACT',
-  objective: 'FACT',
-  statement: 'FACT',
-  guess: 'GUESS',
-  opinion: 'OPINION',
-};
 
 // Custom hook for responsive card sizing
 function useResponsiveCardWidth() {
@@ -126,7 +92,6 @@ export function ConversationCard({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(card.content ?? '');
-  const [showAssignmentMenu, setShowAssignmentMenu] = useState(false);
   const [showControlMenu, setShowControlMenu] = useState(false);
   const inputRef = useRef(null);
   const controlMenuRef = useRef(null);
@@ -136,8 +101,7 @@ export function ConversationCard({
   const CONTROL_RAIL_WIDTH = responsiveWidth.railWidth;
   const RAIL_BTN_SIZE = getRailBtnSize(responsiveWidth.screenWidth);
 
-  const typeKey = card.type || 'topic';
-  const cardType = CARD_TYPES[typeKey] || CARD_TYPES.topic;
+  const cardType = getTypeColors(card.type);
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: card.id,
@@ -191,18 +155,6 @@ export function ConversationCard({
     }
   }, [isEditing]);
 
-  // Close assignment menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showAssignmentMenu && !event.target.closest('.assignment-menu-container')) {
-        setShowAssignmentMenu(false);
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, [showAssignmentMenu]);
-
   // Close control menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -226,7 +178,6 @@ export function ConversationCard({
   };
 
   const handleAssignUser = async (userId) => {
-    setShowAssignmentMenu(false);
     setShowControlMenu(false);
     await onUpdate?.(card.id, {
       assignedToUserId: userId === 'none' ? null : userId,
@@ -314,8 +265,6 @@ export function ConversationCard({
         handleAssignUser={handleAssignUser}
         moveToZone={moveToZone}
         dragHandleProps={dragHandleProps}
-        showAssignMenu={showAssignmentMenu}
-        setShowAssignMenu={setShowAssignmentMenu}
         users={users}
         controlRailWidth={CONTROL_RAIL_WIDTH}
         contentMinHeight={CONTENT_MIN_HEIGHT}
