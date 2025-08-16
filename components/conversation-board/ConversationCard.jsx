@@ -253,7 +253,23 @@ export function ConversationCard({
   // Helper functions to get user information
   const getUser = (userId) => {
     if (!userId) return null;
-    return users.find(user => user.id === userId) || null;
+    
+    // Check if it's a guest user ID (ensure userId is a string)
+    // Handle both 'guest' and 'guest_xxxxx' formats
+    if (typeof userId === 'string' && (userId === 'guest' || userId.startsWith('guest_'))) {
+      // Return a standard guest user object
+      return {
+        id: userId,
+        name: 'Guest User',
+        isGuest: true,
+        profilePicture: null, // Will use default icon
+        isSystemUser: false
+      };
+    }
+    
+    // Try to find in users array
+    const foundUser = users.find(user => user.id === userId);
+    return foundUser || null;
   };
 
   const createdByUser = getUser(card.createdByUserId);
@@ -459,11 +475,17 @@ export function ConversationCard({
                 {assignedToUser ? (
                   <div className="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-2 mb-2">
-                      <ProfilePicture
-                        src={assignedToUser.profilePicture}
-                        name={assignedToUser.name}
-                        size="xs"
-                      />
+                      {assignedToUser.isGuest ? (
+                        <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                          <User className="w-3 h-3 text-orange-600 dark:text-orange-400" />
+                        </div>
+                      ) : (
+                        <ProfilePicture
+                          src={assignedToUser.profilePicture}
+                          name={assignedToUser.name}
+                          size="xs"
+                        />
+                      )}
                       <span className="font-medium">
                         Assigned to: {assignedToUser.name}
                         {assignedToUser.isSystemUser && <span className="opacity-60"> (System)</span>}
@@ -580,11 +602,17 @@ export function ConversationCard({
           {/* Created by user */}
           <div className="flex items-center gap-2">
             {createdByUser ? (
-              <ProfilePicture
-                src={createdByUser.profilePicture}
-                name={createdByUser.name}
-                size="xs"
-              />
+              createdByUser.isGuest ? (
+                <div className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-6 h-6" : "w-6 h-6"} rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center`}>
+                  <User className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-3 h-3"} text-orange-600 dark:text-orange-400`} />
+                </div>
+              ) : (
+                <ProfilePicture
+                  src={createdByUser.profilePicture}
+                  name={createdByUser.name}
+                  size="xs"
+                />
+              )
             ) : (
               <User className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
             )}
@@ -605,11 +633,17 @@ export function ConversationCard({
           {/* Assigned to user (if exists) */}
           {assignedToUser && (
             <div className="flex items-center gap-2">
-              <ProfilePicture
-                src={assignedToUser.profilePicture}
-                name={assignedToUser.name}
-                size="xs"
-              />
+              {assignedToUser.isGuest ? (
+                <div className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-6 h-6" : "w-6 h-6"} rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center`}>
+                  <User className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-3 h-3"} text-orange-600 dark:text-orange-400`} />
+                </div>
+              ) : (
+                <ProfilePicture
+                  src={assignedToUser.profilePicture}
+                  name={assignedToUser.name}
+                  size="xs"
+                />
+              )}
               <span className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[12px]"}>
                 Assigned to: <span className="font-medium">
                   {assignedToUser.name}
