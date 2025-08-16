@@ -32,8 +32,9 @@ import {
   MoreHorizontal,
   MessageCircle
 } from 'lucide-react';
+import { UI_HEIGHTS } from '@/lib/utils/ui-constants';
 
-const TOOLBAR_H = 40;
+const TOOLBAR_H = UI_HEIGHTS.toolbar;
 const DIVIDER_MX = 'mx-2 lg:mx-3';
 const HEADER_SIDE_GAP = 'gap-2 sm:gap-3';
 

@@ -13,10 +13,11 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_LAYOUT } from '@/lib/utils/ui-constants';
 
 /* ---------- Layout / stacking constants ---------- */
-const STACK_GAP_PX = 20;
-const STACK_OFFSET_PX = CARD_DIMENSIONS?.stackOffset ?? 12;
+const STACK_GAP_PX = CARD_LAYOUT.stackGap;
+const STACK_OFFSET_PX = CARD_LAYOUT.stackOffset;
 const BASE_CARD_WIDTH  = Math.max(CARD_DIMENSIONS?.width  ?? 300, 300);
 const BASE_CARD_HEIGHT = Math.max(CARD_DIMENSIONS?.height ?? 140, 140);
 

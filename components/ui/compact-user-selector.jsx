@@ -34,6 +34,7 @@ import { User, Crown, Plus, Edit3, Users, Sun, Moon, Laptop, LogOut } from 'luci
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { PROFILE_PICTURE_SIZES, Z_INDEX } from '@/lib/utils/ui-constants';
 
 export function CompactUserSelector({
   users = [],
@@ -102,7 +103,7 @@ export function CompactUserSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          "w-[50px] h-[50px] rounded-full border-2 border-gray-200 dark:border-gray-600",
+          `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px] rounded-full border-2 border-gray-200 dark:border-gray-600`,
           "hover:border-blue-400 dark:hover:border-blue-500 transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
           "flex items-center justify-center relative",
@@ -135,7 +136,7 @@ export function CompactUserSelector({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-[60px] right-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[200px] max-w-[280px]">
+        <div className={`absolute top-[60px] right-0 z-[${Z_INDEX.dropdown}] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[200px] max-w-[280px]`}>
           <div className="p-1">
             {/* Current user header */}
             {currentUser && (

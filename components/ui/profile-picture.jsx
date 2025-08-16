@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PROFILE_PICTURE_SIZES } from '@/lib/utils/ui-constants';
 
 export function ProfilePicture({
   src,
@@ -21,13 +22,16 @@ export function ProfilePicture({
   const [imageLoading, setImageLoading] = useState(true);
 
   const sizeClasses = {
-    xs: 'w-6 h-6',
-    sm: 'w-8 h-8',
-    md: 'w-10 h-10',
-    lg: 'w-12 h-12',
-    xl: 'w-16 h-16',
-    '50': 'w-[50px] h-[50px]',
-    '46': 'w-[46px] h-[46px]'
+    xs: `w-[${PROFILE_PICTURE_SIZES.xs}px] h-[${PROFILE_PICTURE_SIZES.xs}px]`,
+    sm: `w-[${PROFILE_PICTURE_SIZES.sm}px] h-[${PROFILE_PICTURE_SIZES.sm}px]`,
+    md: `w-[${PROFILE_PICTURE_SIZES.md}px] h-[${PROFILE_PICTURE_SIZES.md}px]`,
+    lg: `w-[${PROFILE_PICTURE_SIZES.lg}px] h-[${PROFILE_PICTURE_SIZES.lg}px]`,
+    xl: `w-[${PROFILE_PICTURE_SIZES.xl}px] h-[${PROFILE_PICTURE_SIZES.xl}px]`,
+    compact: `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px]`,
+    large: `w-[${PROFILE_PICTURE_SIZES.large}px] h-[${PROFILE_PICTURE_SIZES.large}px]`,
+    // Legacy support
+    '50': `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px]`,
+    '46': 'w-[46px] h-[46px]' // Keep this custom size for now
   };
 
   const iconSizes = {

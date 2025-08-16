@@ -7,6 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
+import { CARD_RESPONSIVE_WIDTHS, BREAKPOINTS } from '@/lib/utils/ui-constants';
 
 // Mock Next.js hooks
 vi.mock('next/navigation', () => ({
@@ -78,34 +79,21 @@ describe('Responsive Layout Regression Tests', () => {
 
   describe('Responsive Design Constants', () => {
     test('should have proper responsive card width ranges', () => {
-      const RESPONSIVE_CARD_WIDTHS = {
-        mobile: { min: 220, max: 240 },
-        tablet: { min: 245, max: 265 },
-        desktop: { min: 275, max: 275 },
-        large: { min: 275, max: 300 }
-      };
-
-      // Validate mobile range
-      expect(RESPONSIVE_CARD_WIDTHS.mobile.min).toBe(220);
-      expect(RESPONSIVE_CARD_WIDTHS.mobile.max).toBe(240);
+      // Use centralized constants
+      expect(CARD_RESPONSIVE_WIDTHS.mobile.min).toBe(220);
+      expect(CARD_RESPONSIVE_WIDTHS.mobile.max).toBe(240);
       
       // Validate desktop range
-      expect(RESPONSIVE_CARD_WIDTHS.desktop.min).toBe(275);
-      expect(RESPONSIVE_CARD_WIDTHS.desktop.max).toBe(275);
+      expect(CARD_RESPONSIVE_WIDTHS.desktop.min).toBe(250);
+      expect(CARD_RESPONSIVE_WIDTHS.desktop.max).toBe(250);
       
       // Validate large range
-      expect(RESPONSIVE_CARD_WIDTHS.large.min).toBe(275);
-      expect(RESPONSIVE_CARD_WIDTHS.large.max).toBe(300);
+      expect(CARD_RESPONSIVE_WIDTHS.large.min).toBe(250);
+      expect(CARD_RESPONSIVE_WIDTHS.large.max).toBe(250);
     });
 
     test('should have consistent breakpoint thresholds', () => {
-      const BREAKPOINTS = {
-        mobile: 640,
-        tablet: 768,
-        desktop: 1024,
-        large: 1440
-      };
-
+      // Use centralized constants
       expect(BREAKPOINTS.mobile).toBeLessThan(BREAKPOINTS.tablet);
       expect(BREAKPOINTS.tablet).toBeLessThan(BREAKPOINTS.desktop);
       expect(BREAKPOINTS.desktop).toBeLessThan(BREAKPOINTS.large);
@@ -116,25 +104,25 @@ describe('Responsive Layout Regression Tests', () => {
     test('should detect mobile viewport correctly', () => {
       setViewportSize(375, 667);
       expect(window.innerWidth).toBe(375);
-      expect(window.innerWidth < 640).toBe(true); // Mobile breakpoint
+      expect(window.innerWidth < BREAKPOINTS.mobile).toBe(true); // Mobile breakpoint
     });
 
     test('should detect tablet viewport correctly', () => {
       setViewportSize(768, 1024);
       expect(window.innerWidth).toBe(768);
-      expect(window.innerWidth >= 640 && window.innerWidth < 1024).toBe(true);
+      expect(window.innerWidth >= BREAKPOINTS.mobile && window.innerWidth < BREAKPOINTS.desktop).toBe(true);
     });
 
     test('should detect desktop viewport correctly', () => {
       setViewportSize(1024, 768);
       expect(window.innerWidth).toBe(1024);
-      expect(window.innerWidth >= 1024).toBe(true);
+      expect(window.innerWidth >= BREAKPOINTS.desktop).toBe(true);
     });
 
     test('should detect large desktop viewport correctly', () => {
       setViewportSize(1440, 900);
       expect(window.innerWidth).toBe(1440);
-      expect(window.innerWidth >= 1440).toBe(true);
+      expect(window.innerWidth >= BREAKPOINTS.large).toBe(true);
     });
   });
 
@@ -146,7 +134,7 @@ describe('Responsive Layout Regression Tests', () => {
         'lg:flex',
         'xl:grid-cols-4',
         'min-w-[220px]',
-        'max-w-[300px]',
+        'max-w-[250px]',
         'h-[40px]',
         'min-h-[200px]'
       ];

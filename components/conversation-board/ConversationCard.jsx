@@ -1,7 +1,7 @@
 /**
  * ConversationCard
  * - Dark-mode placeholder text now uses high-contrast colors across all types
- * - MAX_CARD_WIDTH = 275
+ * - MAX_CARD_WIDTH = 250
  * - Preserves drag, stacking visuals, centered content, footer anchoring
  * - Displays user relationships (created by, assigned to) in footer
  * - Supports both new user system and legacy person field for backward compatibility
@@ -26,57 +26,33 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
+import { 
+  CARD_RESPONSIVE_WIDTHS,
+  CARD_HEIGHTS,
+  CARD_LAYOUT,
+  CARD_CONTROL_RAIL,
+  UI_HEIGHTS,
+  BREAKPOINTS,
+  getResponsiveCardWidth,
+  getResponsiveCardHeights,
+  getControlRailDimensions,
+  getMinRailHeight,
+  getBaseMinCardHeight
+} from '@/lib/utils/ui-constants';
 import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 
-// Responsive control rail width - smaller when collapsed
-const getControlRailWidth = (screenWidth) => screenWidth < 640 ? 32 : 44;
-const getRailBtnSize = (screenWidth) => screenWidth < 640 ? 32 : 36;
-const RAIL_GAP = 8;
-const RAIL_TOP_BOTTOM = 8;
-const RAIL_BUTTON_COUNT = 5;
-
-// Calculate minimum rail height (using desktop size as base)
-const RAIL_MIN_HEIGHT =
-  RAIL_TOP_BOTTOM * 2 +
-  getRailBtnSize(1024) * RAIL_BUTTON_COUNT +
-  RAIL_GAP * (RAIL_BUTTON_COUNT - 1);
-
-// Responsive section heights
-const getHeaderMinHeight = (screenWidth) => screenWidth < 640 ? 36 : 48;
-const getFooterMinHeight = (screenWidth) => screenWidth < 640 ? 40 : 50;
-const CONTENT_VERTICAL_PADDING = 24;
-
-// Base card height - responsive to screen size
-const getBaseMinCardHeight = (screenWidth) => {
-  if (screenWidth < 640) {
-    // Mobile: much smaller minimum height since control rail is collapsed
-    return 120;
-  }
-  return Math.max(
-    CARD_DIMENSIONS?.height ?? 160,
-    RAIL_MIN_HEIGHT + getHeaderMinHeight(screenWidth) + getFooterMinHeight(screenWidth)
-  );
-};
-
-// Responsive card width constants
-const RESPONSIVE_CARD_WIDTHS = {
-  // Mobile: smaller cards for better mobile experience
-  mobile: { min: 220, max: 240 },
-  // Small tablets: slightly larger
-  tablet: { min: 245, max: 265 },
-  // Desktop: current preferred size
-  desktop: { min: 275, max: 275 },
-  // Large screens: can be slightly wider if needed
-  large: { min: 275, max: 300 }
-};
+// Use centralized UI constants - keeping legacy functions for compatibility
+const getControlRailWidth = (screenWidth) => getControlRailDimensions(screenWidth).width;
+const getRailBtnSize = (screenWidth) => getControlRailDimensions(screenWidth).buttonSize;
+const getHeaderMinHeight = (screenWidth) => getResponsiveCardHeights(screenWidth).header;
+const getFooterMinHeight = (screenWidth) => getResponsiveCardHeights(screenWidth).footer;
 
 // Current breakpoint-based widths (will be dynamically set based on screen size)
-const MIN_CARD_CORE_WIDTH = 220; // Smallest allowable
-const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 320, MIN_CARD_CORE_WIDTH);
+const MIN_CARD_WIDTH = Math.max(CARD_DIMENSIONS?.width ?? 320, CARD_LAYOUT.minCoreWidth);
 
 // Default max width (will be overridden by responsive logic)
-const MAX_CARD_WIDTH = 275;
+const MAX_CARD_WIDTH = CARD_LAYOUT.maxWidth;
 
 /** Labels */
 const TYPE_LABEL = {
@@ -104,18 +80,18 @@ const TYPE_LABEL = {
 // Custom hook for responsive card sizing
 function useResponsiveCardWidth() {
   const [screenSize, setScreenSize] = useState('desktop');
-  const [screenWidth, setScreenWidth] = useState(1024);
+  const [screenWidth, setScreenWidth] = useState(BREAKPOINTS.desktop);
   
   useEffect(() => {
     const updateScreenSize = () => {
       const width = window.innerWidth;
       setScreenWidth(width);
       
-      if (width < 640) {
+      if (width < BREAKPOINTS.mobile) {
         setScreenSize('mobile');
-      } else if (width < 1024) {
+      } else if (width < BREAKPOINTS.desktop) {
         setScreenSize('tablet');  
-      } else if (width < 1440) {
+      } else if (width < BREAKPOINTS.large) {
         setScreenSize('desktop');
       } else {
         setScreenSize('large');
@@ -131,7 +107,7 @@ function useResponsiveCardWidth() {
   }, []);
 
   return {
-    ...RESPONSIVE_CARD_WIDTHS[screenSize],
+    ...CARD_RESPONSIVE_WIDTHS[screenSize],
     screenWidth,
     railWidth: getControlRailWidth(screenWidth)
   };
@@ -262,7 +238,7 @@ export function ConversationCard({
     try {
       return new Date(createdTs).toLocaleString(undefined, {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
@@ -322,7 +298,7 @@ export function ConversationCard({
           className="rounded-md border bg-white hover:bg-gray-50 text-gray-700 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700 dark:text-gray-200"
           onClick={() => onDelete?.(card.id)}
         >
-          <CloseIcon className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
+          <CloseIcon className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -333,7 +309,7 @@ export function ConversationCard({
           className="rounded-full bg-green-500 hover:bg-green-600 text-white shadow-sm"
           onClick={() => moveToZone('resolved')}
         >
-          <ThumbsUp className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
+          <ThumbsUp className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -344,7 +320,7 @@ export function ConversationCard({
           className="rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm"
           onClick={() => moveToZone('unresolved')}
         >
-          <ThumbsDown className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
+          <ThumbsDown className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         <Button
@@ -355,7 +331,7 @@ export function ConversationCard({
           className="rounded-full bg-slate-700 hover:bg-slate-800 text-white shadow-sm"
           onClick={() => moveToZone('parking')}
         >
-          <Timer className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
+          <Timer className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
         </Button>
 
         {/* User Assignment Button */}
@@ -373,7 +349,7 @@ export function ConversationCard({
             )}
             onClick={() => setShowAssignmentMenu(!showAssignmentMenu)}
           >
-            <UserPlus className={responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} />
+            <UserPlus className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
           </Button>
           
           {/* Assignment Dropdown */}
@@ -532,11 +508,11 @@ export function ConversationCard({
       {/* Header (drag handle) */}
       <div
         className="flex items-center justify-between pl-2 pr-2 pt-2"
-        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 8), minHeight: getHeaderMinHeight(responsiveWidth.screenWidth) }}
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < BREAKPOINTS.mobile ? 6 : 8), minHeight: getHeaderMinHeight(responsiveWidth.screenWidth) }}
         {...dragHandleProps}
       >
         <div className="flex items-center gap-2">
-          <GripVertical className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
+          <GripVertical className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
           <span className="font-extrabold tracking-wide text-gray-900 dark:text-gray-100 text-sm sm:text-base lg:text-lg">
             {TYPE_LABEL[typeKey] || 'TOPIC'}
           </span>
@@ -548,7 +524,7 @@ export function ConversationCard({
       <div
         className="px-2 sm:px-3 lg:px-4 py-2 sm:py-3 flex-1"
         style={{
-          paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 12),
+          paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < BREAKPOINTS.mobile ? 6 : 12),
           minHeight: CONTENT_MIN_HEIGHT,
         }}
         onDoubleClick={handleEdit}
@@ -593,12 +569,12 @@ export function ConversationCard({
       {/* Footer - Responsive padding */}
       <div
         className="px-2 sm:px-3 pb-2 sm:pb-3 pt-1 text-sm mt-auto"
-        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < 640 ? 6 : 8), minHeight: getFooterMinHeight(responsiveWidth.screenWidth) }}
+        style={{ paddingRight: CONTROL_RAIL_WIDTH + (responsiveWidth.screenWidth < BREAKPOINTS.mobile ? 6 : 8), minHeight: getFooterMinHeight(responsiveWidth.screenWidth) }}
       >
         <div className="flex flex-col items-start gap-1 text-gray-700 dark:text-gray-300">
           <div className="flex items-center gap-2">
-            <Calendar className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
-            <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>{dateText}</span>
+            <Calendar className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
+            <span className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[12px]"}>{dateText}</span>
           </div>
           
           {/* Created by user */}
@@ -610,9 +586,9 @@ export function ConversationCard({
                 size="xs"
               />
             ) : (
-              <User className={`${responsiveWidth.screenWidth < 640 ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
+              <User className={`${responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
             )}
-            <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>
+            <span className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[12px]"}>
               Created by: {createdByUser ? (
                 <span className="font-medium">
                   {createdByUser.name}
@@ -634,7 +610,7 @@ export function ConversationCard({
                 name={assignedToUser.name}
                 size="xs"
               />
-              <span className={responsiveWidth.screenWidth < 640 ? "text-[10px]" : "text-[12px]"}>
+              <span className={responsiveWidth.screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[12px]"}>
                 Assigned to: <span className="font-medium">
                   {assignedToUser.name}
                   {assignedToUser.isSystemUser && <span className="opacity-60"> (System)</span>}

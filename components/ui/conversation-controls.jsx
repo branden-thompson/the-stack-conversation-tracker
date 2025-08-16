@@ -18,6 +18,7 @@ import {
   Square, 
   Clock3
 } from 'lucide-react';
+import { UI_HEIGHTS } from '@/lib/utils/ui-constants';
 
 export function ConversationControls({
   activeConversation = null,
@@ -56,7 +57,7 @@ export function ConversationControls({
             disabled={activeConversation?.status === 'active'}
             size="sm"
             variant="outline"
-            className="h-[40px] leading-none"
+            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
           >
             <Play className="w-3 h-3 mr-1" />
             {activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
@@ -70,7 +71,7 @@ export function ConversationControls({
             disabled={activeConversation?.status !== 'active'}
             size="sm"
             variant="outline"
-            className="h-[40px] leading-none"
+            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
           >
             <PauseIcon className="w-3 h-3 mr-1" />
             Pause
@@ -84,7 +85,7 @@ export function ConversationControls({
             disabled={!activeConversation || activeConversation.status === 'stopped'}
             size="sm"
             variant="outline"
-            className="h-[40px] leading-none"
+            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
           >
             <Square className="w-3 h-3 mr-1" />
             Stop
