@@ -1,36 +1,5 @@
 {
-  "cards": [
-    {
-      "id": "tPVf_GZjaCnDqBVqxJ0b-",
-      "type": "topic",
-      "content": "Arunah's ChildCare",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
-      "assignedToUserId": null,
-      "createdAt": "2025-08-16T00:07:38.092Z",
-      "updatedAt": "2025-08-16T00:09:30.753Z"
-    },
-    {
-      "id": "83uYVgjyk5mz7VIY735EV",
-      "type": "accusation",
-      "content": "Branden has engaged in some level of \"emotional infidelity.\"",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
-      "assignedToUserId": null,
-      "createdAt": "2025-08-16T00:09:34.295Z",
-      "updatedAt": "2025-08-16T00:09:52.313Z"
-    }
-  ],
+  "cards": [],
   "users": [
     {
       "id": "system",

@@ -34,7 +34,7 @@ import { User, Crown, Plus, Edit3, Users, Sun, Moon, Laptop, LogOut } from 'luci
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { PROFILE_PICTURE_SIZES, Z_INDEX } from '@/lib/utils/ui-constants';
+import { PROFILE_PICTURE_SIZES, Z_INDEX_CLASSES } from '@/lib/utils/ui-constants';
 
 export function CompactUserSelector({
   users = [],
@@ -136,7 +136,7 @@ export function CompactUserSelector({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute top-[60px] right-0 z-[${Z_INDEX.dropdown}] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[200px] max-w-[280px]`}>
+        <div className="absolute top-[60px] right-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-[200px] max-w-[280px]">
           <div className="p-1">
             {/* Current user header */}
             {currentUser && (
