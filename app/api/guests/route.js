@@ -12,6 +12,7 @@ import {
   guestCleanup 
 } from '@/lib/auth/guest-session.js';
 import { serverGuestSession } from '@/lib/auth/guest-session-server.js';
+import { avatarPool, getGuestAvatarDataURL } from '@/lib/guest-avatars.js';
 
 // In-memory storage for active guest sessions
 // In production, this would be stored in Redis or a database
@@ -24,6 +25,10 @@ function cleanupExpiredSessions() {
   const now = Date.now();
   for (const [sessionId, sessionData] of activeGuestSessions.entries()) {
     if (now > sessionData.expiresAt) {
+      // Release avatar before deleting session
+      if (sessionData && sessionData.user) {
+        avatarPool.releaseAvatar(sessionData.user.id);
+      }
       activeGuestSessions.delete(sessionId);
     }
   }
@@ -87,6 +92,15 @@ export async function POST(request) {
 
     // Create new guest user
     const guestUser = createGuestUser(allUsers, customName);
+    
+    // Assign an avatar to the guest user
+    const avatar = avatarPool.assignAvatar(guestUser.id);
+    guestUser.profilePicture = avatar.svg ? getGuestAvatarDataURL(guestUser.id) : null;
+    guestUser.avatarConfig = {
+      color: avatar.color,
+      shape: avatar.shape,
+      pattern: avatar.pattern
+    };
     
     // Generate session ID and create session data
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -220,6 +234,11 @@ export async function DELETE(request) {
     }
 
     if (activeGuestSessions.has(sessionId)) {
+      const sessionData = activeGuestSessions.get(sessionId);
+      // Release the avatar back to the pool
+      if (sessionData && sessionData.user) {
+        avatarPool.releaseAvatar(sessionData.user.id);
+      }
       activeGuestSessions.delete(sessionId);
       return NextResponse.json({ success: true });
     }

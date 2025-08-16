@@ -39,6 +39,8 @@ import { PROFILE_PICTURE_SIZES, Z_INDEX_CLASSES } from '@/lib/utils/ui-constants
 export function CompactUserSelector({
   users = [],
   currentUserId,
+  currentUser: currentUserProp, // Accept full currentUser object
+  provisionedGuest, // Accept provisioned guest with avatar
   onUserSelect,
   onCreateUser,
   onEditUser,
@@ -54,10 +56,17 @@ export function CompactUserSelector({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   
-  // Handle both regular users and guest mode
-  const currentUser = currentUserId === 'guest' 
-    ? { id: 'guest', name: 'Guest Mode', isGuest: true }
-    : users.find(user => user.id === currentUserId);
+  // Use provided currentUser if available, otherwise fallback to finding by ID
+  const currentUser = currentUserProp || (
+    currentUserId === 'guest' 
+      ? { id: 'guest', name: 'Guest Mode', isGuest: true }
+      : users.find(user => user.id === currentUserId)
+  );
+  
+  // Log provisioned guest info
+  if (provisionedGuest) {
+    console.log('CompactUserSelector - provisioned guest:', provisionedGuest.name, 'has avatar?', !!provisionedGuest.profilePicture);
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,9 +106,11 @@ export function CompactUserSelector({
     } else {
       // Handle guest mode selection
       if (userId === 'guest') {
-        console.log('Guest mode selected');
+        console.log('Guest mode selected, provisioned guest:', provisionedGuest);
         if (onUserSelect) {
-          onUserSelect({ id: 'guest', name: 'Guest Mode', isGuest: true });
+          // Use provisioned guest if available (has avatar), otherwise fallback
+          const guestUser = provisionedGuest || { id: 'guest', name: 'Guest Mode', isGuest: true };
+          onUserSelect(guestUser);
         }
       } else {
         // Handle regular user selection
@@ -137,9 +148,17 @@ export function CompactUserSelector({
         {currentUser ? (
           <div className="relative w-[46px] h-[46px]">
             {currentUser.isGuest ? (
-              <div className="w-[46px] h-[46px] rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg font-bold">
-                G
-              </div>
+              currentUser.profilePicture ? (
+                <img 
+                  src={currentUser.profilePicture} 
+                  alt={currentUser.name}
+                  className="w-[46px] h-[46px] rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-[46px] h-[46px] rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg font-bold">
+                  G
+                </div>
+              )
             ) : (
               <ProfilePicture
                 src={currentUser.profilePicture}
@@ -286,12 +305,20 @@ export function CompactUserSelector({
               )}
               onClick={() => handleUserSelect('guest')}
             >
-              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold">
-                G
-              </div>
+              {provisionedGuest?.profilePicture ? (
+                <img 
+                  src={provisionedGuest.profilePicture} 
+                  alt="Guest avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold">
+                  G
+                </div>
+              )}
               <div className="flex items-center gap-1.5 flex-1">
                 <span className="font-medium text-orange-600 dark:text-orange-400">
-                  Guest Mode
+                  {provisionedGuest?.name || 'Guest Mode'}
                 </span>
                 <span className="text-xs opacity-60">
                   (Anonymous)

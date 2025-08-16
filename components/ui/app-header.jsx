@@ -71,6 +71,7 @@ export function AppHeader({
   sessionTimeRemaining = 0,
   guestCount = 0,
   updateGuestPreferences,
+  provisionedGuest = null,
   
   // Customization
   title = "The Stack",
@@ -401,6 +402,8 @@ export function AppHeader({
                 <CompactUserSelector
                   users={users}
                   currentUserId={currentUser?.id}
+                  currentUser={currentUser}
+                  provisionedGuest={provisionedGuest}
                   onUserSelect={onUserSelect}
                   onCreateUser={onCreateUser}
                   onEditUser={onEditUser}

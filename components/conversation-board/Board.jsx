@@ -79,6 +79,7 @@ function BoardInner({
   sessionTimeRemaining,
   guestCount,
   updateGuestPreferences,
+  provisionedGuest,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -210,6 +211,7 @@ function BoardInner({
           sessionTimeRemaining={sessionTimeRemaining}
           guestCount={guestCount}
           updateGuestPreferences={updateGuestPreferences}
+          provisionedGuest={provisionedGuest}
         />
 
         {/* Board Canvas */}
@@ -297,6 +299,7 @@ export default function Board() {
     guestUsers,
     sessionTimeRemaining,
     isCurrentUserGuest,
+    provisionedGuest,
   } = useGuestUsers();
 
   const handleUserSelect = (selectedUser) => {
@@ -387,6 +390,7 @@ export default function Board() {
         sessionTimeRemaining={sessionTimeRemaining}
         guestCount={guestUsers?.length || 0}
         updateGuestPreferences={updateGuestPreferences}
+        provisionedGuest={provisionedGuest}
       />
 
       {/* User Profile Dialog */}

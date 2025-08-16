@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Guest Avatar Live</title>
+</head>
+<body>
+  <h1>Testing Guest Avatar Integration</h1>
+  <p>Open browser console and run these commands to test guest avatar:</p>
+  
+  <pre>
+// 1. Check if guest user has avatar when created
+const testGuestCreation = async () => {
+  const response = await fetch('/api/guests', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ 
+      customName: 'Test Monster Guest',
+      sessionFingerprint: 'test_' + Date.now()
+    })
+  });
+  const data = await response.json();
+  console.log('Guest user created:', data);
+  console.log('Has profilePicture?', !!data.user?.profilePicture);
+  if (data.user?.profilePicture) {
+    console.log('Avatar URL:', data.user.profilePicture.substring(0, 100) + '...');
+  }
+  return data;
+};
+
+// 2. Check current guest in localStorage
+const checkStoredGuest = () => {
+  const stored = localStorage.getItem('guest_session');
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    console.log('Stored guest:', parsed);
+    console.log('Has profilePicture?', !!parsed.user?.profilePicture);
+  } else {
+    console.log('No guest session stored');
+  }
+};
+
+// 3. Test switching to guest mode
+const testGuestSwitch = () => {
+  // Find the user selector button
+  const userButton = document.querySelector('[title*="Select user"]');
+  if (userButton) {
+    userButton.click();
+    setTimeout(() => {
+      // Look for Guest Mode option
+      const buttons = Array.from(document.querySelectorAll('button'));
+      const guestButton = buttons.find(btn => btn.textContent.includes('Guest Mode'));
+      if (guestButton) {
+        console.log('Found Guest Mode button, clicking...');
+        guestButton.click();
+        
+        // Check if avatar appears
+        setTimeout(() => {
+          const profileImg = document.querySelector('[alt*="Guest"]');
+          if (profileImg) {
+            console.log('Guest avatar found:', profileImg.src.substring(0, 100) + '...');
+          } else {
+            console.log('No guest avatar image found');
+          }
+        }, 500);
+      }
+    }, 200);
+  }
+};
+
+// Run tests
+console.log('=== Testing Guest Avatar System ===');
+console.log('Run these functions:');
+console.log('1. testGuestCreation() - Creates a new guest with avatar');
+console.log('2. checkStoredGuest() - Checks localStorage for guest data');
+console.log('3. testGuestSwitch() - Switches to guest mode in UI');
+  </pre>
+  
+  <script>
+    // Make functions available globally
+    window.testGuestCreation = async () => {
+      const response = await fetch('/api/guests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          customName: 'Test Monster Guest',
+          sessionFingerprint: 'test_' + Date.now()
+        })
+      });
+      const data = await response.json();
+      console.log('Guest user created:', data);
+      console.log('Has profilePicture?', !!data.user?.profilePicture);
+      if (data.user?.profilePicture) {
+        console.log('Avatar URL:', data.user.profilePicture.substring(0, 100) + '...');
+        // Display the avatar
+        const img = document.createElement('img');
+        img.src = data.user.profilePicture;
+        img.style.width = '100px';
+        img.style.height = '100px';
+        document.body.appendChild(img);
+      }
+      return data;
+    };
+    
+    window.checkStoredGuest = () => {
+      const stored = localStorage.getItem('guest_session');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        console.log('Stored guest:', parsed);
+        console.log('Has profilePicture?', !!parsed.user?.profilePicture);
+        return parsed;
+      } else {
+        console.log('No guest session stored');
+        return null;
+      }
+    };
+  </script>
+</body>
+</html>
