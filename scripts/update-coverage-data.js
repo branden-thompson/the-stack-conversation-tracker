@@ -46,7 +46,7 @@ async function updateCoverageDataFile(testResults, coverage) {
 
   // Add new test history entry with coverage
   const now = new Date().toISOString();
-  const newHistoryEntry = `    { date: '${now}', totalTests: ${testResults.totalTests}, passed: ${testResults.passedTests}, failed: ${testResults.failedTests}, duration: ${parseFloat(testResults.duration)} },`;
+  const newHistoryEntry = `    { date: '${now}', totalTests: ${testResults.totalTests}, passed: ${testResults.passedTests}, failed: ${testResults.failedTests}, duration: ${parseFloat(testResults.duration)}, coverage: { statements: ${coverage.statements.toFixed(1)}, branches: ${coverage.branches.toFixed(1)}, functions: ${coverage.functions.toFixed(1)}, lines: ${coverage.lines.toFixed(1)} } },`;
   
   // Replace summary
   let updatedContent = content.replace(
