@@ -75,9 +75,9 @@ export function BoardCanvas({
         {isMobile ? (
           // Mobile Layout: Single column, scrollable
           <div className="h-full overflow-y-auto">
-            <div className="flex flex-col min-h-full">
+            <div className="flex flex-col h-full">
               {/* Active Conversation - Primary focus on mobile */}
-              <div className="flex-shrink-0 p-2 min-h-[200px]">
+              <div className="flex-1 p-2 min-h-[200px]">
                 <Zone
                   zoneId="active"
                   cards={getCardsByZone().active || []}
@@ -92,7 +92,7 @@ export function BoardCanvas({
               </div>
               
               {/* Parking Lot - Adequate drop space */}
-              <div className="flex-shrink-0 p-2 min-h-[180px]">
+              <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="parking"
                   cards={getCardsByZone().parking || []}
@@ -107,7 +107,7 @@ export function BoardCanvas({
               </div>
               
               {/* Resolved - Adequate drop space */}
-              <div className="flex-shrink-0 p-2 min-h-[180px]">
+              <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="resolved"
                   cards={getCardsByZone().resolved || []}
@@ -122,7 +122,7 @@ export function BoardCanvas({
               </div>
               
               {/* Unresolved - Adequate drop space */}
-              <div className="flex-shrink-0 p-2 min-h-[180px]">
+              <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="unresolved"
                   cards={getCardsByZone().unresolved || []}
