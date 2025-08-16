@@ -299,41 +299,41 @@ export default function TestsDashboardPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className={`text-2xl font-bold ${
-                  testState.coverage.statements.percentage >= 90 ? 'text-green-600' :
-                  testState.coverage.statements.percentage >= 70 ? 'text-yellow-600' :
+                  testState.coverage.statements >= 90 ? 'text-green-600' :
+                  testState.coverage.statements >= 70 ? 'text-yellow-600' :
                   'text-red-600'
                 }`}>
-                  {testState.coverage.statements.percentage.toFixed(1)}%
+                  {testState.coverage.statements.toFixed(1)}%
                 </div>
                 <div className="text-sm text-stone-500 dark:text-stone-400">Statements</div>
               </div>
               <div className="text-center">
                 <div className={`text-2xl font-bold ${
-                  testState.coverage.branches.percentage >= 90 ? 'text-green-600' :
-                  testState.coverage.branches.percentage >= 70 ? 'text-yellow-600' :
+                  testState.coverage.branches >= 90 ? 'text-green-600' :
+                  testState.coverage.branches >= 70 ? 'text-yellow-600' :
                   'text-red-600'
                 }`}>
-                  {testState.coverage.branches.percentage.toFixed(1)}%
+                  {testState.coverage.branches.toFixed(1)}%
                 </div>
                 <div className="text-sm text-stone-500 dark:text-stone-400">Branches</div>
               </div>
               <div className="text-center">
                 <div className={`text-2xl font-bold ${
-                  testState.coverage.functions.percentage >= 90 ? 'text-green-600' :
-                  testState.coverage.functions.percentage >= 70 ? 'text-yellow-600' :
+                  testState.coverage.functions >= 90 ? 'text-green-600' :
+                  testState.coverage.functions >= 70 ? 'text-yellow-600' :
                   'text-red-600'
                 }`}>
-                  {testState.coverage.functions.percentage.toFixed(1)}%
+                  {testState.coverage.functions.toFixed(1)}%
                 </div>
                 <div className="text-sm text-stone-500 dark:text-stone-400">Functions</div>
               </div>
               <div className="text-center">
                 <div className={`text-2xl font-bold ${
-                  testState.coverage.lines.percentage >= 90 ? 'text-green-600' :
-                  testState.coverage.lines.percentage >= 70 ? 'text-yellow-600' :
+                  testState.coverage.lines >= 90 ? 'text-green-600' :
+                  testState.coverage.lines >= 70 ? 'text-yellow-600' :
                   'text-red-600'
                 }`}>
-                  {testState.coverage.lines.percentage.toFixed(1)}%
+                  {testState.coverage.lines.toFixed(1)}%
                 </div>
                 <div className="text-sm text-stone-500 dark:text-stone-400">Lines</div>
               </div>
