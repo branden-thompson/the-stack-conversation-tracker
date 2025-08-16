@@ -42,8 +42,15 @@ export function ConversationControls({
           <div className="font-medium text-gray-900 dark:text-gray-100">
             {activeConversation ? activeConversation.name : 'No active conversation'}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-            {runtime}
+          <div className="flex items-center gap-2">
+            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+              {runtime}
+            </div>
+            {activeConversation && (
+              <div className="text-xs text-green-600 dark:text-green-400">
+                • Tracking
+              </div>
+            )}
           </div>
         </div>
       </div>

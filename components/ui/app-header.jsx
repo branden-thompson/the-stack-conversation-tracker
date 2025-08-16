@@ -315,6 +315,11 @@ export function AppHeader({
                         <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
                           {runtime}
                         </div>
+                        {activeConversation && (
+                          <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            ✓ Events tracking to /dev/convos
+                          </div>
+                        )}
                       </div>
 
                       {/* Control Buttons */}

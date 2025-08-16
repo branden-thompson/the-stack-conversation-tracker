@@ -123,8 +123,12 @@ function BoardInner({
           type: newCard?.type,
           zone: newCard?.zone,
         });
+      } else {
+        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
       }
-    } catch {}
+    } catch (err) {
+      console.error('[Conv Events] Error logging event:', err);
+    }
   }
 
   async function handleDelete(id) {
@@ -133,15 +137,22 @@ function BoardInner({
     try {
       if (conv.activeId) {
         await conv.logEvent(conv.activeId, 'card.deleted', { id, zone: card?.zone });
+      } else {
+        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
       }
-    } catch {}
+    } catch (err) {
+      console.error('[Conv Events] Error logging event:', err);
+    }
   }
 
   const wrappedUpdateCard = async (id, updates) => {
     const before = cards.find(c => c.id === id);
     const updated = await updateCard(id, updates);
     try {
-      if (!conv.activeId) return updated;
+      if (!conv.activeId) {
+        console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
+        return updated;
+      }
 
       // If content changed
       if (updates && Object.prototype.hasOwnProperty.call(updates, 'content')) {
@@ -155,7 +166,9 @@ function BoardInner({
           to: updates.zone,
         });
       }
-    } catch {}
+    } catch (err) {
+      console.error('[Conv Events] Error logging event:', err);
+    }
     return updated;
   };
 
@@ -250,8 +263,12 @@ function BoardInner({
                   type: newCard?.type,
                   zone: newCard?.zone,
                 });
+              } else {
+                console.log('[Conv Events] No active conversation - events not being logged. Start a conversation to track events in /dev/convos.');
               }
-            } catch {}
+            } catch (err) {
+              console.error('[Conv Events] Error logging event:', err);
+            }
           }}
         />
 

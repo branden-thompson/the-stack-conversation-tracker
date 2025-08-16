@@ -70,6 +70,15 @@ export default function DevConvos() {
 
   // MINIMAL HARDENING: always treat items as an array
   const safeItems = Array.isArray(items) ? items : [];
+  
+  // Debug logging
+  console.log('[DevConvos] Conversations loaded:', { 
+    loading, 
+    error, 
+    itemsCount: safeItems.length, 
+    activeId,
+    items: safeItems 
+  });
 
   const [name, setName] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -104,6 +113,14 @@ export default function DevConvos() {
     }
     return () => t && clearInterval(t);
   }, [selected, poll, listEvents]);
+
+  // Auto-refresh conversations list every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refresh();
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [refresh]);
 
   // Filtered + sorted list for the Events table (right panel)
   const filtered = useMemo(() => {
