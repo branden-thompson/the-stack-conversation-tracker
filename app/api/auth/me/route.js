@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie, shouldRefreshSession, createSessionToken, setSessionCookie } from '@/lib/auth/session';
-import { readData } from '@/lib/utils/storage';
+import { getUserById } from '@/lib/db/database';
 
 export async function GET(request) {
   try {

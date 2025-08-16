@@ -54,7 +54,10 @@ export function CompactUserSelector({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   
-  const currentUser = users.find(user => user.id === currentUserId);
+  // Handle both regular users and guest mode
+  const currentUser = currentUserId === 'guest' 
+    ? { id: 'guest', name: 'Guest Mode', isGuest: true }
+    : users.find(user => user.id === currentUserId);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -69,6 +72,10 @@ export function CompactUserSelector({
   }, []);
 
   const handleUserSelect = (userId) => {
+    console.log('=== COMPACT USER SELECTOR ===');
+    console.log('handleUserSelect called with userId:', userId);
+    console.log('Available users:', users.map(u => ({id: u.id, name: u.name, isSystemUser: u.isSystemUser})));
+    
     if (userId.startsWith('action:')) {
       const action = userId.replace('action:', '');
       
@@ -88,9 +95,24 @@ export function CompactUserSelector({
           console.warn('Unknown action:', action);
       }
     } else {
-      const selectedUser = users.find(user => user.id === userId);
-      if (selectedUser && onUserSelect) {
-        onUserSelect(selectedUser);
+      // Handle guest mode selection
+      if (userId === 'guest') {
+        console.log('Guest mode selected');
+        if (onUserSelect) {
+          onUserSelect({ id: 'guest', name: 'Guest Mode', isGuest: true });
+        }
+      } else {
+        // Handle regular user selection
+        const selectedUser = users.find(user => user.id === userId);
+        console.log('Looking for user with ID:', userId);
+        console.log('Found selectedUser:', selectedUser);
+        
+        if (selectedUser && onUserSelect) {
+          console.log('Calling onUserSelect with:', selectedUser);
+          onUserSelect(selectedUser);
+        } else {
+          console.warn('User not found or onUserSelect missing:', {selectedUser, onUserSelect: !!onUserSelect});
+        }
       }
     }
     setIsOpen(false);
@@ -114,12 +136,18 @@ export function CompactUserSelector({
       >
         {currentUser ? (
           <div className="relative w-[46px] h-[46px]">
-            <ProfilePicture
-              src={currentUser.profilePicture}
-              name={currentUser.name}
-              size="46"
-              className="border-0"
-            />
+            {currentUser.isGuest ? (
+              <div className="w-[46px] h-[46px] rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-lg font-bold">
+                G
+              </div>
+            ) : (
+              <ProfilePicture
+                src={currentUser.profilePicture}
+                name={currentUser.name}
+                size="46"
+                className="border-0"
+              />
+            )}
             {/* System user indicator */}
             {currentUser.isSystemUser && (
               <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-white dark:border-gray-800">
@@ -144,6 +172,7 @@ export function CompactUserSelector({
                 <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700">
                   Current: {currentUser.name}
                   {currentUser.isSystemUser && <span className="text-xs opacity-60 ml-1">(System)</span>}
+                  {currentUser.isGuest && <span className="text-xs opacity-60 ml-1">(Guest)</span>}
                 </div>
               </>
             )}
@@ -246,6 +275,29 @@ export function CompactUserSelector({
                 No users available
               </div>
             )}
+
+            {/* Guest Mode Option */}
+            <div className="border-t border-gray-200 dark:border-gray-700 my-1" />
+            <button
+              className={cn(
+                "w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm",
+                "flex items-center gap-2",
+                currentUserId === 'guest' && "bg-orange-50 dark:bg-orange-900/20"
+              )}
+              onClick={() => handleUserSelect('guest')}
+            >
+              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold">
+                G
+              </div>
+              <div className="flex items-center gap-1.5 flex-1">
+                <span className="font-medium text-orange-600 dark:text-orange-400">
+                  Guest Mode
+                </span>
+                <span className="text-xs opacity-60">
+                  (Anonymous)
+                </span>
+              </div>
+            </button>
 
             {/* Management Actions */}
             {showManagementActions && (

@@ -15,7 +15,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { CompactUserSelector } from '@/components/ui/compact-user-selector';
 import { ConversationControls } from '@/components/ui/conversation-controls';
@@ -66,6 +66,12 @@ export function AppHeader({
   onEditUser,
   onManageUsers,
   
+  // Guest mode
+  isGuestMode = false,
+  sessionTimeRemaining = 0,
+  guestCount = 0,
+  updateGuestPreferences,
+  
   // Customization
   title = "The Stack",
   subtitle = "Conversation tracking and facilitation",
@@ -97,10 +103,19 @@ export function AppHeader({
   const iconBtnClass = `h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px] p-0 leading-none`;
   const { theme, setTheme, systemTheme } = useTheme();
   
-  // Prepare theme controls for user selector
+  // Enhanced theme controls that handle both regular users and guests
+  const handleThemeChange = useCallback((newTheme) => {
+    if (isGuestMode && updateGuestPreferences) {
+      // Update guest preferences
+      updateGuestPreferences({ theme: newTheme });
+    }
+    // Always update the global theme
+    setTheme(newTheme);
+  }, [isGuestMode, updateGuestPreferences, setTheme]);
+  
   const themeControls = {
     theme,
-    setTheme,
+    setTheme: handleThemeChange,
     systemTheme,
     currentTheme: theme === 'system' ? systemTheme : theme
   };
@@ -122,9 +137,21 @@ export function AppHeader({
             </Button>
           )}
           <div className="min-w-0 hidden sm:block">
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">
-              {title}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 truncate">
+                {title}
+              </h1>
+              {isGuestMode && (
+                <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded-full">
+                  Guest Mode
+                </span>
+              )}
+              {guestCount > 1 && (
+                <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full">
+                  {guestCount} guests
+                </span>
+              )}
+            </div>
             {subtitle && (
               <p className="text-xs text-gray-600 dark:text-gray-300 hidden sm:block truncate">
                 {subtitle}

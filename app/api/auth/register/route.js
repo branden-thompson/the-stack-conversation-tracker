@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
-import { readData, writeData } from '@/lib/utils/storage';
+import { getAllUsers, createUser } from '@/lib/db/database';
 import { createSessionToken, setSessionCookie } from '@/lib/auth/session';
 import { USER_ROLES } from '@/lib/types/auth';
 

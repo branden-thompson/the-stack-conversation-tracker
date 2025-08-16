@@ -12,7 +12,7 @@ import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
 import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
 import { useCards } from '@/lib/hooks/useCards';
-import { useUsers } from '@/lib/hooks/useUsers';
+import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { CARD_TYPES } from '@/lib/utils/constants';
@@ -74,6 +74,11 @@ function BoardInner({
   onCreateUser,
   onEditUser,
   onManageUsers,
+  // Guest mode props
+  isGuestMode,
+  sessionTimeRemaining,
+  guestCount,
+  updateGuestPreferences,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -200,6 +205,11 @@ function BoardInner({
           onCreateUser={onCreateUser}
           onEditUser={onEditUser}
           onManageUsers={onManageUsers}
+          // Guest mode props
+          isGuestMode={isGuestMode}
+          sessionTimeRemaining={sessionTimeRemaining}
+          guestCount={guestCount}
+          updateGuestPreferences={updateGuestPreferences}
         />
 
         {/* Board Canvas */}
@@ -274,34 +284,66 @@ export default function Board() {
   } = useCards();
 
   const {
-    users,
+    allUsers: users,
     currentUser,
     switchUser,
     createUser,
     updateUser,
     deleteUser,
-  } = useUsers();
+    isGuestMode,
+    updateGuestUserName,
+    updateGuestPreferences,
+    createNewGuestUser,
+    guestUsers,
+    sessionTimeRemaining,
+    isCurrentUserGuest,
+  } = useGuestUsers();
 
   const handleUserSelect = (selectedUser) => {
+    console.log('=== BOARD HANDLEUSERSELECT ===');
+    console.log('selectedUser received:', selectedUser);
+    console.log('Calling switchUser with ID:', selectedUser.id);
     switchUser(selectedUser.id);
   };
 
   const handleCreateUser = (userData) => {
-    // Open dialog in create mode
+    // Guests can't create registered users - offer to create another guest or upgrade
+    if (isCurrentUserGuest) {
+      // For now, just create a new guest user
+      createNewGuestUser();
+      return;
+    }
+    
+    // Open dialog in create mode for registered users
     setEditingUser(null);
     setUserProfileMode('create');
     setUserProfileOpen(true);
   };
 
   const handleEditUser = (user) => {
-    // Open dialog in edit mode
+    // Handle guest user name editing differently
+    if (user?.isGuest && isCurrentUserGuest && user.id === currentUser?.id) {
+      const newName = prompt('Enter new name:', user.name);
+      if (newName && newName.trim()) {
+        updateGuestUserName(newName.trim());
+      }
+      return;
+    }
+    
+    // Open dialog in edit mode for registered users
     setEditingUser(user);
     setUserProfileMode('edit');
     setUserProfileOpen(true);
   };
 
   const handleManageUsers = () => {
-    // For now, open create dialog - later this could be a dedicated management page
+    if (isCurrentUserGuest) {
+      // Show guest-specific options
+      alert('Guest users have limited management capabilities. You can create additional guests or edit your own name.');
+      return;
+    }
+    
+    // For registered users, open create dialog - later this could be a dedicated management page
     handleCreateUser();
   };
 
@@ -340,6 +382,11 @@ export default function Board() {
         onCreateUser={handleCreateUser}
         onEditUser={handleEditUser}
         onManageUsers={handleManageUsers}
+        // Guest mode props
+        isGuestMode={isGuestMode}
+        sessionTimeRemaining={sessionTimeRemaining}
+        guestCount={guestUsers?.length || 0}
+        updateGuestPreferences={updateGuestPreferences}
       />
 
       {/* User Profile Dialog */}

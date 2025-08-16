@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { readData, writeData } from '@/lib/utils/storage';
+import { getAllUsers, updateUser } from '@/lib/db/database';
 import { createSessionToken, setSessionCookie } from '@/lib/auth/session';
 import { USER_ROLES } from '@/lib/types/auth';
 
@@ -23,9 +23,8 @@ export async function POST(request) {
       );
     }
 
-    // Get users from storage
-    const data = await readData();
-    const users = data.users || [];
+    // Get users from database
+    const users = await getAllUsers();
 
     // Find user by email
     const user = users.find(u => u.email === email.toLowerCase());
@@ -64,9 +63,11 @@ export async function POST(request) {
           user.lockedUntil
       };
 
-      // Update user in storage
-      const updatedUsers = users.map(u => u.id === user.id ? updatedUser : u);
-      await writeData({ ...data, users: updatedUsers });
+      // Update user in database
+      await updateUser(user.id, {
+        failedLoginAttempts: updatedUser.failedLoginAttempts,
+        lockedUntil: updatedUser.lockedUntil
+      });
 
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -84,9 +85,12 @@ export async function POST(request) {
       updatedAt: now
     };
 
-    // Update user in storage
-    const updatedUsers = users.map(u => u.id === user.id ? updatedUser : u);
-    await writeData({ ...data, users: updatedUsers });
+    // Update user in database
+    await updateUser(user.id, {
+      lastLoginAt: updatedUser.lastLoginAt,
+      failedLoginAttempts: 0,
+      lockedUntil: null
+    });
 
     // Create session token
     const token = createSessionToken(updatedUser);
