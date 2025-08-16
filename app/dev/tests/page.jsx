@@ -134,13 +134,6 @@ const INITIAL_TEST_STATE = {
                 "failed": 0
         }
 ]
-    },
-    uiRegression: {
-      total: 0,
-      passed: 0,
-      failed: 0,
-      duration: '0.00s',
-      files: []
     }
   },
   coverage: {
