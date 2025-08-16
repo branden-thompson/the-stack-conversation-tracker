@@ -267,7 +267,7 @@ export function ConversationCard({
     getBaseMinCardHeight(responsiveWidth.screenWidth) - 
     getHeaderMinHeight(responsiveWidth.screenWidth) - 
     getFooterMinHeight(responsiveWidth.screenWidth) - 
-    CONTENT_VERTICAL_PADDING
+    CARD_LAYOUT.contentPadding
   );
 
   return (

@@ -22,11 +22,11 @@ export function ProfilePicture({
   const [imageLoading, setImageLoading] = useState(true);
 
   const sizeClasses = {
-    xs: `w-[${PROFILE_PICTURE_SIZES.xs}px] h-[${PROFILE_PICTURE_SIZES.xs}px]`,
-    sm: `w-[${PROFILE_PICTURE_SIZES.sm}px] h-[${PROFILE_PICTURE_SIZES.sm}px]`,
-    md: `w-[${PROFILE_PICTURE_SIZES.md}px] h-[${PROFILE_PICTURE_SIZES.md}px]`,
-    lg: `w-[${PROFILE_PICTURE_SIZES.lg}px] h-[${PROFILE_PICTURE_SIZES.lg}px]`,
-    xl: `w-[${PROFILE_PICTURE_SIZES.xl}px] h-[${PROFILE_PICTURE_SIZES.xl}px]`,
+    xs: 'w-6 h-6',      // 24px - keep original Tailwind classes for reliability
+    sm: 'w-8 h-8',      // 32px
+    md: 'w-10 h-10',    // 40px
+    lg: 'w-12 h-12',    // 48px
+    xl: 'w-16 h-16',    // 64px
     compact: `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px]`,
     large: `w-[${PROFILE_PICTURE_SIZES.large}px] h-[${PROFILE_PICTURE_SIZES.large}px]`,
     // Legacy support
