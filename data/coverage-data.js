@@ -63,7 +63,7 @@ export const FILE_GROUPS = {
 
 // Detailed coverage data
 export const COVERAGE_DATA = {
-                  summary: {
+                    summary: {
     statements: { covered: 170, total: 200, percentage: 85.20 },
     branches: { covered: 107, total: 120, percentage: 89.50 },
     functions: { covered: 55, total: 70, percentage: 78.80 },
@@ -280,6 +280,7 @@ export const COVERAGE_DATA = {
   ],
   // Test history - Auto-updated by post-commit hook
   testHistory: [
+    { date: '2025-08-17T02:57:44.252Z', totalTests: 522, passed: 426, failed: 96, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-17T01:37:27.093Z', totalTests: 454, passed: 362, failed: 92, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-17T00:51:53.090Z', totalTests: 454, passed: 360, failed: 94, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-17T00:19:49.604Z', totalTests: 454, passed: 362, failed: 92, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
@@ -309,7 +310,7 @@ export const COVERAGE_DATA = {
     { date: '2025-08-15T17:27:57.562Z', totalTests: 397, passed: 323, failed: 74, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-15T17:20:38.405Z', totalTests: 397, passed: 328, failed: 69, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
     { date: '2025-08-15T15:50:39.306Z', totalTests: 334, passed: 308, failed: 26, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
-    { date: '2025-08-15T15:40:16.369Z', totalTests: 319, passed: 295, failed: 24, duration: 0, coverage: { statements: 85.2, branches: 89.5, functions: 78.8, lines: 85.2 } },
+
 
 
 
