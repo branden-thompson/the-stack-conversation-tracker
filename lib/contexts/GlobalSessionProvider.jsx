@@ -49,90 +49,40 @@ export function GlobalSessionProvider({ children }) {
     }
     
     if (!user) {
-      console.log('[GlobalSessionProvider] No user provided, creating guest session');
+      console.log('[GlobalSessionProvider] No user provided, using sessionGuestProvisioning for consistency');
       
-      // Use a stable guest ID for this browser (shared across tabs)
-      // Check if we already have guest data stored
-      const GUEST_DATA_KEY = 'provisioned_guest_data';
-      let guestData = null;
+      // Use sessionGuestProvisioning to ensure consistency with profile switcher
+      const { sessionGuestProvisioning } = await import('@/lib/auth/guest-session');
+      const provisionedGuest = await sessionGuestProvisioning.getOrCreateProvisionedGuest();
       
-      if (typeof window !== 'undefined') {
-        const storedData = window.localStorage.getItem(GUEST_DATA_KEY);
-        if (storedData) {
-          try {
-            guestData = JSON.parse(storedData);
-            // Check if the stored guest data is recent (within 24 hours)
-            const GUEST_ID_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
-            const match = guestData.id?.match(/guest_(\d+)/);
-            if (match) {
-              const timestamp = parseInt(match[1]);
-              if (Date.now() - timestamp > GUEST_ID_EXPIRY) {
-                // Guest data is too old, create new
-                guestData = null;
-              }
-            }
-          } catch (e) {
-            console.error('[GlobalSessionProvider] Failed to parse guest data:', e);
-            guestData = null;
-          }
-        }
+      if (!provisionedGuest) {
+        console.error('[GlobalSessionProvider] Failed to get provisioned guest');
+        return;
       }
       
-      let guestId, randomName, randomColor;
-      
-      if (guestData) {
-        // Use existing guest data
-        guestId = guestData.id;
-        randomName = guestData.name;
-        randomColor = guestData.color;
-      } else {
-        // Create new guest data
-        guestId = `guest_${Date.now()}`;
-        
-        // Generate a random guest name
-        const guestNames = [
-          'Curious Cat', 'Happy Hippo', 'Brave Bear', 'Wise Owl',
-          'Swift Fox', 'Gentle Giraffe', 'Clever Crow', 'Dancing Dolphin',
-          'Eager Eagle', 'Friendly Frog', 'Lucky Lion', 'Jolly Jaguar',
-          'Mystic Moose', 'Noble Narwhal', 'Peaceful Panda', 'Quirky Quail',
-        ];
-        randomName = guestNames[Math.floor(Math.random() * guestNames.length)];
-        
-        // Generate a random avatar color
-        const avatarColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA6CA', '#C7ECEE', '#F8B500'];
-        randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-        
-        // Store guest data for consistency
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(GUEST_DATA_KEY, JSON.stringify({
-            id: guestId,
-            name: randomName,
-            color: randomColor,
-          }));
-        }
-      }
+      console.log('[GlobalSessionProvider] Using provisioned guest:', provisionedGuest.name, provisionedGuest.id);
       
       const guestUser = {
-        id: guestId,
-        name: randomName,
+        id: provisionedGuest.id,
+        name: provisionedGuest.name,
         isGuest: true,
-        profilePicture: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${encodeURIComponent(randomColor)}"/><text x="50" y="50" font-family="Arial" font-size="40" fill="white" text-anchor="middle" dominant-baseline="middle">${randomName.charAt(0)}</text></svg>`,
+        profilePicture: provisionedGuest.profilePicture,
       };
       
       // Check for stored session
-      const storedSessionId = getStoredSessionId(guestId);
+      const storedSessionId = getStoredSessionId(guestUser.id);
       
       try {
         const response = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId: guestId,
+            userId: guestUser.id,
             userType: SESSION_USER_TYPES.GUEST,
             sessionId: storedSessionId,
             browser: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
             metadata: {
-              userName: randomName,
+              userName: guestUser.name,
               route: pathname || (typeof window !== 'undefined' ? window.location.pathname : '/'),
               provisioned: true,
               avatar: guestUser.profilePicture,
@@ -144,10 +94,10 @@ export function GlobalSessionProvider({ children }) {
           const session = await response.json();
           console.log('[GlobalSessionProvider] Provisioned guest session:', session.id);
           setCurrentSession(session);
-          storeSessionId(session.id, guestId);
+          storeSessionId(session.id, guestUser.id);
           
           // Also initialize client-side tracker with the API session ID
-          await sessionTracker.startSession(guestId, SESSION_USER_TYPES.GUEST, session.id);
+          await sessionTracker.startSession(guestUser.id, SESSION_USER_TYPES.GUEST, session.id);
         }
       } catch (error) {
         console.error('[GlobalSessionProvider] Failed to create guest session:', error);

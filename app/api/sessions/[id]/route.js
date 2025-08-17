@@ -37,6 +37,9 @@ export async function PATCH(request, { params }) {
     // Always update last activity
     session.lastActivityAt = Date.now();
     
+    // Note: Removed aggressive guest session cleanup
+    // Session state transitions now handled by /api/sessions/transition endpoint
+    
     return NextResponse.json({
       success: true,
       session

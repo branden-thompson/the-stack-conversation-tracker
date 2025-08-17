@@ -45,6 +45,25 @@ node reset-cards-for-ui.js
 
 #### Available Scripts:
 - **reset-cards-for-ui.js** - Resets database cards to a clean state for UI testing
+- **clean-simulated.js** - Cleans up simulated sessions
+- **test-event-store.js** - Tests event store functionality
+
+### 📁 verification/
+Verification scripts for testing component implementations.
+
+**How to run:**
+```bash
+cd dev-scripts/verification
+node verify-chart-features.js
+```
+
+#### Available Scripts:
+- **test-coverage-chart.js** - Tests coverage chart rendering and data
+- **verify-chart-enhancements.js** - Verifies chart enhancement implementations
+- **verify-chart-features.js** - Tests chart feature completeness
+- **verify-compact-coverage.js** - Validates compact coverage display
+- **verify-multi-line-chart.js** - Tests multi-line chart functionality
+- **verify-size-increases.js** - Verifies UI size adjustments
 
 ### 📁 test-pages/
 HTML test pages for visual and interactive testing.
@@ -56,12 +75,18 @@ HTML test pages for visual and interactive testing.
 #### Available Pages:
 - **guest-avatars-test.html** - Visual gallery of generated guest avatars
 - **test-guest-avatar-live.html** - Interactive test page with console commands for guest avatar API
+- **force-clear-guest-data.html** - Emergency tool to clear all guest data from localStorage/sessionStorage
 
 ### 📁 mock-scenarios/
 Mock test data and scenario definitions for testing.
 
 #### Available Files:
 - **user-switching.test.js** - Mock test scenarios for user switching functionality (not an actual test file)
+
+### 📄 Root Files
+
+#### Test Results & Data:
+- **test-results.json** - Latest test execution results from vitest runs
 
 ## Important Notes
 

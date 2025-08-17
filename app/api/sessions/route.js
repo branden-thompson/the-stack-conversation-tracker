@@ -103,24 +103,41 @@ export async function POST(request) {
       }
     }
     
+    console.log('[Sessions API] Found', userSessions.length, 'existing sessions for user:', userId);
+    
     const currentRoute = metadata?.route || '/';
     
-    // For guest sessions, create separate sessions per route to track different tabs
+    // For guest sessions, handle provisioned guests differently than anonymous ones
     if (userType === 'guest') {
-      // Check if we have an active session for this exact route
-      const exactRouteMatch = userSessions.find(({ session }) => 
-        session.currentRoute === currentRoute
-      );
+      // Check if this is a provisioned guest (has persistent name/avatar)
+      const isProvisionedGuest = metadata?.provisioned === true;
       
-      if (exactRouteMatch) {
-        // Only reuse if the route matches exactly and session is recent (< 5 minutes old)
-        const age = Date.now() - exactRouteMatch.session.lastActivityAt;
-        if (age < 5 * 60 * 1000) {
-          // Update the session
-          exactRouteMatch.session.lastActivityAt = Date.now();
-          
-          console.log('[Sessions API] Reusing guest session for same route:', exactRouteMatch.id, currentRoute);
-          return NextResponse.json(exactRouteMatch.session, { status: 200 });
+      if (isProvisionedGuest && userSessions.length > 0) {
+        // For provisioned guests, reuse any active session (same behavior as registered users)
+        const mostRecent = userSessions.sort((a, b) => b.session.lastActivityAt - a.session.lastActivityAt)[0];
+        
+        // Update the session route and activity
+        mostRecent.session.lastActivityAt = Date.now();
+        mostRecent.session.currentRoute = currentRoute;
+        
+        console.log('[Sessions API] Reusing provisioned guest session, updating route:', mostRecent.id, currentRoute);
+        return NextResponse.json(mostRecent.session, { status: 200 });
+      } else if (!isProvisionedGuest) {
+        // For anonymous guests, create separate sessions per route to track different tabs
+        const exactRouteMatch = userSessions.find(({ session }) => 
+          session.currentRoute === currentRoute
+        );
+        
+        if (exactRouteMatch) {
+          // Only reuse if the route matches exactly and session is recent (< 5 minutes old)
+          const age = Date.now() - exactRouteMatch.session.lastActivityAt;
+          if (age < 5 * 60 * 1000) {
+            // Update the session
+            exactRouteMatch.session.lastActivityAt = Date.now();
+            
+            console.log('[Sessions API] Reusing anonymous guest session for same route:', exactRouteMatch.id, currentRoute);
+            return NextResponse.json(exactRouteMatch.session, { status: 200 });
+          }
         }
       }
     } else {
@@ -131,11 +148,31 @@ export async function POST(request) {
         mostRecent.session.lastActivityAt = Date.now();
         mostRecent.session.currentRoute = currentRoute;
         
+        // Also clean up any guest sessions when switching to registered user
+        const allGuestSessions = [];
+        for (const [id, session] of sessionStore.entries()) {
+          if (session.userType === 'guest' && session.status === SESSION_STATUS.ACTIVE) {
+            allGuestSessions.push({ id, session });
+          }
+        }
+        
+        if (allGuestSessions.length > 0) {
+          console.log(`[Sessions API] Switching to registered user, ending ${allGuestSessions.length} guest sessions`);
+          allGuestSessions.forEach(({ session }) => {
+            session.status = SESSION_STATUS.ENDED;
+            session.endedAt = Date.now();
+          });
+        }
+        
         console.log('[Sessions API] Reusing registered user session, updating route:', mostRecent.id, currentRoute);
         return NextResponse.json(mostRecent.session, { status: 200 });
       }
     }
     
+    // Note: Removed aggressive session cleanup logic
+    // Session state transitions now handled by /api/sessions/transition endpoint
+    // This allows for proper inactive state management instead of immediate deletion
+
     // Check if we have too many sessions for this user (max 3 to allow for multiple tabs)
     if (userSessions.length >= 3) {
       // Find and end the oldest session

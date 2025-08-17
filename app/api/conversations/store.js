@@ -1,5 +1,7 @@
 // app/api/conversations/store.js
 
+import { emitConversationToSession } from '@/lib/services/conversation-session-bridge';
+
 // ---- Singleton backing store (survives HMR/dev) ----
 const g = globalThis;
 if (!g.__CONV_STORE__) {
@@ -105,18 +107,53 @@ export function clearEvents(id) {
 }
 
 // ---- Convenience functions for API routes ----
-export function startConversation(name) {
-  return createConversation(name);
+export function startConversation(name, userId = null) {
+  const conv = createConversation(name);
+  
+  // Emit to session tracking
+  emitConversationToSession(conv.id, 'conversation.started', {
+    name: conv.name,
+    startedAt: conv.startedAt,
+  }, userId);
+  
+  return conv;
 }
 
-export function pauseConversation(id) {
-  return patchConversation(id, { status: 'paused' });
+export function pauseConversation(id, userId = null) {
+  const conv = patchConversation(id, { status: 'paused' });
+  
+  if (conv) {
+    // Emit to session tracking
+    emitConversationToSession(id, 'conversation.paused', {
+      pausedAt: conv.pausedAt,
+    }, userId);
+  }
+  
+  return conv;
 }
 
-export function resumeConversation(id) {
-  return patchConversation(id, { status: 'active' });
+export function resumeConversation(id, userId = null) {
+  const conv = patchConversation(id, { status: 'active' });
+  
+  if (conv) {
+    // Emit to session tracking
+    emitConversationToSession(id, 'conversation.resumed', {
+      resumedAt: conv.startedAt,
+    }, userId);
+  }
+  
+  return conv;
 }
 
-export function stopConversation(id) {
-  return patchConversation(id, { status: 'stopped' });
+export function stopConversation(id, userId = null) {
+  const conv = patchConversation(id, { status: 'stopped' });
+  
+  if (conv) {
+    // Emit to session tracking
+    emitConversationToSession(id, 'conversation.stopped', {
+      stoppedAt: conv.stoppedAt,
+    }, userId);
+  }
+  
+  return conv;
 }

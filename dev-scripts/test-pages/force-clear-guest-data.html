@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Guest Data</title>
+</head>
+<body>
+    <h1>Clear Guest Data</h1>
+    <button onclick="clearGuestData()">Clear localStorage Guest Data</button>
+    <div id="output"></div>
+    
+    <script>
+        async function clearGuestData() {
+            const output = document.getElementById('output');
+            
+            output.innerHTML = '<h3>🧹 Clearing all guest data...</h3>';
+            
+            try {
+                // Clear localStorage (now less relevant since we use sessionGuestProvisioning)
+                const localStorageKeys = [
+                    'provisioned_guest_data',
+                    'selectedUserId'
+                ];
+                
+                localStorageKeys.forEach(key => {
+                    localStorage.removeItem(key);
+                });
+                
+                // Clear sessionStorage 
+                const sessionStorageKeys = [
+                    'selectedUserId',
+                    'provisioned_session_guest',
+                    'guest_coordination_session',
+                    'guest_coordination_fingerprint'
+                ];
+                
+                sessionStorageKeys.forEach(key => {
+                    sessionStorage.removeItem(key);
+                });
+                
+                // Clear guest sessions via API
+                const response = await fetch('http://localhost:3000/api/sessions/cleanup', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userType: 'guest'
+                    })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    output.innerHTML += '<p>✅ API cleanup: ' + result.message + '</p>';
+                } else {
+                    output.innerHTML += '<p>⚠️ API cleanup failed: ' + response.status + '</p>';
+                }
+                
+                output.innerHTML += '<h3>✅ All guest data cleared!</h3>';
+                output.innerHTML += '<p>Both the profile switcher and session tracking should now sync properly.</p>';
+                output.innerHTML += '<p><strong>Refreshing your main app automatically in 3 seconds...</strong></p>';
+                
+                // Auto refresh the main app
+                setTimeout(() => {
+                    // Try to refresh the parent window if this is opened in a popup
+                    if (window.opener) {
+                        window.opener.location.reload();
+                        window.close();
+                    } else {
+                        // Provide a button to manually refresh
+                        output.innerHTML += '<p><button onclick="window.close()">Close this window and manually refresh your main app</button></p>';
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                output.innerHTML += '<p>❌ Error: ' + error.message + '</p>';
+            }
+        }
+        
+        // Show current data on load
+        window.onload = function() {
+            const output = document.getElementById('output');
+            
+            const localData = localStorage.getItem('provisioned_guest_data');
+            const sessionData = sessionStorage.getItem('provisioned_session_guest');
+            
+            output.innerHTML = '<h3>Current guest data:</h3>';
+            output.innerHTML += '<h4>localStorage:</h4><pre>' + (localData || 'None') + '</pre>';
+            output.innerHTML += '<h4>sessionStorage:</h4><pre>' + (sessionData || 'None') + '</pre>';
+        };
+    </script>
+</body>
+</html>

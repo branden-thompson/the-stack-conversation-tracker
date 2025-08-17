@@ -183,7 +183,7 @@ export default function UserTrackingPage() {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 ${DEV_LAYOUT.sectionPadding} ${THEME.colors.text.primary} overflow-hidden`}>
+      <div className={`flex-1 ${DEV_LAYOUT.sectionPadding} ${THEME.colors.text.primary}`}>
         <div className="h-full grid grid-cols-12 gap-4">
           {/* Left Column: Sessions (8 cols) */}
           <div className="col-span-8 flex flex-col h-full">
@@ -264,46 +264,114 @@ export default function UserTrackingPage() {
                 />
               )}
 
-              {/* Grouped View */}
-              {viewMode === 'grouped' && (
-                <div className="space-y-4">
-                  {/* Debug info - remove after testing */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="text-xs text-gray-500 mb-2">
-                      Registered sessions: {Object.keys(sessions.grouped).length} users, 
-                      Guest sessions: {sessions.guests.length}
-                    </div>
-                  )}
-                  
-                  {/* Registered Users */}
-                  {Object.entries(sessions.grouped).map(([userId, userSessions]) => {
-                    const user = allUsers.find(u => u.id === userId);
-                    return (
-                      <SessionGroup
-                        key={userId}
-                        userId={userId}
-                        user={user}
-                        sessions={userSessions}
-                        defaultExpanded={userSessions.some(s => s.status === SESSION_STATUS.ACTIVE)}
-                        onRemoveSession={async (sessionId) => {
-                          if (sessionId.startsWith('sim_')) {
-                            await removeSimulatedSessions(sessionId);
+              {/* Grouped View - Enhanced with 3 collapsible groups */}
+              {viewMode === 'grouped' && (() => {
+                // Split guest sessions into active and inactive provisioned guests
+                const activeProvisionedGuests = sessions.guests.filter(session => 
+                  session.userType === 'guest' && 
+                  session.status === SESSION_STATUS.ACTIVE &&
+                  session.metadata?.provisioned === true
+                );
+                
+                const inactiveProvisionedGuests = sessions.guests.filter(session => 
+                  session.userType === 'guest' && 
+                  session.status === SESSION_STATUS.INACTIVE &&
+                  session.metadata?.provisioned === true
+                );
+                
+                // Other guest sessions (non-provisioned)
+                const otherGuestSessions = sessions.guests.filter(session => 
+                  session.metadata?.provisioned !== true
+                );
+                
+                return (
+                  <div className="space-y-4">
+                    {/* Debug info - remove after testing */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="text-xs text-gray-500 mb-2">
+                        Registered: {Object.keys(sessions.grouped).length} users, 
+                        Active Guests: {activeProvisionedGuests.length}, 
+                        Inactive Guests: {inactiveProvisionedGuests.length},
+                        Other Guests: {otherGuestSessions.length}
+                      </div>
+                    )}
+                    
+                    {/* Group 1: Registered Users */}
+                    <SessionGroup
+                      key="registered-users"
+                      groupTitle="Registered Users"
+                      groupCount={Object.keys(sessions.grouped).length}
+                      defaultExpanded={true}
+                      groupIcon={<Users className="w-4 h-4" />}
+                      className="border-blue-200 dark:border-blue-800"
+                    >
+                      {Object.entries(sessions.grouped).map(([userId, userSessions]) => {
+                        const user = allUsers.find(u => u.id === userId);
+                        
+                        // Render each user as a single card (like provisioned guests)
+                        // If multiple sessions, show combined info
+                        const combinedSession = {
+                          id: `combined-${userId}`,
+                          userId: userId,
+                          userName: user?.name || 'Unknown User',
+                          userType: 'registered',
+                          status: userSessions.some(s => s.status === SESSION_STATUS.ACTIVE) ? SESSION_STATUS.ACTIVE : 
+                                 userSessions.some(s => s.status === SESSION_STATUS.INACTIVE) ? SESSION_STATUS.INACTIVE : 'idle',
+                          startedAt: Math.min(...userSessions.map(s => s.startedAt)),
+                          lastActivityAt: Math.max(...userSessions.map(s => s.lastActivityAt)),
+                          browser: userSessions.length === 1 ? 
+                            userSessions[0]?.browser || 'Unknown' : 
+                            `${userSessions[0]?.browser?.split(' ')[0] || 'Unknown'} (${userSessions.length} sessions)`,
+                          currentRoute: userSessions.length === 1 ? userSessions[0].currentRoute : `${userSessions.length} routes`,
+                          eventCount: userSessions.reduce((sum, s) => sum + (s.eventCount || 0), 0),
+                          recentActions: userSessions.flatMap(s => s.recentActions || []).sort((a, b) => b.timestamp - a.timestamp).slice(0, 1),
+                          metadata: {
+                            sessionCount: userSessions.length,
+                            routes: userSessions.map(s => s.currentRoute),
+                            sessions: userSessions, // Store original sessions for detailed display
+                            routeActivities: userSessions.map(s => ({
+                              route: s.currentRoute,
+                              lastActivity: s.lastActivityAt,
+                              eventCount: s.eventCount || 0,
+                              recentAction: s.recentActions?.[0] || null
+                            }))
                           }
-                        }}
-                      />
-                    );
-                  })}
-                  
-                  {/* Guest Sessions */}
-                  {sessions.guests.length > 0 && (
-                    <div className="space-y-2">
-                      <h3 className={cn(
-                        "text-sm font-semibold px-2",
-                        THEME.colors.text.secondary
-                      )}>
-                        Guest Sessions ({sessions.guests.length})
-                      </h3>
-                      {sessions.guests.map(session => (
+                        };
+                        
+                        return (
+                          <SessionCard
+                            key={userId}
+                            session={combinedSession}
+                            user={user}
+                            onRemove={async (sessionId) => {
+                              // Remove all sessions for this user if they're simulated
+                              const simSessions = userSessions.filter(s => s.id.startsWith('sim_'));
+                              for (const session of simSessions) {
+                                await removeSimulatedSessions(session.id);
+                              }
+                            }}
+                            isSimulated={userSessions.some(s => s.metadata?.simulated || s.id.startsWith('sim_'))}
+                            compact={false}
+                          />
+                        );
+                      })}
+                      {Object.keys(sessions.grouped).length === 0 && (
+                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                          No registered user sessions
+                        </div>
+                      )}
+                    </SessionGroup>
+                    
+                    {/* Group 2: Active Provisioned Guests */}
+                    <SessionGroup
+                      key="active-provisioned-guests"
+                      groupTitle="Active Provisioned Guests"
+                      groupCount={activeProvisionedGuests.length}
+                      defaultExpanded={activeProvisionedGuests.length > 0}
+                      groupIcon={<div className="w-3 h-3 bg-green-500 rounded-full" />}
+                      className="border-green-200 dark:border-green-800"
+                    >
+                      {activeProvisionedGuests.map(session => (
                         <SessionCard
                           key={session.id}
                           session={session}
@@ -319,23 +387,89 @@ export default function UserTrackingPage() {
                           isSimulated={session.metadata?.simulated || session.id.startsWith('sim_')}
                         />
                       ))}
-                    </div>
-                  )}
-                  
-                  {/* No Sessions */}
-                  {Object.keys(sessions.grouped).length === 0 && sessions.guests.length === 0 && (
-                    <div className={cn(
-                      "text-center py-12",
-                      THEME.colors.text.tertiary
-                    )}>
-                      <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-lg mb-1">No Active Sessions</p>
-                      <p className="text-sm">User sessions will appear here when users connect</p>
-                      <p className="text-xs mt-4">Use the simulation controls to create test sessions</p>
-                    </div>
-                  )}
-                </div>
-              )}
+                      {activeProvisionedGuests.length === 0 && (
+                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                          No active provisioned guests
+                        </div>
+                      )}
+                    </SessionGroup>
+                    
+                    {/* Group 3: Inactive Provisioned Guests */}
+                    <SessionGroup
+                      key="inactive-provisioned-guests"
+                      groupTitle="Inactive Provisioned Guests"
+                      groupCount={inactiveProvisionedGuests.length}
+                      defaultExpanded={false}
+                      groupIcon={<div className="w-3 h-3 bg-yellow-500 rounded-full" />}
+                      className="border-yellow-200 dark:border-yellow-800"
+                    >
+                      {inactiveProvisionedGuests.map(session => (
+                        <SessionCard
+                          key={session.id}
+                          session={session}
+                          user={{ 
+                            id: session.userId, 
+                            name: session.userName || 'Guest',
+                            profilePicture: session.metadata?.avatar,
+                          }}
+                          onRemove={session.id.startsWith('sim_') ? 
+                            () => removeSimulatedSessions(session.id) : 
+                            undefined
+                          }
+                          isSimulated={session.metadata?.simulated || session.id.startsWith('sim_')}
+                        />
+                      ))}
+                      {inactiveProvisionedGuests.length === 0 && (
+                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                          No inactive provisioned guests
+                        </div>
+                      )}
+                    </SessionGroup>
+                    
+                    {/* Other Guest Sessions (if any) - for backward compatibility */}
+                    {otherGuestSessions.length > 0 && (
+                      <SessionGroup
+                        key="other-guest-sessions"
+                        groupTitle="Other Guest Sessions"
+                        groupCount={otherGuestSessions.length}
+                        defaultExpanded={false}
+                        groupIcon={<div className="w-3 h-3 bg-gray-500 rounded-full" />}
+                        className="border-gray-200 dark:border-gray-800"
+                      >
+                        {otherGuestSessions.map(session => (
+                          <SessionCard
+                            key={session.id}
+                            session={session}
+                            user={{ 
+                              id: session.userId, 
+                              name: session.userName || 'Guest',
+                              profilePicture: session.metadata?.avatar,
+                            }}
+                            onRemove={session.id.startsWith('sim_') ? 
+                              () => removeSimulatedSessions(session.id) : 
+                              undefined
+                            }
+                            isSimulated={session.metadata?.simulated || session.id.startsWith('sim_')}
+                          />
+                        ))}
+                      </SessionGroup>
+                    )}
+                    
+                    {/* No Sessions */}
+                    {Object.keys(sessions.grouped).length === 0 && sessions.guests.length === 0 && (
+                      <div className={cn(
+                        "text-center py-12",
+                        THEME.colors.text.tertiary
+                      )}>
+                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p className="text-lg mb-1">No Active Sessions</p>
+                        <p className="text-sm">User sessions will appear here when users connect</p>
+                        <p className="text-xs mt-4">Use the simulation controls to create test sessions</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* List View */}
               {viewMode === 'list' && (
@@ -386,7 +520,7 @@ export default function UserTrackingPage() {
             {/* Recent Activity (if not in timeline view) */}
             {viewMode !== 'timeline' && (
               <div className={cn(
-                "flex-1 rounded-lg border overflow-hidden",
+                "flex-1 rounded-lg border",
                 THEME.colors.background.secondary,
                 THEME.colors.border.primary
               )}>

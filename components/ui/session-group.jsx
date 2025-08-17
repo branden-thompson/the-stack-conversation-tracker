@@ -21,11 +21,29 @@ export function SessionGroup({
   defaultExpanded = false,
   onRemoveSession,
   className,
+  // New props for generic grouping
+  groupTitle,
+  groupCount,
+  groupIcon,
+  nested = false,
+  children, // For nested content instead of sessions
 }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
+  // Determine if this is a generic group or user session group
+  const isGenericGroup = !!groupTitle;
+
   // Calculate group statistics
   const stats = useMemo(() => {
+    if (isGenericGroup) {
+      return {
+        total: groupCount || 0,
+        active: 0,
+        inactive: 0,
+        idle: 0,
+      };
+    }
+
     const result = {
       total: sessions.length,
       active: 0,
@@ -40,7 +58,7 @@ export function SessionGroup({
     });
 
     return result;
-  }, [sessions]);
+  }, [sessions, isGenericGroup, groupCount]);
 
   // Determine overall group status
   const groupStatus = useMemo(() => {
@@ -51,12 +69,13 @@ export function SessionGroup({
 
   const statusColors = SESSION_STATUS_COLORS[groupStatus];
 
-  if (sessions.length === 0) {
+  // For user session groups, if no sessions, return null
+  if (!isGenericGroup && sessions.length === 0) {
     return null;
   }
 
-  // If only one session, show it directly without grouping
-  if (sessions.length === 1) {
+  // For user session groups, if only one session and not nested, show it directly without grouping
+  if (!isGenericGroup && !nested && sessions.length === 1) {
     return (
       <SessionCard
         session={sessions[0]}
@@ -69,59 +88,71 @@ export function SessionGroup({
   }
 
   return (
-    <div className={cn("space-y-2", className)}>
+    <div className={cn(
+      "rounded-xl border shadow-sm",
+      THEME.colors.background.secondary,
+      THEME.colors.border.primary,
+      className
+    )}>
       {/* Group Header */}
-      <div 
-        className={cn(
-          "rounded-lg border p-3",
-          statusColors.bg,
-          statusColors.border,
-          THEME.colors.background.secondary
-        )}
-      >
+      <div className="p-6">
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             size="sm"
-            className="p-0 h-auto hover:bg-transparent"
+            className={cn("p-0 h-auto", THEME.colors.background.hoverStrong)}
             onClick={() => setIsExpanded(!isExpanded)}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {isExpanded ? (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className={cn("w-5 h-5", THEME.colors.text.secondary)} />
               ) : (
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className={cn("w-5 h-5", THEME.colors.text.secondary)} />
               )}
               
-              {/* User Info */}
-              <div className="flex items-center gap-2">
-                {user && (
-                  <ProfilePicture
-                    src={user.profilePicture}
-                    name={user.name}
-                    size="md"
-                  />
-                )}
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn("font-semibold", THEME.colors.text.primary)}>
+              {isGenericGroup ? (
+                /* Generic Group Header */
+                <div className="flex items-center gap-3">
+                  <div className="scale-125">{groupIcon}</div>
+                  <span className={cn("text-lg font-semibold", THEME.colors.text.primary)}>
+                    {groupTitle}
+                  </span>
+                </div>
+              ) : (
+                /* User Session Group Header */
+                <div className="flex items-center gap-3">
+                  {user && (
+                    <ProfilePicture
+                      src={user.profilePicture}
+                      name={user.name}
+                      size="md"
+                    />
+                  )}
+                  <div>
+                    <span className={cn("text-lg font-semibold", THEME.colors.text.primary)}>
                       {user?.name || 'Unknown User'}
                     </span>
-                    <span className={cn(
-                      "text-xs px-1.5 py-0.5 rounded",
-                      "bg-blue-100 dark:bg-blue-900/30",
-                      "text-blue-700 dark:text-blue-300"
-                    )}>
-                      {stats.total} sessions
-                    </span>
-                  </div>
-                  <div className={cn("text-xs", THEME.colors.text.tertiary)}>
-                    {user?.email || `User ID: ${userId}`}
+                    {user?.email && (
+                      <div className={cn("text-sm", THEME.colors.text.tertiary)}>
+                        {user.email}
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </Button>
+
+          {/* Count - Far Right with Proper Padding */}
+          <div className="flex-1 flex justify-end pr-2">
+            <div className={cn(
+              "text-lg font-semibold px-3 py-1 rounded-lg",
+              THEME.colors.background.tertiary,
+              THEME.colors.text.secondary
+            )}>
+              {isGenericGroup ? stats.total : `${stats.total} sessions`}
+            </div>
+          </div>
 
           {/* Status Summary */}
           <div className="flex items-center gap-3">
@@ -152,8 +183,8 @@ export function SessionGroup({
           </div>
         </div>
 
-        {/* Quick Session Preview (when collapsed) */}
-        {!isExpanded && sessions.length > 0 && (
+        {/* Quick Session Preview (when collapsed) - Only for user session groups */}
+        {!isExpanded && !isGenericGroup && sessions.length > 0 && (
           <div className={cn("mt-2 pt-2 border-t", THEME.colors.border.primary)}>
             <div className="flex flex-wrap gap-2">
               {sessions.slice(0, 3).map(session => (
@@ -190,38 +221,29 @@ export function SessionGroup({
         )}
       </div>
 
-      {/* Expanded Sessions */}
+      {/* Expanded Content - Within the group border */}
       {isExpanded && (
-        <div className="pl-6 space-y-2">
-          {sessions.map((session, index) => (
-            <div key={session.id} className="relative">
-              {/* Connection line */}
-              {index < sessions.length - 1 && (
-                <div 
-                  className={cn(
-                    "absolute left-[-14px] top-8 bottom-[-8px] w-0.5",
-                    "bg-gray-300 dark:bg-gray-600"
-                  )}
-                />
+        <div className="px-6 pb-6">
+          <div className={cn("border-t pt-4", THEME.colors.border.primary)}>
+            <div className="space-y-3">
+              {isGenericGroup ? (
+                /* Generic Group Content - Render children */
+                children
+              ) : (
+                /* User Session Group Content - Render sessions */
+                sessions.map((session, index) => (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    user={user}
+                    onRemove={onRemoveSession}
+                    isSimulated={session.metadata?.simulated}
+                    compact
+                  />
+                ))
               )}
-              
-              {/* Connection dot */}
-              <div 
-                className={cn(
-                  "absolute left-[-16px] top-8 w-1 h-1 rounded-full",
-                  "bg-gray-400 dark:bg-gray-500"
-                )}
-              />
-              
-              <SessionCard
-                session={session}
-                user={user}
-                onRemove={onRemoveSession}
-                isSimulated={session.metadata?.simulated}
-                compact
-              />
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>
