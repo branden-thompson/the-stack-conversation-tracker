@@ -173,7 +173,7 @@ export function AppHeader({
           {showAppActions && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px ${APP_THEME.colors.border.primary} ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
 
               {/* App controls */}
               <div className="flex items-center gap-2">
@@ -279,7 +279,7 @@ export function AppHeader({
           {showConversationControls && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px ${APP_THEME.colors.border.primary} ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
 
               {/* Mobile/Tablet: Compact Conversation Menu */}
               <div className="relative xl:hidden" ref={conversationOverflowRef}>
@@ -405,7 +405,7 @@ export function AppHeader({
           {showUserContext && users.length > 0 && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px ${APP_THEME.colors.border.primary} ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
 
               {/* Compact User Selector - Fixed width, never shrinks */}
               <div className="flex-shrink-0 w-[50px]">

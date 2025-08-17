@@ -24,7 +24,7 @@ import {
   Zap,
   BarChart3,
 } from 'lucide-react';
-import { THEME, DEV_LAYOUT } from '@/lib/utils/ui-constants';
+import { THEME, DEV_LAYOUT, UI_HEIGHTS } from '@/lib/utils/ui-constants';
 import { SESSION_STATUS } from '@/lib/utils/session-constants';
 import { cn } from '@/lib/utils';
 
@@ -118,14 +118,40 @@ export default function UserTrackingPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Right controls for header
+  // Right controls for header - split into two groups
   const rightControls = (
     <>
+      {/* Action Buttons Group */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          onClick={refresh}
+          className={`h-[${UI_HEIGHTS.toolbar}px] leading-none`}
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
+        
+        <Button
+          variant="outline"
+          onClick={handleExport}
+          className={`h-[${UI_HEIGHTS.toolbar}px] leading-none`}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export
+        </Button>
+      </div>
+      
+      {/* Divider */}
+      <span className="h-6 w-px bg-zinc-300 dark:bg-zinc-600 mx-3" />
+      
+      {/* User Tracking Stats Group */}
       <div className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm",
+        "flex items-center gap-2 px-3 rounded-md text-sm",
         THEME.colors.background.tertiary,
         THEME.colors.border.primary,
-        "border"
+        "border",
+        `h-[${UI_HEIGHTS.toolbar}px]`
       )}>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -142,24 +168,6 @@ export default function UserTrackingPage() {
           <span>{stats.idle} idle</span>
         </div>
       </div>
-      
-      <Button
-        variant="outline"
-        onClick={refresh}
-        className="h-[40px] leading-none"
-      >
-        <RefreshCw className="w-4 h-4 mr-2" />
-        Refresh
-      </Button>
-      
-      <Button
-        variant="outline"
-        onClick={handleExport}
-        className="h-[40px] leading-none"
-      >
-        <Download className="w-4 h-4 mr-2" />
-        Export
-      </Button>
     </>
   );
 
