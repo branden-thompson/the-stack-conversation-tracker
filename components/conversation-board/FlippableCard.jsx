@@ -11,6 +11,7 @@ import { CardFace } from './CardFace';
 import { CardBack } from './CardBack';
 import { ANIMATION } from '@/lib/utils/ui-constants';
 import { useConversations } from '@/lib/hooks/useConversations';
+import { useGlobalSession } from '@/lib/contexts/GlobalSessionProvider';
 import { cn } from '@/lib/utils';
 
 export function FlippableCard({
@@ -46,6 +47,7 @@ export function FlippableCard({
   const [isFlipped, setIsFlipped] = useState(!card.faceUp);
   const [isAnimating, setIsAnimating] = useState(false);
   const { activeId: conversationId } = useConversations();
+  const { emitCardEvent } = useGlobalSession();
   
   // Sync with card's faceUp state
   useEffect(() => {
@@ -82,6 +84,15 @@ export function FlippableCard({
         // Revert the flip on error
         setIsFlipped(isFlipped);
       } else {
+        // Emit session tracking event
+        emitCardEvent('flipped', {
+          cardId: card.id,
+          flippedBy: source,
+          zone: card.zone,
+          from: isFlipped ? 'faceDown' : 'faceUp',
+          flippedTo: isFlipped ? 'faceUp' : 'faceDown',
+        });
+        
         // Call the callback if provided
         if (onFlipCallback) {
           const result = await response.json();

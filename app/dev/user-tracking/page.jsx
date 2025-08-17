@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useUserTracking } from '@/lib/hooks/useUserTracking';
 import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
+import { useButtonTracking } from '@/lib/hooks/useButtonTracking';
 import { DevHeader } from '@/components/ui/dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { SessionCard } from '@/components/ui/session-card';
@@ -31,6 +32,9 @@ export default function UserTrackingPage() {
   const [trayOpen, setTrayOpen] = useState(false);
   const [autoActivity, setAutoActivity] = useState(true);
   const [viewMode, setViewMode] = useState('grouped'); // 'grouped' | 'list' | 'timeline'
+  
+  // Enable global button tracking
+  useButtonTracking();
   
   // Handle auto-activity toggle
   const handleToggleAutoActivity = async (enabled) => {
@@ -263,6 +267,14 @@ export default function UserTrackingPage() {
               {/* Grouped View */}
               {viewMode === 'grouped' && (
                 <div className="space-y-4">
+                  {/* Debug info - remove after testing */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="text-xs text-gray-500 mb-2">
+                      Registered sessions: {Object.keys(sessions.grouped).length} users, 
+                      Guest sessions: {sessions.guests.length}
+                    </div>
+                  )}
+                  
                   {/* Registered Users */}
                   {Object.entries(sessions.grouped).map(([userId, userSessions]) => {
                     const user = allUsers.find(u => u.id === userId);

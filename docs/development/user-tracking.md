@@ -42,11 +42,97 @@ if (totalUserSessions >= 2) {
 }
 ```
 
+## Event Types and Tracking Implementation
+
+### Tracked Event Categories
+
+The system tracks events across six main categories:
+
+1. **Navigation Events** (`navigation`)
+   - `page_view`: Initial page load
+   - `route_change`: Client-side navigation
+
+2. **Board Events** (`board`)
+   - `card_created`: New card added
+   - `card_updated`: Card content modified
+   - `card_deleted`: Card removed
+   - `card_moved`: Card zone changed
+   - `card_flipped`: Card face toggled
+
+3. **UI Events** (`ui`)
+   - `button_clicked`: Any button interaction
+   - `dialog_opened`: Modal/dialog shown
+   - `dialog_closed`: Modal/dialog hidden
+   - `tray_opened`: Side panel opened
+   - `tray_closed`: Side panel closed
+
+4. **Test Events** (`tests`)
+   - `test_run`: Test suite executed
+   - `test_view`: Test results viewed
+   - `coverage_view`: Coverage report viewed
+
+5. **Session Events** (`session`)
+   - `session_start`: User session begins
+   - `session_end`: User session ends
+   - `user_idle`: User inactive for 5 minutes
+   - `user_active`: User returns from idle
+   - `user_switched`: Different user selected
+
+6. **Settings Events** (`settings`)
+   - `theme_changed`: Light/dark mode toggle
+   - `animation_toggled`: Animations enabled/disabled
+   - `preference_updated`: Other preferences changed
+
+### Event Emission Points
+
+Events are emitted from various components:
+
+```javascript
+// Board.jsx - Card operations
+emitCardEvent('moved', {
+  cardId: id,
+  from: before.zone,
+  to: updates.zone,
+});
+
+// FlippableCard.jsx - Flip tracking
+emitCardEvent('flipped', {
+  cardId: card.id,
+  flippedBy: source,
+  zone: card.zone,
+  from: isFlipped ? 'faceDown' : 'faceUp',
+  flippedTo: isFlipped ? 'faceUp' : 'faceDown',
+});
+
+// Global button tracking via useButtonTracking hook
+emitUIEvent('buttonClick', {
+  label: buttonText,
+  variant: buttonVariant,
+  hasIcon: hasIcon
+});
+```
+
+### Event Flow Pipeline
+
+1. **Component Action** → Triggers event emission
+2. **GlobalSessionProvider** → Maps event type to constant
+3. **SessionTracker** → Batches events (10 events or 500ms)
+4. **API Endpoint** → `/api/sessions/events` receives batch
+5. **Event Store** → In-memory storage with TTL
+6. **User Tracking UI** → Polls and displays events
+
 ## Architecture
 
 ### Core Components with Implementation Details
 
 ```
+┌─────────────────────────────────────────────────┐
+│              SessionManager Service              │
+│  - Singleton pattern using global variables     │
+│  - Ensures session stores shared across routes  │
+│  - Manages cleanup intervals                    │
+└─────────────────────────────────────────────────┘
+                          ↓
 ┌─────────────────────────────────────────────────┐
 │              GlobalSessionProvider               │
 │  - Wraps entire app in providers.jsx            │
@@ -192,6 +278,44 @@ curl -X POST http://localhost:3000/api/sessions/simulate \
 ```
 
 ## Implementation Details
+
+### SessionManager Singleton Pattern
+
+The SessionManager (`/lib/services/session-manager.js`) ensures all API routes share the same session stores:
+
+```javascript
+class SessionManager {
+  constructor() {
+    // Use global variables to ensure singleton across API routes
+    if (!global.sessionStore) {
+      global.sessionStore = new Map();
+      global.eventStore = new Map();
+      global.simulatedSessions = new Map();
+      this.startCleanup();
+    }
+  }
+  
+  get sessionStore() {
+    return global.sessionStore;
+  }
+}
+
+// Export singleton instance
+const sessionManager = new SessionManager();
+export default sessionManager;
+```
+
+**Why This Pattern?**
+- Next.js API routes can be loaded in different module contexts
+- Regular module exports don't guarantee singleton behavior
+- Global variables persist across all API route invocations
+- Prevents session store fragmentation between routes
+
+**Usage in API Routes**:
+```javascript
+import sessionManager from '@/lib/services/session-manager';
+const { sessionStore, eventStore } = sessionManager;
+```
 
 ### Session Initialization Flow
 
@@ -502,12 +626,101 @@ curl -s http://localhost:3000/api/sessions/simulate | jq '.total'
 - Intervals continue firing even after their parent objects are deleted
 - Only process restart truly clears all intervals
 
+## Key Files and Components
+
+### Core Implementation Files
+
+1. **Session Management**
+   - `/lib/services/session-manager.js` - Singleton session store manager
+   - `/lib/contexts/GlobalSessionProvider.jsx` - Main session context
+   - `/lib/services/session-tracker.js` - Client-side tracking service
+   - `/lib/utils/session-storage.js` - localStorage persistence
+   - `/lib/utils/session-constants.js` - Event types and labels
+
+2. **Event Tracking Hooks**
+   - `/lib/hooks/useSessionEmitter.js` - Event emission logic
+   - `/lib/hooks/useButtonTracking.js` - Global button click tracking
+   - `/lib/hooks/useUserTracking.js` - Subscribe to session updates
+
+3. **API Endpoints**
+   - `/app/api/sessions/route.js` - Session CRUD with reuse logic
+   - `/app/api/sessions/events/route.js` - Event ingestion
+   - `/app/api/sessions/simulate/route.js` - Test session generation
+   - `/app/api/sessions/cleanup/route.js` - Manual cleanup
+
+4. **UI Components**
+   - `/app/dev/user-tracking/page.jsx` - Main tracking dashboard
+   - `/components/ui/activity-timeline.jsx` - Event timeline display
+   - `/components/ui/session-card.jsx` - Session status cards
+   - `/components/conversation-board/FlippableCard.jsx` - Card flip tracking
+
+5. **Integration Points**
+   - `/components/conversation-board/Board.jsx` - Card event emissions
+   - `/app/providers.jsx` - GlobalSessionProvider wrapper
+
 ## Related Documentation
 
 - [UI Constants](./ui-constants.md) - Theme and styling system
 - [Card Type Constants](./card-type-constants.md) - Card system constants
 - [Database Schema](./database.md) - Data persistence layer
 - [Testing Guide](./testing.md) - Test writing and running
+
+## Common Issues and Solutions
+
+### Issue: Events Not Appearing in Timeline
+
+**Symptoms**: 
+- Only seeing session start/end events
+- Card/UI events missing from timeline
+
+**Diagnosis**:
+```bash
+# Check if events are being received
+curl -s "http://localhost:3000/api/sessions/events?limit=20" | jq '[.events[].type] | unique'
+
+# Should see various types like:
+# ["button_clicked", "card_moved", "session_start", "user_active"]
+```
+
+**Solutions**:
+1. Verify sessionTracker is initialized:
+   - Check console for `[SessionTracker] Starting session for:` message
+   - Ensure GlobalSessionProvider wraps the app
+
+2. Check event emission:
+   - Look for console warnings: `[SessionTracker] No current session, cannot emit event`
+   - Verify user context is available before emitting
+
+3. Verify event batching is working:
+   - Events are sent in batches (10 events or 500ms timeout)
+   - Check Network tab for POST to `/api/sessions/events`
+
+### Issue: Event Labels Show Raw Type Strings
+
+**Symptoms**:
+- Seeing "card_moved" instead of "Moved Card"
+- Event types not human-readable
+
+**Solution**:
+Ensure `SESSION_EVENT_LABELS` uses string keys:
+```javascript
+// ✅ Correct
+'card_moved': 'Moved Card'
+
+// ❌ Wrong
+[SESSION_EVENT_TYPES.CARD_MOVED]: 'Moved Card'
+```
+
+### Issue: Button Clicks Not Tracked
+
+**Symptoms**:
+- No `button_clicked` events in timeline
+- UI interactions not captured
+
+**Solution**:
+1. Ensure `useButtonTracking` hook is imported and called in main components
+2. Check that buttons are actual `<button>` elements (not divs with onClick)
+3. Verify GlobalSessionProvider is initialized before button clicks
 
 ## Quick Troubleshooting Checklist
 
@@ -562,6 +775,54 @@ When user tracking issues occur, follow this checklist in order:
 - Reuse sessions within 30-minute window
 - Limit to 2 concurrent sessions per user
 
+### Provisioned Guest Session Duplication
+**Problem**: Each page refresh created a new provisioned guest session instead of reusing the existing one.
+
+**Root Cause**:
+- Guest ID was generated using `Date.now()` on every initialization
+- No persistence mechanism for guest IDs across refreshes
+- Auto-initialization in GlobalSessionProvider created new guest on every mount
+
+**Solution**:
+1. Store provisioned guest ID in sessionStorage:
+```javascript
+const GUEST_ID_KEY = 'provisioned_guest_id';
+let guestId = window.sessionStorage.getItem(GUEST_ID_KEY);
+if (!guestId) {
+  guestId = `guest_${Date.now()}`;
+  window.sessionStorage.setItem(GUEST_ID_KEY, guestId);
+}
+```
+2. Modified auto-initialization to only run once per page load
+3. Added logic to upgrade from guest to registered user sessions
+
+### Registered User Sessions Not Showing
+**Problem**: Registered user sessions (like Branden) weren't appearing in the active sessions table.
+
+**Root Cause**:
+- GlobalSessionProvider was auto-creating a guest session on mount
+- When Board component later called `initializeSession(currentUser)`, it was skipped because a session already existed
+- The provisioned guest session wasn't being upgraded to a registered user session
+- An `isInitialized` flag was preventing session upgrades
+
+**Solution**:
+1. Removed the `isInitialized` flag that was blocking session upgrades
+2. Updated session initialization to handle all user switching scenarios:
+```javascript
+// Handle user switching scenarios:
+// 1. Provisioned guest → Registered user
+// 2. Registered user → Different registered user
+// 3. Registered user → Guest (including provisioned)
+// 4. Guest → Different guest
+
+if (currentSession?.userId === user?.id && currentSession?.userType === (user?.isGuest ? 'guest' : 'registered')) {
+  // Skip if already have session for exact same user
+  return;
+}
+```
+3. For registered users, reuse any active session but update the route
+4. For guest users, create separate sessions per route for multi-tab support
+
 ### Phantom Events Challenge
 **Problem**: Simulated events continued appearing even after deleting all simulated users.
 
@@ -576,23 +837,245 @@ When user tracking issues occur, follow this checklist in order:
 - Server restart as nuclear option
 - Added pause/resume functionality for better control
 
+### Event Tracking Initialization Issue
+**Problem**: Card events weren't being tracked in the session timeline, only session start/end events appeared.
+
+**Root Cause**:
+- The client-side `sessionTracker` wasn't initialized for reused sessions
+- Only new sessions triggered `sessionTracker.startSession()`
+- Without an active session in sessionTracker, events couldn't be emitted
+
+**Solution**:
+```javascript
+// Always initialize client-side tracker for all sessions
+await sessionTracker.startSession(user.id, userType);
+```
+- Modified to check if session already exists for same user
+- Prevents duplicate session creation while ensuring tracker is active
+
+### Event Label and Category Mapping Issue
+**Problem**: Events showed raw type strings like "card_moved" instead of readable labels like "Moved Card".
+
+**Root Cause**:
+- Event labels were keyed by constant references: `[SESSION_EVENT_TYPES.CARD_MOVED]: 'Moved Card'`
+- But lookups used string values: `SESSION_EVENT_LABELS[event.type]` where `event.type = 'card_moved'`
+- JavaScript object keys using computed properties evaluate to their values
+
+**Solution**:
+```javascript
+// Changed from constant references to string literals
+export const SESSION_EVENT_LABELS = {
+  'card_moved': 'Moved Card',
+  'card_created': 'Created Card',
+  'button_clicked': 'Clicked Button',
+  // ... etc
+};
+```
+
+### Card Flip Event Tracking
+**Problem**: Card flip events weren't being tracked in the session timeline.
+
+**Solution**:
+1. Added `useGlobalSession` hook to FlippableCard component
+2. Emit event after successful flip:
+```javascript
+emitCardEvent('flipped', {
+  cardId: card.id,
+  flippedBy: source,
+  zone: card.zone,
+  from: isFlipped ? 'faceDown' : 'faceUp',
+  flippedTo: isFlipped ? 'faceUp' : 'faceDown',
+});
+```
+
+### Global Button Click Tracking
+**Problem**: Button clicks throughout the app weren't being tracked.
+
+**Solution**: Created a global button tracking system using event delegation:
+
+1. Created `useButtonTracking` hook that listens to all clicks
+2. Uses event delegation to catch all button clicks at document level
+3. Automatically extracts button metadata:
+   - Label from aria-label, title, or text content
+   - Variant from className analysis
+   - Icon presence detection
+4. Added to main components (Board, UserTracking page)
+
+**Benefits**:
+- No need to modify individual buttons
+- Works automatically for all current and future buttons
+- Captures rich metadata for analytics
+
+### Event Count Not Incrementing
+**Problem**: Session event counts remained at 0 even though events were being tracked.
+
+**Root Cause**:
+- The client-side `sessionTracker` was creating its own session with `createSession()` which generated a different ID
+- Events were being sent with the sessionTracker's ID, but the API was looking for events with the API's session ID
+- Mismatch between client and server session IDs meant events couldn't be associated with sessions
+
+**Solution**:
+1. Modified `sessionTracker.startSession()` to accept an optional session ID parameter:
+```javascript
+async startSession(userId, userType, existingSessionId = null) {
+  if (existingSessionId) {
+    // Use the session ID from the API
+    this.currentSession = {
+      id: existingSessionId,
+      // ... other session properties
+    };
+  } else {
+    // Create new session with generated ID
+    this.currentSession = createSession(userId, userType);
+  }
+}
+```
+2. Pass the API session ID to sessionTracker when initializing:
+```javascript
+await sessionTracker.startSession(user.id, userType, session.id);
+```
+
+### Guest User ID Normalization Issue
+**Problem**: Guest users were being tracked but their sessions weren't working properly.
+
+**Root Cause**:
+In `useGuestUsers.js`, the `getCurrentUser` function was overriding guest IDs:
+```javascript
+// Old problematic code:
+if (isGuestMode && currentGuestUser) {
+  return { ...currentGuestUser, id: 'guest' }; // This broke session tracking!
+}
+```
+
+**Solution**:
+Keep the actual guest ID for proper session tracking:
+```javascript
+if (isGuestMode && currentGuestUser) {
+  return currentGuestUser; // Preserve the actual guest ID
+}
+```
+
+### React Key Prop Warning in Timeline
+**Problem**: "Each child in a list should have a unique key prop" warning in ActivityTimeline.
+
+**Root Cause**:
+- Some events from the API might have duplicate IDs or missing IDs
+- React requires unique keys for list items to properly track component state
+
+**Solution**:
+Added deduplication and ID generation in the `filteredEvents` useMemo:
+```javascript
+const filteredEvents = useMemo(() => {
+  // First, deduplicate events by ID
+  const uniqueEvents = [];
+  const seenIds = new Set();
+  
+  for (const event of events) {
+    // Ensure event has an ID, generate one if missing
+    const eventId = event.id || `fallback-${event.timestamp}-${event.type}`;
+    if (!seenIds.has(eventId)) {
+      seenIds.add(eventId);
+      uniqueEvents.push({ ...event, id: eventId });
+    }
+  }
+  // ... rest of filtering logic
+}, [events, selectedCategory, maxItems]);
+```
+
 ### Implementation Complexity
 The session tracking system touches many layers:
 - **Frontend**: React hooks, context providers, localStorage
 - **Backend**: API routes, in-memory stores, event batching
 - **State Management**: User context, session lifecycle, event queues
 - **Cleanup**: Automatic timeouts, manual cleanup, interval management
+- **Synchronization**: Client and server session IDs must match for event tracking
 
 Success requires coordination across all layers and careful attention to cleanup.
+
+## Best Practices and Lessons Learned
+
+### Session Management Best Practices
+
+1. **Always Use Stable IDs**
+   - Use localStorage for cross-tab persistence (not sessionStorage)
+   - Generate IDs with timestamps for debugging: `guest_${Date.now()}`
+   - Store complete guest data (ID, name, avatar) to maintain consistency
+
+2. **Synchronize Client and Server Session IDs**
+   - Pass API session ID to client-side trackers
+   - Never let client generate its own session ID if server provides one
+   - Always verify ID match when debugging event tracking
+
+3. **Handle All User Switching Scenarios**
+   - Guest → Registered user
+   - Registered → Different registered user
+   - Registered → Guest (back to provisioned)
+   - Guest → Different guest
+   - Test each scenario when making session changes
+
+4. **Avoid State Flags That Block Updates**
+   - Don't use `isInitialized` flags that prevent session upgrades
+   - Let the session initialization function handle deduplication
+   - Allow session "upgrades" from provisioned to real users
+
+5. **Deduplicate at Multiple Levels**
+   - API level: Check for existing sessions before creating
+   - Client level: Check for stored sessions in localStorage
+   - Event level: Deduplicate events by ID before rendering
+
+### Debugging Checklist
+
+When sessions aren't working correctly:
+
+1. **Check Session Creation**
+   ```javascript
+   // Console should show:
+   [GlobalSessionProvider] User switch detected: {from: "Guest", to: "Branden", ...}
+   [Board] Initializing session for user: Branden spf6lSu8SSOxZIOsYlYVd isGuest: false
+   ```
+
+2. **Verify Session IDs Match**
+   ```bash
+   # Check API sessions
+   curl -s http://localhost:3000/api/sessions | jq '.grouped'
+   
+   # Check event store has matching session ID
+   curl -s "http://localhost:3000/api/sessions/events?sessionId=SESSION_ID" | jq '.events[0]'
+   ```
+
+3. **Check localStorage State**
+   ```javascript
+   // Should have provisioned guest data
+   localStorage.getItem('provisioned_guest_data')
+   
+   // Should have session storage
+   localStorage.getItem('conversation_tracker_session')
+   ```
+
+4. **Verify User Context**
+   ```javascript
+   // In console, check current user
+   console.log('Current user:', currentUser)
+   // Should show actual ID, not 'guest' for guest users
+   ```
+
+### Common Pitfalls to Avoid
+
+1. **Don't Override Guest IDs** - Keep actual IDs for tracking
+2. **Don't Use sessionStorage for Cross-Tab Data** - Use localStorage
+3. **Don't Skip Event Deduplication** - Assume duplicates will happen
+4. **Don't Trust Initial State** - Users can switch at any time
+5. **Don't Forget Session Cleanup** - Old sessions accumulate quickly
 
 ## Conclusion
 
 The User Tracking system is a complex but robust solution for monitoring user sessions. The key to its reliability is:
 
-1. **Session persistence** through localStorage
-2. **Intelligent reuse logic** to prevent duplicates  
-3. **Proper cleanup** of intervals and events
-4. **Server restart** as the ultimate reset
+1. **Session persistence** through localStorage with proper expiry
+2. **Intelligent reuse logic** to prevent duplicates while allowing upgrades
+3. **ID synchronization** between client and server for event tracking
+4. **Proper cleanup** of intervals and events
+5. **Server restart** as the ultimate reset for phantom events
 
 When debugging, always check the console logs, localStorage state, and API responses in that order. The system is designed to handle edge cases like browser refreshes, multiple tabs, and user switching while preventing session explosion through automatic cleanup and validation.
 

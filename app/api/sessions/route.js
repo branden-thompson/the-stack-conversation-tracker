@@ -7,39 +7,14 @@
 
 import { NextResponse } from 'next/server';
 import { SESSION_STATUS } from '@/lib/utils/session-constants';
+import sessionManager from '@/lib/services/session-manager';
 
-// In-memory session store (replace with Redis/DB in production)
-const sessionStore = new Map();
-
-// Cleanup old sessions periodically
-setInterval(() => {
-  const now = Date.now();
-  const INACTIVE_TIMEOUT = 30 * 60 * 1000; // 30 minutes for inactive
-  const SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours for ended
-  
-  for (const [id, session] of sessionStore.entries()) {
-    const age = now - session.lastActivityAt;
-    
-    // Mark inactive sessions as ended after 30 minutes
-    if (session.status === SESSION_STATUS.ACTIVE && age > INACTIVE_TIMEOUT) {
-      console.log('[Sessions Cleanup] Ending inactive session:', id);
-      session.status = SESSION_STATUS.ENDED;
-      session.endedAt = now;
-    }
-    
-    // Delete ended sessions after 24 hours
-    if (session.status === SESSION_STATUS.ENDED && age > SESSION_TIMEOUT) {
-      console.log('[Sessions Cleanup] Deleting old session:', id);
-      sessionStore.delete(id);
-    }
-  }
-}, 5 * 60 * 1000); // Cleanup every 5 minutes
+// Get stores from session manager
+const { sessionStore, eventStore, simulatedSessions } = sessionManager;
 
 export async function GET(request) {
   try {
-    // Import from other endpoints
-    const { simulatedSessions } = await import('./simulate/route.js');
-    const { eventStore } = await import('./events/route.js');
+    // Stores are now from sessionManager
     
     // Get all active sessions from store
     const regularSessions = Array.from(sessionStore.values())
@@ -121,41 +96,51 @@ export async function POST(request) {
     }
     
     // Check for any active sessions for this user
-    // Group by route to handle multiple tabs properly
-    const userSessions = new Map();
+    const userSessions = [];
     for (const [id, session] of sessionStore.entries()) {
       if (session.userId === userId && session.status === SESSION_STATUS.ACTIVE) {
-        const route = session.currentRoute || '/';
-        if (!userSessions.has(route)) {
-          userSessions.set(route, []);
-        }
-        userSessions.get(route).push({ id, session });
+        userSessions.push({ id, session });
       }
     }
     
     const currentRoute = metadata?.route || '/';
     
-    // If we have sessions for this route, reuse the most recent one
-    if (userSessions.has(currentRoute)) {
-      const routeSessions = userSessions.get(currentRoute);
-      // Sort by last activity, most recent first
-      routeSessions.sort((a, b) => b.session.lastActivityAt - a.session.lastActivityAt);
-      const mostRecent = routeSessions[0];
+    // For guest sessions, create separate sessions per route to track different tabs
+    if (userType === 'guest') {
+      // Check if we have an active session for this exact route
+      const exactRouteMatch = userSessions.find(({ session }) => 
+        session.currentRoute === currentRoute
+      );
       
-      // Update the session
-      mostRecent.session.lastActivityAt = Date.now();
-      
-      console.log('[Sessions API] Reusing most recent session for route:', mostRecent.id);
-      return NextResponse.json(mostRecent.session, { status: 200 });
+      if (exactRouteMatch) {
+        // Only reuse if the route matches exactly and session is recent (< 5 minutes old)
+        const age = Date.now() - exactRouteMatch.session.lastActivityAt;
+        if (age < 5 * 60 * 1000) {
+          // Update the session
+          exactRouteMatch.session.lastActivityAt = Date.now();
+          
+          console.log('[Sessions API] Reusing guest session for same route:', exactRouteMatch.id, currentRoute);
+          return NextResponse.json(exactRouteMatch.session, { status: 200 });
+        }
+      }
+    } else {
+      // For registered users, reuse any active session but update the route
+      if (userSessions.length > 0) {
+        const mostRecent = userSessions.sort((a, b) => b.session.lastActivityAt - a.session.lastActivityAt)[0];
+        // Update the session route and activity
+        mostRecent.session.lastActivityAt = Date.now();
+        mostRecent.session.currentRoute = currentRoute;
+        
+        console.log('[Sessions API] Reusing registered user session, updating route:', mostRecent.id, currentRoute);
+        return NextResponse.json(mostRecent.session, { status: 200 });
+      }
     }
     
-    // Check if we have too many sessions for this user (max 2 - one per tab)
-    const totalUserSessions = Array.from(userSessions.values()).flat().length;
-    if (totalUserSessions >= 2) {
+    // Check if we have too many sessions for this user (max 3 to allow for multiple tabs)
+    if (userSessions.length >= 3) {
       // Find and end the oldest session
-      const allSessions = Array.from(userSessions.values()).flat();
-      allSessions.sort((a, b) => a.session.lastActivityAt - b.session.lastActivityAt);
-      const oldest = allSessions[0];
+      userSessions.sort((a, b) => a.session.lastActivityAt - b.session.lastActivityAt);
+      const oldest = userSessions[0];
       
       console.log('[Sessions API] Too many sessions, ending oldest:', oldest.id);
       oldest.session.status = SESSION_STATUS.ENDED;
@@ -182,7 +167,6 @@ export async function POST(request) {
     sessionStore.set(session.id, session);
     
     // Also initialize in event store
-    const { eventStore } = await import('./events/route.js');
     eventStore.set(session.id, []);
     
     console.log('[Sessions API] New session created:', session.id, 'Total sessions:', sessionStore.size);
@@ -237,5 +221,5 @@ export async function DELETE(request) {
   }
 }
 
-// Export sessionStore for use in other endpoints
-export { sessionStore };
+// Export stores from session manager
+export { sessionStore, eventStore, simulatedSessions };

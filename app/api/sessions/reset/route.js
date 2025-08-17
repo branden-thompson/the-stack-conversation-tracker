@@ -5,13 +5,12 @@
  */
 
 import { NextResponse } from 'next/server';
+import sessionManager from '@/lib/services/session-manager';
 
 export async function DELETE(request) {
   try {
-    // Import all stores
-    const { sessionStore } = await import('../route.js');
-    const { eventStore } = await import('../events/route.js');
-    const { simulatedSessions } = await import('../simulate/route.js');
+    // Get stores from session manager
+    const { sessionStore, eventStore, simulatedSessions } = sessionManager;
     
     // Count before clearing
     const sessionCount = sessionStore.size;

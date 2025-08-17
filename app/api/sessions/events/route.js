@@ -5,10 +5,10 @@
  */
 
 import { NextResponse } from 'next/server';
+import sessionManager from '@/lib/services/session-manager';
 
-// Import shared session store (in production, use proper data store)
-// For now, we'll use a simple in-memory store
-export const eventStore = new Map(); // sessionId -> events[]
+// Get stores from session manager
+const { sessionStore, eventStore } = sessionManager;
 
 // Maximum events to keep per session
 const MAX_EVENTS_PER_SESSION = 1000;
@@ -50,7 +50,7 @@ export async function POST(request) {
 
     // Update session activity timestamp in the main session store
     try {
-      const { sessionStore } = await import('../route.js');
+      // sessionStore already imported from sessionManager
       if (sessionStore.has(sessionId)) {
         const session = sessionStore.get(sessionId);
         session.lastActivityAt = Date.now();

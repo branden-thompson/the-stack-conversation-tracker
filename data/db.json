@@ -6,15 +6,15 @@
       "content": "this is a test",
       "zone": "active",
       "position": {
-        "x": 10,
-        "y": 142.8984375
+        "x": 292.80078125,
+        "y": 60
       },
       "stackOrder": 0,
       "faceUp": true,
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-17T00:42:08.365Z",
-      "updatedAt": "2025-08-17T02:47:45.885Z"
+      "updatedAt": "2025-08-17T03:13:45.921Z"
     }
   ],
   "users": [

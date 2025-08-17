@@ -11,9 +11,13 @@ import {
   SESSION_STATUS,
   getBrowserInfo,
 } from '@/lib/utils/session-constants';
+import sessionManager from '@/lib/services/session-manager';
 
-// Store simulated sessions (exported for use in main sessions endpoint)
-export const simulatedSessions = new Map();
+// Get stores from session manager
+const { simulatedSessions, eventStore } = sessionManager;
+
+// Export simulatedSessions for other routes that import it
+export { simulatedSessions };
 
 // Guest names for simulation
 const GUEST_NAMES = [
@@ -216,7 +220,7 @@ export async function DELETE(request) {
     const sessionId = searchParams.get('sessionId');
     
     // Import event store for cleanup
-    const { eventStore } = await import('../events/route.js');
+    // eventStore already imported from sessionManager
     
     if (sessionId) {
       // Remove specific session

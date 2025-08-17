@@ -147,12 +147,25 @@ export function ActivityTimeline({
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
 
-  // Filter events by category
+  // Filter events by category and ensure unique IDs
   const filteredEvents = useMemo(() => {
-    if (selectedCategory === 'all') {
-      return events.slice(0, maxItems);
+    // First, deduplicate events by ID
+    const uniqueEvents = [];
+    const seenIds = new Set();
+    
+    for (const event of events) {
+      // Ensure event has an ID, generate one if missing
+      const eventId = event.id || `fallback-${event.timestamp}-${event.type}`;
+      if (!seenIds.has(eventId)) {
+        seenIds.add(eventId);
+        uniqueEvents.push({ ...event, id: eventId });
+      }
     }
-    return events
+    
+    if (selectedCategory === 'all') {
+      return uniqueEvents.slice(0, maxItems);
+    }
+    return uniqueEvents
       .filter(event => {
         const category = event.category || EVENT_TYPE_CATEGORY_MAP[event.type] || 'custom';
         return category === selectedCategory;

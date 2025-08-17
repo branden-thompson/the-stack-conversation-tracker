@@ -16,6 +16,7 @@ import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { useGlobalSession } from '@/lib/contexts/GlobalSessionProvider';
+import { useButtonTracking } from '@/lib/hooks/useButtonTracking';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
@@ -88,6 +89,9 @@ function BoardInner({
   const [helpOpen, setHelpOpen] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
   
+  // Enable global button tracking
+  useButtonTracking();
+  
   // Animation preferences - default to true, sync with current user preferences
   const [animationsEnabled, setAnimationsEnabled] = useState(() => {
     return currentUser?.preferences?.animationsEnabled !== false;
@@ -115,8 +119,9 @@ function BoardInner({
   useEffect(() => {
     console.log('[Board] User state:', currentUser);
     if (currentUser && currentUser.id) {
-      console.log('[Board] Initializing session for user:', currentUser.name, currentUser.id);
-      // Trigger session initialization when user is available
+      console.log('[Board] Initializing session for user:', currentUser.name, currentUser.id, 'isGuest:', currentUser.isGuest);
+      // Always initialize session when user changes
+      // The GlobalSessionProvider will handle deduplication
       initializeSession(currentUser);
     } else {
       console.log('[Board] No current user available yet');

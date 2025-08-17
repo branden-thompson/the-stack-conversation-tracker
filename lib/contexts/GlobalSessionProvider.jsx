@@ -6,6 +6,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import sessionTracker from '@/lib/services/session-tracker';
 import { SESSION_EVENT_TYPES, SESSION_USER_TYPES } from '@/lib/utils/session-constants';
 import { storeSessionId, getStoredSessionId, clearStoredSession, updateSessionTimestamp } from '@/lib/utils/session-storage';
@@ -14,27 +15,108 @@ const GlobalSessionContext = createContext(null);
 
 export function GlobalSessionProvider({ children }) {
   const [currentSession, setCurrentSession] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const pathname = usePathname();
   
   /**
    * Initialize or update session for a user
    */
   const initializeSession = useCallback(async (user) => {
-    // Skip if already initializing
-    if (currentSession?.userId === user?.id && isInitialized) {
-      console.log('[GlobalSessionProvider] Session already initialized for user:', user?.name);
+    // Skip if already have a session for the exact same user
+    if (currentSession?.userId === user?.id && currentSession?.userType === (user?.isGuest ? 'guest' : 'registered')) {
+      console.log('[GlobalSessionProvider] Session already exists for user:', user?.name || 'guest');
       return;
+    }
+    
+    // Handle user switching scenarios:
+    // 1. Provisioned guest → Registered user
+    // 2. Registered user → Different registered user
+    // 3. Registered user → Guest (including provisioned)
+    // 4. Guest → Different guest
+    
+    if (currentSession) {
+      const switchingFromGuest = currentSession.metadata?.provisioned || currentSession.userType === 'guest';
+      const switchingToGuest = !user || user.isGuest;
+      
+      console.log('[GlobalSessionProvider] User switch detected:', {
+        from: currentSession.userName,
+        to: user?.name || 'guest',
+        fromType: currentSession.userType,
+        toType: user ? (user.isGuest ? 'guest' : 'registered') : 'guest'
+      });
+      
+      // Always create a new session when switching users
+      // This ensures proper tracking for each user context
     }
     
     if (!user) {
       console.log('[GlobalSessionProvider] No user provided, creating guest session');
       
-      // Create a provisioned guest session
-      const guestId = `guest_${Date.now()}`;
+      // Use a stable guest ID for this browser (shared across tabs)
+      // Check if we already have guest data stored
+      const GUEST_DATA_KEY = 'provisioned_guest_data';
+      let guestData = null;
+      
+      if (typeof window !== 'undefined') {
+        const storedData = window.localStorage.getItem(GUEST_DATA_KEY);
+        if (storedData) {
+          try {
+            guestData = JSON.parse(storedData);
+            // Check if the stored guest data is recent (within 24 hours)
+            const GUEST_ID_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+            const match = guestData.id?.match(/guest_(\d+)/);
+            if (match) {
+              const timestamp = parseInt(match[1]);
+              if (Date.now() - timestamp > GUEST_ID_EXPIRY) {
+                // Guest data is too old, create new
+                guestData = null;
+              }
+            }
+          } catch (e) {
+            console.error('[GlobalSessionProvider] Failed to parse guest data:', e);
+            guestData = null;
+          }
+        }
+      }
+      
+      let guestId, randomName, randomColor;
+      
+      if (guestData) {
+        // Use existing guest data
+        guestId = guestData.id;
+        randomName = guestData.name;
+        randomColor = guestData.color;
+      } else {
+        // Create new guest data
+        guestId = `guest_${Date.now()}`;
+        
+        // Generate a random guest name
+        const guestNames = [
+          'Curious Cat', 'Happy Hippo', 'Brave Bear', 'Wise Owl',
+          'Swift Fox', 'Gentle Giraffe', 'Clever Crow', 'Dancing Dolphin',
+          'Eager Eagle', 'Friendly Frog', 'Lucky Lion', 'Jolly Jaguar',
+          'Mystic Moose', 'Noble Narwhal', 'Peaceful Panda', 'Quirky Quail',
+        ];
+        randomName = guestNames[Math.floor(Math.random() * guestNames.length)];
+        
+        // Generate a random avatar color
+        const avatarColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA6CA', '#C7ECEE', '#F8B500'];
+        randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
+        
+        // Store guest data for consistency
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(GUEST_DATA_KEY, JSON.stringify({
+            id: guestId,
+            name: randomName,
+            color: randomColor,
+          }));
+        }
+      }
+      
       const guestUser = {
         id: guestId,
-        name: 'Provisioned Guest',
+        name: randomName,
         isGuest: true,
+        profilePicture: `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${encodeURIComponent(randomColor)}"/><text x="50" y="50" font-family="Arial" font-size="40" fill="white" text-anchor="middle" dominant-baseline="middle">${randomName.charAt(0)}</text></svg>`,
       };
       
       // Check for stored session
@@ -50,9 +132,10 @@ export function GlobalSessionProvider({ children }) {
             sessionId: storedSessionId,
             browser: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
             metadata: {
-              userName: 'Provisioned Guest',
-              route: typeof window !== 'undefined' ? window.location.pathname : '/',
+              userName: randomName,
+              route: pathname || (typeof window !== 'undefined' ? window.location.pathname : '/'),
               provisioned: true,
+              avatar: guestUser.profilePicture,
             },
           }),
         });
@@ -63,8 +146,8 @@ export function GlobalSessionProvider({ children }) {
           setCurrentSession(session);
           storeSessionId(session.id, guestId);
           
-          // Also initialize client-side tracker
-          await sessionTracker.startSession(guestId, SESSION_USER_TYPES.GUEST);
+          // Also initialize client-side tracker with the API session ID
+          await sessionTracker.startSession(guestId, SESSION_USER_TYPES.GUEST, session.id);
         }
       } catch (error) {
         console.error('[GlobalSessionProvider] Failed to create guest session:', error);
@@ -98,7 +181,7 @@ export function GlobalSessionProvider({ children }) {
           browser: typeof window !== 'undefined' ? window.navigator.userAgent : 'Unknown',
           metadata: {
             userName: user.name,
-            route: typeof window !== 'undefined' ? window.location.pathname : '/',
+            route: pathname || (typeof window !== 'undefined' ? window.location.pathname : '/'),
             isSystemUser: user.isSystemUser || false,
             avatar: user.avatar,
           },
@@ -113,17 +196,14 @@ export function GlobalSessionProvider({ children }) {
         setCurrentSession(session);
         storeSessionId(session.id, user.id);
         
-        // Only initialize client-side tracker for new sessions
-        if (isNewSession) {
-          await sessionTracker.startSession(user.id, userType);
-        }
-        
-        setIsInitialized(true);
+        // Initialize client-side tracker with the API session ID
+        // This ensures the sessionTracker has a currentSession for emitting events
+        await sessionTracker.startSession(user.id, userType, session.id);
       }
     } catch (error) {
       console.error('[GlobalSessionProvider] Failed to create/reuse session:', error);
     }
-  }, [currentSession, isInitialized]);
+  }, [currentSession, pathname]);
   
   /**
    * Emit a tracking event
@@ -186,27 +266,49 @@ export function GlobalSessionProvider({ children }) {
     }
   }, [emit]);
   
-  // Don't auto-initialize - let Board component handle it when user is known
-  
-  // Track route changes
+  // Auto-initialize a guest session if no session exists
   useEffect(() => {
-    const handleRouteChange = () => {
-      if (currentSession) {
-        emit(SESSION_EVENT_TYPES.ROUTE_CHANGE, {
-          from: currentSession.currentRoute,
-          to: window.location.pathname,
-        });
-        sessionTracker.updateRoute(window.location.pathname);
-      }
-    };
+    // Only auto-initialize once per app load
+    if (!currentSession && pathname) {
+      console.log('[GlobalSessionProvider] Auto-initializing provisioned guest session for route:', pathname);
+      // Create a provisioned guest session automatically for tracking
+      // Don't set isInitialized here - let initializeSession handle it
+      // This allows upgrading to a registered user later
+      initializeSession(null);
+    }
+  }, [pathname, currentSession, initializeSession]);
+  
+  // Track route changes using Next.js pathname
+  useEffect(() => {
+    if (!currentSession || !pathname) return;
     
-    // Listen for popstate events (browser back/forward)
-    window.addEventListener('popstate', handleRouteChange);
+    const previousRoute = sessionTracker.currentSession?.currentRoute;
     
-    return () => {
-      window.removeEventListener('popstate', handleRouteChange);
-    };
-  }, [currentSession, emit]);
+    console.log('[GlobalSessionProvider] Route change detected:', previousRoute, '->', pathname);
+    
+    // Only emit if route actually changed
+    if (previousRoute && previousRoute !== pathname) {
+      emit(SESSION_EVENT_TYPES.ROUTE_CHANGE, {
+        from: previousRoute,
+        to: pathname,
+      });
+    }
+    
+    // Always update the route in session tracker
+    sessionTracker.updateRoute(pathname);
+    
+    // Always update the server-side session route
+    if (currentSession.id) {
+      console.log('[GlobalSessionProvider] Updating server session route:', currentSession.id, pathname);
+      fetch(`/api/sessions/${currentSession.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ route: pathname }),
+      }).catch(error => {
+        console.error('Failed to update session route:', error);
+      });
+    }
+  }, [pathname, currentSession, emit]);
   
   // Update session timestamp periodically to keep it alive
   useEffect(() => {
@@ -241,7 +343,6 @@ export function GlobalSessionProvider({ children }) {
   
   const contextValue = {
     currentSession,
-    isInitialized,
     initializeSession,
     emit,
     emitCardEvent,
