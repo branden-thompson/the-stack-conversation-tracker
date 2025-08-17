@@ -6,7 +6,13 @@ import { Button } from '@/components/ui/button';
 import { DevHeader } from '@/components/ui/dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { RefreshCw, Download } from 'lucide-react';
-import { THEME } from '@/lib/utils/ui-constants';
+import { THEME, EVENT_TYPES, EVENT_COLORS, EVENT_LABELS, DEV_LAYOUT } from '@/lib/utils/ui-constants';
+import { ConversationStatusBadge, ConversationStatusIndicator } from '@/components/ui/status-badge';
+import { SelectionEmptyState, NoDataEmptyState } from '@/components/ui/empty-state';
+import { EventTypeBadge } from '@/components/ui/event-type-badge';
+import { JSONPreview } from '@/components/ui/json-preview';
+import { ConversationActions, EventActions } from '@/components/ui/button-group';
+import { EventFilterControls } from '@/components/ui/filter-controls';
 
 function fmtDuration(ms) {
   if (!ms || ms < 0) return '00:00:00';
@@ -17,51 +23,30 @@ function fmtDuration(ms) {
   return `${h}:${m}:${ss}`;
 }
 
-function JSONPreview({ value }) {
-  return (
-    <pre className={`text-xs ${THEME.colors.background.tertiary} rounded p-2 overflow-auto max-h-40`}>
-      {JSON.stringify(value, null, 2)}
-    </pre>
-  );
-}
 
 const typeColor = (type) => {
-  switch (type) {
-    case 'card.created': return 'bg-emerald-500';
-    case 'card.moved':   return 'bg-sky-500';
-    case 'card.updated': return 'bg-amber-500';
-    case 'card.deleted': return 'bg-rose-500';
-    case 'card.flipped': return 'bg-pink-500';
-    default:             return 'bg-zinc-400';
-  }
+  return EVENT_COLORS[type] || 'bg-zinc-400';
 };
 
 const typeLabel = (type) => {
-  switch (type) {
-    case 'card.created': return 'Card created';
-    case 'card.moved':   return 'Card moved';
-    case 'card.updated': return 'Card updated';
-    case 'card.deleted': return 'Card deleted';
-    case 'card.flipped': return 'Card flipped';
-    default:             return type;
-  }
+  return EVENT_LABELS[type] || type;
 };
 
 const summarizePayload = (type, payload = {}) => {
-  if (type === 'card.created') {
+  if (type === EVENT_TYPES.CARD_CREATED) {
     return `id: ${payload.id ?? '—'} • type: ${payload.type ?? '—'}`;
   }
-  if (type === 'card.moved') {
+  if (type === EVENT_TYPES.CARD_MOVED) {
     return `id: ${payload.id ?? '—'} • ${payload.from ?? '—'} → ${payload.to ?? '—'}`;
   }
-  if (type === 'card.updated') {
+  if (type === EVENT_TYPES.CARD_UPDATED) {
     const keys = Object.keys(payload).filter((k) => k !== 'id');
     return `id: ${payload.id ?? '—'} • fields: ${keys.length ? keys.join(', ') : '—'}`;
   }
-  if (type === 'card.deleted') {
+  if (type === EVENT_TYPES.CARD_DELETED) {
     return `id: ${payload.id ?? '—'}`;
   }
-  if (type === 'card.flipped') {
+  if (type === EVENT_TYPES.CARD_FLIPPED) {
     return `id: ${payload.cardId ?? '—'} • ${payload.from ?? '—'} → ${payload.flippedTo ?? '—'} • by: ${payload.flippedBy ?? '—'}`;
   }
   return Object.keys(payload).length ? JSON.stringify(payload) : '—';
@@ -77,14 +62,16 @@ export default function DevConvos() {
   // MINIMAL HARDENING: always treat items as an array
   const safeItems = Array.isArray(items) ? items : [];
   
-  // Debug logging
-  console.log('[DevConvos] Conversations loaded:', { 
-    loading, 
-    error, 
-    itemsCount: safeItems.length, 
-    activeId,
-    items: safeItems 
-  });
+  // Debug logging - only in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[DevConvos] Conversations loaded:', { 
+      loading, 
+      error, 
+      itemsCount: safeItems.length, 
+      activeId
+      // Omitting full items array to avoid large console output
+    });
+  }
 
   const [name, setName] = useState('');
   const [selectedId, setSelectedId] = useState(null);
@@ -115,7 +102,7 @@ export default function DevConvos() {
     }
     run();
     if (poll) {
-      t = setInterval(run, 1000);
+      t = setInterval(run, DEV_LAYOUT.eventPollInterval);
     }
     return () => t && clearInterval(t);
   }, [selected, poll, listEvents]);
@@ -124,7 +111,7 @@ export default function DevConvos() {
   useEffect(() => {
     const interval = setInterval(() => {
       refresh();
-    }, 2000);
+    }, DEV_LAYOUT.conversationRefreshInterval);
     return () => clearInterval(interval);
   }, [refresh]);
 
@@ -164,6 +151,41 @@ export default function DevConvos() {
     return '00:00:00';
   }, [selected]);
 
+  // Event types for emit buttons
+  const eventTypesToEmit = useMemo(() => [
+    {
+      type: EVENT_TYPES.CARD_CREATED,
+      label: 'Emit: card.created',
+      payload: { id: crypto.randomUUID(), type: 'topic' }
+    },
+    {
+      type: EVENT_TYPES.CARD_MOVED,
+      label: 'Emit: card.moved',
+      payload: { id: 'demo', from: 'active', to: 'resolved' }
+    },
+    {
+      type: EVENT_TYPES.CARD_UPDATED,
+      label: 'Emit: card.updated',
+      payload: { id: 'demo', content: 'edited' }
+    },
+    {
+      type: EVENT_TYPES.CARD_DELETED,
+      label: 'Emit: card.deleted',
+      payload: { id: 'demo' }
+    },
+    {
+      type: EVENT_TYPES.CARD_FLIPPED,
+      label: 'Emit: card.flipped',
+      payload: { 
+        cardId: 'demo', 
+        flippedBy: 'user',
+        zone: 'active',
+        from: 'faceUp',
+        flippedTo: 'faceDown'
+      }
+    }
+  ], []);
+
   const rightControls = (
     <>
       <Button 
@@ -184,7 +206,7 @@ export default function DevConvos() {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `dev-conversations-${Date.now()}.json`;
+          a.download = `${DEV_LAYOUT.exportFilenames.allConversations}-${Date.now()}.json`;
           a.click();
           URL.revokeObjectURL(url);
         }}
@@ -205,7 +227,12 @@ export default function DevConvos() {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 ${THEME.colors.text.primary} min-h-0`}>
+      <div 
+        className={`flex-1 grid gap-${DEV_LAYOUT.gridGap} ${DEV_LAYOUT.sectionPadding} ${THEME.colors.text.primary} min-h-0`}
+        style={{
+          gridTemplateColumns: `${DEV_LAYOUT.leftPanelWidth} 1fr`
+        }}
+      >
       {/* LEFT: conversations list */}
       <div className={`flex flex-col rounded-lg border ${THEME.colors.border.primary} overflow-hidden`}>
         <div className={`p-3 border-b ${THEME.colors.border.primary}`}>
@@ -240,71 +267,45 @@ export default function DevConvos() {
             >
               <div className="flex items-center justify-between">
                 <div className="font-semibold truncate">{c.name}</div>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${THEME.colors.background.accent}`}>
-                  {c.status}
-                </span>
+                <ConversationStatusBadge status={c.status} size="s" />
               </div>
               <div className={`text-xs ${THEME.colors.text.light} mt-1`}>
                 {new Date(c.createdAt).toLocaleString()}
               </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button
-                  size="sm"
-                  variant={c.status === 'active' ? 'default' : 'outline'}
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await patch(c.id, {
+              <div className="mt-2">
+                <ConversationActions
+                  conversation={c}
+                  compact={true}
+                  onStart={async (conv) => {
+                    await patch(conv.id, {
                       status: 'active',
-                      startedAt: c.startedAt || Date.now(),
+                      startedAt: conv.startedAt || Date.now(),
                       pausedAt: null,
                       stoppedAt: null,
                     });
-                    setActiveId(c.id);
+                    setActiveId(conv.id);
                     refresh();
                   }}
-                >
-                  Start
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await patch(c.id, {
+                  onPause={async (conv) => {
+                    await patch(conv.id, {
                       status: 'paused',
                       pausedAt: Date.now(),
                     });
                     refresh();
                   }}
-                >
-                  Pause
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await patch(c.id, {
+                  onStop={async (conv) => {
+                    await patch(conv.id, {
                       status: 'stopped',
                       stoppedAt: Date.now(),
                     });
                     refresh();
                   }}
-                >
-                  Stop
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await fetch(`/api/conversations/${c.id}`, { method: 'DELETE' });
-                    if (selectedId === c.id) setSelectedId(null);
+                  onDelete={async (conv) => {
+                    await fetch(`/api/conversations/${conv.id}`, { method: 'DELETE' });
+                    if (selectedId === conv.id) setSelectedId(null);
                     refresh();
                   }}
-                >
-                  Delete
-                </Button>
+                />
               </div>
             </div>
           ))}
@@ -324,10 +325,11 @@ export default function DevConvos() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`text-sm px-3 py-1 rounded-full ${THEME.colors.background.accent}`}>
-                  {selected.status}
-                </span>
-                <span className="text-sm font-mono">{runtime}</span>
+                <ConversationStatusIndicator 
+                  status={selected.status}
+                  runtime={runtime}
+                  size="s"
+                />
                 <Button
                   variant="outline"
                   onClick={() => setPoll((p) => !p)}
@@ -345,7 +347,7 @@ export default function DevConvos() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `conversation-${selected?.id || 'export'}.json`;
+                    a.download = `${DEV_LAYOUT.exportFilenames.singleConversation}-${selected?.id || 'export'}.json`;
                     a.click();
                     URL.revokeObjectURL(url);
                   }}
@@ -363,57 +365,45 @@ export default function DevConvos() {
               </div>
             </div>
           ) : (
-            <div className={`text-sm ${THEME.colors.text.muted}`}>Select a conversation from the left.</div>
+            <SelectionEmptyState 
+              title="Select a Conversation"
+              description="Choose a conversation from the left to view details."
+              size="sm"
+            />
           )}
         </div>
 
         {/* Filters */}
-        <div className={`p-3 border-b ${THEME.colors.border.primary} flex items-center gap-2`}>
-          <select
-            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <option value="all">All types</option>
-            <option value="card.created">card.created</option>
-            <option value="card.moved">card.moved</option>
-            <option value="card.updated">card.updated</option>
-            <option value="card.deleted">card.deleted</option>
-            <option value="card.flipped">card.flipped</option>
-          </select>
-          <input
-            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary} flex-1`}
-            placeholder="Search in type or payload…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <select
-            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
-            value={sortDir}
-            onChange={(e) => setSortDir(e.target.value)}
-          >
-            <option value="desc">Newest first</option>
-            <option value="asc">Oldest first</option>
-          </select>
-        </div>
+        <EventFilterControls
+          eventTypes={Object.values(EVENT_TYPES)}
+          filterType={filterType}
+          query={query}
+          sortDir={sortDir}
+          onFilterTypeChange={setFilterType}
+          onQueryChange={setQuery}
+          onSortChange={setSortDir}
+        />
 
         {/* MIDDLE: split horizontally into Timeline (left) and Events (right); both scroll */}
         <div className="flex-1 overflow-hidden min-h-0">
-          <div className="grid grid-cols-2 h-full min-h-0">
+          <div className={`grid ${DEV_LAYOUT.timelineEventsGrid} h-full min-h-0`}>
             {/* Timeline (left column) */}
             <section className={`h-full flex flex-col border-r ${THEME.colors.border.primary} min-h-0`}>
               <div className={`px-4 py-2 text-sm font-semibold border-b ${THEME.colors.border.primary} ${THEME.colors.background.tertiary} flex-shrink-0`}>Timeline</div>
               <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
                 {selected ? (
                   timeline.length ? (
-                    <ol className="relative ml-5">
+                    <ol className="relative ml-5 pt-2">
                       {/* vertical rail */}
-                      <span className={`absolute left-0 top-0 bottom-0 w-px ${THEME.colors.border.secondary}`} />
+                      <div 
+                        className={`absolute left-0 top-2 w-0.5 bg-zinc-300 dark:bg-zinc-600`}
+                        style={{ height: 'calc(100% - 8px)' }}
+                      />
                       {timeline.map((e) => (
                         <li key={e.id} className="relative pl-4 py-2">
                           {/* dot */}
                           <span
-                            className={`absolute left-[-6px] top-[14px] w-3 h-3 rounded-full ring-2 ring-white dark:ring-gray-900 ${typeColor(e.type)}`}
+                            className={`absolute left-[-6px] top-[14px] w-3 h-3 rounded-full ring-2 ring-zinc-50 dark:ring-zinc-900 ${typeColor(e.type)}`}
                             aria-hidden="true"
                           />
                           {/* content */}
@@ -432,10 +422,18 @@ export default function DevConvos() {
                       ))}
                     </ol>
                   ) : (
-                    <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>No timeline entries.</div>
+                    <NoDataEmptyState 
+                      title="No Timeline Entries"
+                      description="Timeline events will appear here as they occur."
+                      size="sm"
+                    />
                   )
                 ) : (
-                  <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>Select a conversation to view timeline.</div>
+                  <SelectionEmptyState 
+                    title="Select a Conversation"
+                    description="Choose a conversation to view its timeline."
+                    size="sm"
+                  />
                 )}
               </div>
             </section>
@@ -453,21 +451,35 @@ export default function DevConvos() {
                             <div className="font-mono text-xs opacity-80">
                               {new Date(e.at).toLocaleString()}
                             </div>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${THEME.colors.background.accent}`}>
-                              {e.type}
-                            </span>
+                            <EventTypeBadge 
+                              eventType={e.type}
+                              size="xs"
+                              showIcon={false}
+                            />
                           </div>
                           <div className="mt-2">
-                            <JSONPreview value={e.payload} />
+                            <JSONPreview 
+                              value={e.payload} 
+                              collapsible={true}
+                              maxHeight="max-h-32"
+                            />
                           </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>No events.</div>
+                    <NoDataEmptyState 
+                      title="No Events"
+                      description="Events will be listed here when they occur."
+                      size="sm"
+                    />
                   )
                 ) : (
-                  <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>Select a conversation to view events.</div>
+                  <SelectionEmptyState 
+                    title="Select a Conversation"
+                    description="Choose a conversation to view its events."
+                    size="sm"
+                  />
                 )}
               </div>
             </section>
@@ -476,43 +488,12 @@ export default function DevConvos() {
 
         {/* EMIT BAR: fixed at bottom of right column */}
         {selected && (
-          <div className={`p-3 border-t ${THEME.colors.border.primary} flex flex-wrap gap-2`}>
-            <Button
-              variant="secondary"
-              onClick={() => logEvent(selected.id, 'card.created', { id: crypto.randomUUID(), type: 'topic' })}
-            >
-              Emit: card.created
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => logEvent(selected.id, 'card.moved', { id: 'demo', from: 'active', to: 'resolved' })}
-            >
-              Emit: card.moved
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => logEvent(selected.id, 'card.updated', { id: 'demo', content: 'edited' })}
-            >
-              Emit: card.updated
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => logEvent(selected.id, 'card.deleted', { id: 'demo' })}
-            >
-              Emit: card.deleted
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => logEvent(selected.id, 'card.flipped', { 
-                cardId: 'demo', 
-                flippedBy: 'user',
-                zone: 'active',
-                from: 'faceUp',
-                flippedTo: 'faceDown'
-              })}
-            >
-              Emit: card.flipped
-            </Button>
+          <div className={`p-3 border-t ${THEME.colors.border.primary}`}>
+            <EventActions
+              eventTypes={eventTypesToEmit}
+              onEmitEvent={(eventType, payload) => logEvent(selected.id, eventType, payload)}
+              compact={true}
+            />
           </div>
         )}
       </div>

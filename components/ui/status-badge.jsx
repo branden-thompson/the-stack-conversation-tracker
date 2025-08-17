@@ -1,20 +1,62 @@
 /**
  * StatusBadge Component
  * 
- * A reusable badge component for displaying status with counts
- * and animated indicators
+ * A unified status badge component that handles different types of statuses:
+ * - Conversation status (active, paused, stopped, idle)
+ * - Coverage status (passing, failing, partial, pending, unknown)
+ * - Generic status with custom colors
  */
 
 'use client';
 
 import { cn } from '@/lib/utils';
-import { CheckCircle2, XCircle, AlertCircle, Clock, Loader2 } from 'lucide-react';
+import { THEME } from '@/lib/utils/ui-constants';
+import { CheckCircle2, XCircle, AlertCircle, Clock, Loader2, Play, Pause, Square } from 'lucide-react';
 
 /**
- * Get status configuration based on type
+ * Get status configuration based on type and status type
  */
-function getStatusConfig(status) {
-  const configs = {
+function getStatusConfig(status, type = 'coverage') {
+  if (type === 'conversation') {
+    const conversationConfigs = {
+      active: {
+        bg: 'bg-green-100 dark:bg-green-950/30',
+        border: 'border-green-200 dark:border-green-800',
+        text: 'text-green-700 dark:text-green-300',
+        icon: Play,
+        iconColor: 'text-green-600 dark:text-green-400',
+        pulse: true
+      },
+      paused: {
+        bg: 'bg-yellow-100 dark:bg-yellow-950/30',
+        border: 'border-yellow-200 dark:border-yellow-800',
+        text: 'text-yellow-700 dark:text-yellow-300',
+        icon: Pause,
+        iconColor: 'text-yellow-600 dark:text-yellow-400',
+        pulse: false
+      },
+      stopped: {
+        bg: THEME.colors.background.accent,
+        border: THEME.colors.border.primary,
+        text: THEME.colors.text.muted,
+        icon: Square,
+        iconColor: THEME.colors.text.light,
+        pulse: false
+      },
+      idle: {
+        bg: THEME.colors.background.accent,
+        border: THEME.colors.border.primary,
+        text: THEME.colors.text.muted,
+        icon: null,
+        iconColor: THEME.colors.text.light,
+        pulse: false
+      }
+    };
+    return conversationConfigs[status] || conversationConfigs.idle;
+  }
+
+  // Coverage/test statuses
+  const coverageConfigs = {
     passing: {
       bg: 'bg-green-100 dark:bg-green-950/30',
       border: 'border-green-200 dark:border-green-800',
@@ -58,24 +100,31 @@ function getStatusConfig(status) {
     }
   };
 
-  return configs[status] || configs.pending;
+  return coverageConfigs[status] || coverageConfigs.pending;
 }
 
 export function StatusBadge({
-  status = 'pending', // passing, failing, warning, pending, running
+  status = 'pending', // passing, failing, warning, pending, running (coverage) | active, paused, stopped, idle (conversation)
+  type = 'coverage', // 'coverage' | 'conversation'
   count = null,
   total = null,
   label = null,
-  size = 'md', // s, md, lg
+  size = 'md', // xs, s, md, lg
   variant = 'default', // default, pill, card
   animated = true,
   showIcon = true,
   className
 }) {
-  const config = getStatusConfig(status);
+  const config = getStatusConfig(status, type);
   const Icon = config.icon;
   
   const sizeClasses = {
+    xs: { 
+      badge: 'px-1.5 py-0.5', 
+      text: 'text-xs', 
+      icon: 'w-2.5 h-2.5',
+      gap: 'gap-1'
+    },
     s: { 
       badge: 'px-2 py-0.5', 
       text: 'text-xs', 
@@ -109,6 +158,8 @@ export function StatusBadge({
     `${count}/${total}` : 
     count !== null ? 
     `${count}` : 
+    type === 'conversation' ? 
+    status.charAt(0).toUpperCase() + status.slice(1) :
     status.charAt(0).toUpperCase() + status.slice(1)
   );
 
@@ -250,6 +301,59 @@ export function StatusGroup({
           showIcon={false}
         />
       ))}
+    </div>
+  );
+}
+
+/**
+ * Conversation status badge wrapper
+ */
+export function ConversationStatusBadge({
+  status = 'idle',
+  showIcon = true,
+  size = 'md',
+  variant = 'pill',
+  className
+}) {
+  return (
+    <StatusBadge
+      status={status}
+      type="conversation"
+      size={size}
+      variant={variant}
+      showIcon={showIcon}
+      className={className}
+    />
+  );
+}
+
+/**
+ * Conversation status indicator with runtime display
+ */
+export function ConversationStatusIndicator({
+  status,
+  runtime = null,
+  size = 'md',
+  className
+}) {
+  return (
+    <div className={cn('flex items-center gap-2', className)}>
+      <ConversationStatusBadge 
+        status={status} 
+        size={size}
+        showIcon={true} 
+      />
+      {runtime && (
+        <span className={cn(
+          'font-mono',
+          size === 'xs' ? 'text-xs' : 
+          size === 's' ? 'text-xs' :
+          size === 'md' ? 'text-sm' : 'text-base',
+          THEME.colors.text.secondary
+        )}>
+          {runtime}
+        </span>
+      )}
     </div>
   );
 }
