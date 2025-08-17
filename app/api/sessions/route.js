@@ -145,6 +145,19 @@ export async function POST(request) {
         existingSession.lastActivityAt = Date.now();
         existingSession.currentRoute = metadata?.route || existingSession.currentRoute;
         
+        // Track route history
+        if (!existingSession.routeHistory) {
+          existingSession.routeHistory = [];
+        }
+        if (metadata?.route && metadata.route !== existingSession.currentRoute) {
+          // Add to route history if it's a new route
+          existingSession.routeHistory.push({
+            route: metadata.route,
+            visitedAt: Date.now(),
+            eventCount: 0
+          });
+        }
+        
         console.log('[Sessions API] Reusing existing session:', existingSessionId);
         return NextResponse.json(existingSession, { status: 200 });
       }
@@ -201,6 +214,34 @@ export async function POST(request) {
         const mostRecent = userSessions.sort((a, b) => b.session.lastActivityAt - a.session.lastActivityAt)[0];
         // Update the session route and activity
         mostRecent.session.lastActivityAt = Date.now();
+        
+        // Track route history
+        if (!mostRecent.session.routeHistory) {
+          mostRecent.session.routeHistory = [{
+            route: mostRecent.session.currentRoute || '/',
+            visitedAt: mostRecent.session.startedAt || Date.now(),
+            eventCount: 0
+          }];
+        }
+        
+        // Add to route history if it's a different route
+        if (currentRoute !== mostRecent.session.currentRoute) {
+          const existingRouteIndex = mostRecent.session.routeHistory.findIndex(r => r.route === currentRoute);
+          
+          if (existingRouteIndex >= 0) {
+            // Update existing route entry
+            mostRecent.session.routeHistory[existingRouteIndex].visitedAt = Date.now();
+            mostRecent.session.routeHistory[existingRouteIndex].eventCount++;
+          } else {
+            // Add new route to history
+            mostRecent.session.routeHistory.push({
+              route: currentRoute,
+              visitedAt: Date.now(),
+              eventCount: 1
+            });
+          }
+        }
+        
         mostRecent.session.currentRoute = currentRoute;
         
         // Also clean up any guest sessions when switching to registered user
@@ -252,6 +293,11 @@ export async function POST(request) {
       status: SESSION_STATUS.ACTIVE,
       browser: browser || 'Unknown',
       currentRoute: metadata?.route || '/',
+      routeHistory: [{
+        route: metadata?.route || '/',
+        visitedAt: Date.now(),
+        eventCount: 0
+      }],
       eventCount: 0,
       recentActions: [],
       metadata: metadata || {},

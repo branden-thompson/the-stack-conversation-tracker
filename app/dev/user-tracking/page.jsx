@@ -318,6 +318,48 @@ export default function UserTrackingPage() {
                         
                         // Render each user as a single card (like provisioned guests)
                         // If multiple sessions, show combined info
+                        
+                        // Collect all unique routes from all sessions' route history
+                        const allRoutes = new Map();
+                        userSessions.forEach(session => {
+                          // Add routes from routeHistory if available
+                          if (session.routeHistory && Array.isArray(session.routeHistory)) {
+                            session.routeHistory.forEach(routeEntry => {
+                              const existing = allRoutes.get(routeEntry.route);
+                              if (existing) {
+                                existing.eventCount += routeEntry.eventCount || 0;
+                                existing.lastActivity = Math.max(existing.lastActivity, routeEntry.visitedAt || 0);
+                              } else {
+                                allRoutes.set(routeEntry.route, {
+                                  route: routeEntry.route,
+                                  lastActivity: routeEntry.visitedAt || session.lastActivityAt,
+                                  eventCount: routeEntry.eventCount || 0,
+                                  recentAction: null
+                                });
+                              }
+                            });
+                          } else {
+                            // Fallback to currentRoute if no history
+                            const route = session.currentRoute || '/';
+                            const existing = allRoutes.get(route);
+                            if (existing) {
+                              existing.eventCount += session.eventCount || 0;
+                              existing.lastActivity = Math.max(existing.lastActivity, session.lastActivityAt);
+                            } else {
+                              allRoutes.set(route, {
+                                route: route,
+                                lastActivity: session.lastActivityAt,
+                                eventCount: session.eventCount || 0,
+                                recentAction: session.recentActions?.[0] || null
+                              });
+                            }
+                          }
+                        });
+                        
+                        // Convert map to array and sort by last activity
+                        const routeActivities = Array.from(allRoutes.values())
+                          .sort((a, b) => b.lastActivity - a.lastActivity);
+                        
                         const combinedSession = {
                           id: `combined-${userId}`,
                           userId: userId,
@@ -330,19 +372,14 @@ export default function UserTrackingPage() {
                           browser: userSessions.length === 1 ? 
                             userSessions[0]?.browser || 'Unknown' : 
                             `${userSessions[0]?.browser?.split(' ')[0] || 'Unknown'} (${userSessions.length} sessions)`,
-                          currentRoute: userSessions.length === 1 ? userSessions[0].currentRoute : `${userSessions.length} routes`,
+                          currentRoute: userSessions.length === 1 ? userSessions[0].currentRoute : `${routeActivities.length} routes`,
                           eventCount: userSessions.reduce((sum, s) => sum + (s.eventCount || 0), 0),
                           recentActions: userSessions.flatMap(s => s.recentActions || []).sort((a, b) => b.timestamp - a.timestamp).slice(0, 1),
                           metadata: {
                             sessionCount: userSessions.length,
-                            routes: userSessions.map(s => s.currentRoute),
+                            routes: routeActivities.map(r => r.route),
                             sessions: userSessions, // Store original sessions for detailed display
-                            routeActivities: userSessions.map(s => ({
-                              route: s.currentRoute,
-                              lastActivity: s.lastActivityAt,
-                              eventCount: s.eventCount || 0,
-                              recentAction: s.recentActions?.[0] || null
-                            }))
+                            routeActivities: routeActivities
                           }
                         };
                         

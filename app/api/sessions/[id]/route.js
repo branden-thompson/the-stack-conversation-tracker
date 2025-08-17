@@ -26,8 +26,36 @@ export async function PATCH(request, { params }) {
     
     // Update session properties
     if (body.route !== undefined) {
+      // Initialize route history if it doesn't exist
+      if (!session.routeHistory) {
+        session.routeHistory = [{
+          route: session.currentRoute || '/',
+          visitedAt: session.startedAt || Date.now(),
+          eventCount: 0
+        }];
+      }
+      
+      // Add to route history if it's a different route
+      if (body.route !== session.currentRoute) {
+        // Find existing route entry or create new one
+        const existingRouteIndex = session.routeHistory.findIndex(r => r.route === body.route);
+        
+        if (existingRouteIndex >= 0) {
+          // Update existing route entry
+          session.routeHistory[existingRouteIndex].visitedAt = Date.now();
+          session.routeHistory[existingRouteIndex].eventCount++;
+        } else {
+          // Add new route to history
+          session.routeHistory.push({
+            route: body.route,
+            visitedAt: Date.now(),
+            eventCount: 1
+          });
+        }
+      }
+      
       session.currentRoute = body.route;
-      console.log(`[Sessions API] Updated route for session ${id}: ${body.route}`);
+      console.log(`[Sessions API] Updated route for session ${id}: ${body.route}, history:`, session.routeHistory.map(r => r.route));
     }
     
     if (body.status !== undefined) {

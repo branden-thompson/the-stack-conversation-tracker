@@ -298,77 +298,127 @@ export function SessionCard({
         </div>
       </div>
 
-      {/* Session Details - Two Column Layout */}
-      <div className="flex gap-4">
-        {/* Left Column: Browser & Routes */}
-        <div className={cn("flex-1 space-y-2 text-sm", THEME.colors.text.secondary)}>
-          <div className="flex items-center gap-2">
-            <BrowserIcon className="w-4 h-4" />
-            <span className="truncate">{getShortUserAgent(session.browser)}</span>
-          </div>
-          <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 mt-0.5" />
-            {session.metadata?.sessionCount > 1 ? (
-              <div className="flex-1">
-                <div className="text-xs mb-1 font-medium">Routes ({session.metadata.routes.length}):</div>
-                <div className="space-y-1">
-                  {session.metadata.routeActivities?.map((routeActivity, index) => (
-                    <div key={index} className={cn(
-                      "text-xs px-2 py-1 rounded",
-                      THEME.colors.background.tertiary
-                    )}>
-                      <div className="flex items-center justify-between">
-                        <span className={cn("font-mono", THEME.colors.text.primary)}>{routeActivity.route}</span>
-                        <span className={THEME.colors.text.tertiary}>{routeActivity.eventCount} events</span>
-                      </div>
-                      {routeActivity.recentAction && (
-                        <div className={cn("mt-1", THEME.colors.text.secondary)}>
-                          {SESSION_EVENT_LABELS[routeActivity.recentAction.type] || routeActivity.recentAction.type}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <span className="truncate">{session.currentRoute}</span>
-            )}
-          </div>
+      {/* Session Details - Enhanced Layout */}
+      <div className="space-y-2">
+        {/* Browser Info Row */}
+        <div className="flex items-center gap-2 text-sm">
+          <BrowserIcon className={cn("w-4 h-4", THEME.colors.text.tertiary)} />
+          <span className={cn("truncate", THEME.colors.text.secondary)}>
+            {getShortUserAgent(session.browser)}
+          </span>
         </div>
 
-        {/* Vertical Divider */}
-        <div className={cn("w-px bg-gray-300 dark:bg-gray-600")}></div>
-
-        {/* Right Column: Recent Activity */}
-        <div className="flex-1">
-          {recentAction ? (
-            <div>
-              <div className={cn("text-xs font-medium mb-2", THEME.colors.text.tertiary)}>
-                Last Activity
+        {/* Routes and Activities Table */}
+        {session.metadata?.sessionCount > 1 && session.metadata?.routeActivities ? (
+          <div className="space-y-0">
+            {/* Header Row */}
+            <div className="grid grid-cols-2">
+              <div className={cn(
+                "pr-3 py-1.5 text-xs font-medium flex items-center gap-2",
+                THEME.colors.text.tertiary
+              )}>
+                <MapPin className="w-4 h-4" />
+                <span>Route</span>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Activity className="w-3 h-3 flex-shrink-0" />
-                  <span className={cn("text-sm truncate", THEME.colors.text.secondary)}>
-                    {recentAction.label}
-                  </span>
-                </div>
-                <span className={cn("text-xs whitespace-nowrap", THEME.colors.text.tertiary)}>
-                  {formatLastActivity(recentAction.timestamp)}
-                </span>
+              <div className={cn(
+                "pl-3 py-1.5 text-xs font-medium flex items-center gap-2 border-l",
+                "border-gray-300 dark:border-gray-600",
+                THEME.colors.text.tertiary
+              )}>
+                <Activity className="w-4 h-4" />
+                <span>Last Activity</span>
               </div>
             </div>
-          ) : (
-            <div>
-              <div className={cn("text-xs font-medium mb-2", THEME.colors.text.tertiary)}>
-                Last Activity
+            
+            {/* Data Rows */}
+            {session.metadata.routeActivities.map((routeActivity, index) => (
+              <div key={index} className="grid grid-cols-2">
+                {/* Route Column */}
+                <div className={cn(
+                  "pr-3 py-2 text-sm flex items-start gap-2"
+                )}>
+                  <MapPin className={cn("w-4 h-4 mt-0.5 flex-shrink-0", THEME.colors.text.tertiary)} />
+                  <div className="flex-1 min-w-0">
+                    <div className={cn("font-mono truncate", THEME.colors.text.primary)}>
+                      {routeActivity.route}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Activity Column */}
+                <div className={cn(
+                  "pl-3 py-2 text-sm flex items-center gap-2 border-l",
+                  "border-gray-300 dark:border-gray-600"
+                )}>
+                  <Activity className={cn("w-4 h-4 flex-shrink-0", THEME.colors.text.tertiary)} />
+                  <div className="flex-1 flex items-center justify-between min-w-0">
+                    {routeActivity.recentAction ? (
+                      <>
+                        <span className={cn("truncate", THEME.colors.text.secondary)}>
+                          {SESSION_EVENT_LABELS[routeActivity.recentAction.type] || routeActivity.recentAction.type}
+                        </span>
+                        <span className={cn("text-xs ml-2 whitespace-nowrap", THEME.colors.text.tertiary)}>
+                          {routeActivity.eventCount} events
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className={cn("", THEME.colors.text.secondary)}>
+                          Session Started
+                        </span>
+                        <span className={cn("text-xs ml-2 whitespace-nowrap", THEME.colors.text.tertiary)}>
+                          {routeActivity.eventCount || 0} events
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
-              <span className={cn("text-xs", THEME.colors.text.tertiary)}>
-                No recent activity
+            ))}
+          </div>
+        ) : (
+          /* Single Route Display */
+          <div className="grid grid-cols-2">
+            {/* Route Column */}
+            <div className={cn(
+              "pr-3 py-2 text-sm flex items-center gap-2"
+            )}>
+              <MapPin className={cn("w-4 h-4 flex-shrink-0", THEME.colors.text.tertiary)} />
+              <span className={cn("font-mono truncate", THEME.colors.text.primary)}>
+                {session.currentRoute}
               </span>
             </div>
-          )}
-        </div>
+            
+            {/* Activity Column */}
+            <div className={cn(
+              "pl-3 py-2 text-sm flex items-center gap-2 border-l",
+              "border-gray-300 dark:border-gray-600"
+            )}>
+              <Activity className={cn("w-4 h-4 flex-shrink-0", THEME.colors.text.tertiary)} />
+              <div className="flex-1 flex items-center justify-between min-w-0">
+                {recentAction ? (
+                  <>
+                    <span className={cn("truncate", THEME.colors.text.secondary)}>
+                      {recentAction.label}
+                    </span>
+                    <span className={cn("text-xs ml-2 whitespace-nowrap", THEME.colors.text.tertiary)}>
+                      {session.eventCount} events
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className={cn("", THEME.colors.text.secondary)}>
+                      Session Started
+                    </span>
+                    <span className={cn("text-xs ml-2 whitespace-nowrap", THEME.colors.text.tertiary)}>
+                      {session.eventCount || 0} events
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Session ID (for debugging) */}
