@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
+import { GlobalSessionProvider } from '@/lib/contexts/GlobalSessionProvider';
 
 export default function Providers({ children }) {
   return (
@@ -10,7 +11,9 @@ export default function Providers({ children }) {
       enableSystem            // allow system auto
       disableTransitionOnChange // avoids flashy transitions on toggle
     >
-      {children}
+      <GlobalSessionProvider>
+        {children}
+      </GlobalSessionProvider>
     </ThemeProvider>
   );
 }

@@ -15,6 +15,7 @@ import { useCards } from '@/lib/hooks/useCards';
 import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
+import { useGlobalSession } from '@/lib/contexts/GlobalSessionProvider';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
@@ -101,12 +102,38 @@ function BoardInner({
   const conversationControls = useConversationControls();
   const { activeConversation, runtime, onPause, onResumeOrStart, onStop, conversationApi: conv } = conversationControls;
 
+  // Session tracking
+  const { 
+    emitCardEvent, 
+    emitUIEvent,
+    emitPreferenceEvent,
+    emit,
+    initializeSession
+  } = useGlobalSession();
+  
+  // Sync session when user changes
+  useEffect(() => {
+    console.log('[Board] User state:', currentUser);
+    if (currentUser && currentUser.id) {
+      console.log('[Board] Initializing session for user:', currentUser.name, currentUser.id);
+      // Trigger session initialization when user is available
+      initializeSession(currentUser);
+    } else {
+      console.log('[Board] No current user available yet');
+    }
+  }, [currentUser, initializeSession]);
+
   // Left tray
   const [trayOpen, setTrayOpen] = useState(false);
   
   // Handle animations toggle
   const handleAnimationsToggle = useCallback(async (enabled) => {
     setAnimationsEnabled(enabled);
+    
+    // Emit preference change event
+    emitPreferenceEvent('animation', {
+      animationsEnabled: enabled
+    });
     
     // Update user preferences if logged in
     if (currentUser && !isGuestMode) {
@@ -130,7 +157,7 @@ function BoardInner({
     if (isGuestMode && updateGuestPreferences) {
       updateGuestPreferences({ animationsEnabled: enabled });
     }
-  }, [currentUser, isGuestMode, updateGuestPreferences]);
+  }, [currentUser, isGuestMode, updateGuestPreferences, emitPreferenceEvent]);
 
   const resetLayout = useCallback(() => {
     setLayoutKey((k) => k + 1);
@@ -155,6 +182,14 @@ function BoardInner({
   async function handleCreate(type) {
     const payload = buildNewCardPayload(type, currentUser);
     const newCard = await createCard(payload);
+    
+    // Emit user tracking event
+    emitCardEvent('created', {
+      cardId: newCard?.id,
+      cardType: newCard?.type,
+      zone: newCard?.zone,
+    });
+    
     try {
       if (conv.activeId) {
         await conv.logEvent(conv.activeId, 'card.created', {
@@ -172,6 +207,13 @@ function BoardInner({
   async function handleDelete(id) {
     const card = cards.find(c => c.id === id);
     await deleteCard(id);
+    
+    // Emit user tracking event
+    emitCardEvent('deleted', {
+      cardId: id,
+      zone: card?.zone,
+    });
+    
     try {
       if (conv.activeId) {
         await conv.logEvent(conv.activeId, 'card.deleted', { id, zone: card?.zone });
@@ -185,6 +227,22 @@ function BoardInner({
   const wrappedUpdateCard = async (id, updates) => {
     const before = cards.find(c => c.id === id);
     const updated = await updateCard(id, updates);
+    
+    // Emit user tracking events
+    if (updates && Object.prototype.hasOwnProperty.call(updates, 'content')) {
+      emitCardEvent('updated', { 
+        cardId: id, 
+        fields: ['content'] 
+      });
+    }
+    if (before && updates && updates.zone && updates.zone !== before.zone) {
+      emitCardEvent('moved', {
+        cardId: id,
+        from: before.zone,
+        to: updates.zone,
+      });
+    }
+    
     try {
       if (!conv.activeId) {
         return updated;
@@ -239,9 +297,18 @@ function BoardInner({
     <div className={`h-screen flex flex-col ${getAppThemeClasses('page')}`}>
         {/* Header */}
         <AppHeader
-          onOpenTray={() => setTrayOpen(true)}
-          onOpenHelp={() => setHelpOpen(true)}
-          onOpenNewCard={() => setDialogOpen(true)}
+          onOpenTray={() => {
+            setTrayOpen(true);
+            emitUIEvent('trayOpen', { trayType: 'navigation' });
+          }}
+          onOpenHelp={() => {
+            setHelpOpen(true);
+            emitUIEvent('dialogOpen', { dialogType: 'help' });
+          }}
+          onOpenNewCard={() => {
+            setDialogOpen(true);
+            emitUIEvent('dialogOpen', { dialogType: 'newCard' });
+          }}
           onResetLayout={resetLayout}
           onRefreshCards={refreshCards}
           activeConversation={activeConversation}

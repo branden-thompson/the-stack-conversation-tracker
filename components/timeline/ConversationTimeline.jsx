@@ -50,6 +50,8 @@ function AccordionListView({ conversation, events }) {
       {/* Card Rows */}
       {cardBranches.map((cardBranch) => {
         const cardIsExpanded = isExpanded(cardBranch.cardId);
+        // Handle synthetic root events (when no card.created event exists)
+        const isSynthetic = cardBranch.rootEvent?.synthetic;
         const cardName = cardBranch.rootEvent.payload?.content?.substring(0, 30) || 
                         `${cardBranch.rootEvent.payload?.type || 'card'} (${cardBranch.cardId.slice(0, 8)})`;
         

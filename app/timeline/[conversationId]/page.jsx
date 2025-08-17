@@ -56,7 +56,7 @@ export default function TimelinePage() {
         const eventData = await listEvents(conversationId);
         setEvents(eventData || []);
       } catch (err) {
-        console.error('Failed to load events:', err);
+        console.error('[Timeline] Failed to load events:', err);
         setEventsError('Failed to load timeline events');
       } finally {
         setEventsLoading(false);
