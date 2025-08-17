@@ -115,16 +115,16 @@ function BoardInner({
     initializeSession
   } = useGlobalSession();
   
-  // Sync session when user changes
+  // Session initialization is now handled by GlobalSessionProvider automatically
+  // This ensures all pages get sessions, not just the Board
   useEffect(() => {
-    console.log('[Board] User state:', currentUser);
     if (currentUser && currentUser.id) {
-      console.log('[Board] Initializing session for user:', currentUser.name, currentUser.id, 'isGuest:', currentUser.isGuest);
-      // Always initialize session when user changes
-      // The GlobalSessionProvider will handle deduplication
-      initializeSession(currentUser);
-    } else {
-      console.log('[Board] No current user available yet');
+      console.log('[Board] Current user:', currentUser.name, currentUser.id, 'isGuest:', currentUser.isGuest);
+      // If user switches, update the session
+      if (!currentUser.isGuest && !currentUser.isSystemUser) {
+        // For registered users, update the session
+        initializeSession(currentUser);
+      }
     }
   }, [currentUser, initializeSession]);
 

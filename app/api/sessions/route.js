@@ -15,14 +15,32 @@ const { sessionStore, eventStore, simulatedSessions } = sessionManager;
 export async function GET(request) {
   try {
     // Stores are now from sessionManager
+    console.log('[Sessions API] GET - sessionStore size:', sessionStore.size, 'keys:', Array.from(sessionStore.keys()));
     
     // Get all active sessions from store
-    const regularSessions = Array.from(sessionStore.values())
+    const allSessions = Array.from(sessionStore.values());
+    
+    // Debug: Check if SESSION_STATUS.ENDED is what we expect
+    console.log('[Sessions API] SESSION_STATUS.ENDED value:', SESSION_STATUS.ENDED);
+    
+    console.log('[Sessions API] All sessions:', allSessions.map(s => ({
+      id: s.id.substring(0,8), 
+      status: s.status,
+      statusIsEnded: s.status === SESSION_STATUS.ENDED,
+      statusIsActive: s.status === SESSION_STATUS.ACTIVE,
+      statusValue: `"${s.status}"`,
+      userName: s.userName,
+      createdAt: new Date(s.startedAt).toISOString()
+    })));
+    
+    const regularSessions = allSessions
       .filter(session => session.status !== SESSION_STATUS.ENDED)
       .map(session => ({
         ...session,
         events: eventStore.get(session.id) || [],
       }));
+    
+    console.log('[Sessions API] After filtering (not ENDED):', regularSessions.length);
     
     // Get simulated sessions
     const simSessions = Array.from(simulatedSessions?.values() || [])
@@ -67,7 +85,29 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
+    
+    // Handle DELETE via sendBeacon (which sends POST with method: 'DELETE')
+    if (body.method === 'DELETE') {
+      const { searchParams } = new URL(request.url);
+      const sessionId = searchParams.get('id');
+      
+      if (sessionId && sessionStore.has(sessionId)) {
+        const session = sessionStore.get(sessionId);
+        console.log('[Sessions API] Ending session via sendBeacon:', sessionId);
+        session.status = SESSION_STATUS.ENDED;
+        session.endedAt = Date.now();
+        return NextResponse.json({ success: true, message: 'Session ended' });
+      }
+      
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 404 }
+      );
+    }
+    
     const { userId, userType, browser, metadata, sessionId: existingSessionId } = body;
+    
+    console.log('[Sessions API] POST request received:', { userId, userType, isSystemUser: metadata?.isSystemUser });
 
     // Validate userId
     if (!userId || userId === 'undefined' || userId === 'null') {
@@ -75,6 +115,21 @@ export async function POST(request) {
       return NextResponse.json(
         { error: 'Valid userId is required' },
         { status: 400 }
+      );
+    }
+    
+    // CRITICAL: Don't create sessions for system user
+    if (userId === 'system' || metadata?.isSystemUser === true) {
+      console.log('[Sessions API] Skipping session creation for system user:', userId);
+      return NextResponse.json(
+        { 
+          id: 'system-no-session',
+          userId: 'system',
+          userName: 'System',
+          status: 'system',
+          message: 'System user does not require sessions' 
+        },
+        { status: 200 }
       );
     }
 
@@ -185,10 +240,12 @@ export async function POST(request) {
     }
 
     // Create new session only if no valid existing session
+    console.log('[Sessions API] Creating session with SESSION_STATUS.ACTIVE:', SESSION_STATUS.ACTIVE);
+    
     const session = {
       id: existingSessionId || crypto.randomUUID(),
       userId,
-      userType,
+      userType: userType || 'guest', // Default to guest if not specified
       userName: metadata?.userName || userId,
       startedAt: Date.now(),
       lastActivityAt: Date.now(),
@@ -199,14 +256,36 @@ export async function POST(request) {
       recentActions: [],
       metadata: metadata || {},
     };
+    
+    console.log('[Sessions API] Session object created with status:', session.status);
 
-    // Store session
+    // Store session - with extra validation
+    console.log('[Sessions API] About to store session with ID:', session.id);
+    const beforeSize = sessionStore.size;
     sessionStore.set(session.id, session);
+    const afterSize = sessionStore.size;
     
     // Also initialize in event store
     eventStore.set(session.id, []);
     
-    console.log('[Sessions API] New session created:', session.id, 'Total sessions:', sessionStore.size);
+    console.log('[Sessions API] Store operation - Before:', beforeSize, 'After:', afterSize);
+    console.log('[Sessions API] New session created:', session.id, 
+      'User:', session.userName, 
+      'Type:', session.userType,
+      'Status:', session.status,
+      'Total sessions:', sessionStore.size);
+    
+    // Debug: Log all current sessions
+    console.log('[Sessions API] Current sessions in store:', 
+      Array.from(sessionStore.keys()));
+    
+    // Verify the session was stored correctly
+    const storedSession = sessionStore.get(session.id);
+    console.log('[Sessions API] Verified stored session:', {
+      found: !!storedSession,
+      id: storedSession?.id,
+      status: storedSession?.status
+    });
 
     return NextResponse.json(session, { status: 201 });
   } catch (error) {

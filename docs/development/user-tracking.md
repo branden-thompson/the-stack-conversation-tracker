@@ -2,336 +2,322 @@
 
 ## Overview
 
-The User Tracking system provides real-time monitoring of user sessions and activity across the application. It features a simplified session state management system with provisioned guest support and a clean three-group UI structure for optimal user experience.
+The conversation tracker implements a sophisticated user tracking system that manages both registered users and provisioned guests across browser tabs and sessions. This system ensures proper user isolation, session persistence, and seamless switching between different user contexts.
 
 ## Key Features
 
-### Session State Management System
-- **State Transitions**: Sessions use `active`, `inactive`, `idle`, and `ended` states instead of aggressive deletion
-- **Provisioned Guest Management**: 1 guest per browser tab with proper persistence
-- **5-Second Transition Delays**: Smooth transitions between user types
-- **Session Persistence**: Sessions survive browser refreshes and tab switches
+- **Unique provisioned guest per browser tab** - Each tab gets its own guest identity
+- **Session persistence** - User sessions are tracked server-side
+- **Seamless user switching** - Switch between registered users and guests without losing context
+- **Automatic cleanup** - Sessions end properly when tabs close
+- **Real-time tracking** - View all active users and sessions at `/dev/user-tracking`
 
-### Enhanced User Interface
-- **Three-Group Structure**: Registered Users, Active Provisioned Guests, Inactive Provisioned Guests
-- **Consistent Card Design**: All user types use the same SessionCard component
-- **Dev Theme Integration**: Consistent zinc/slate color scheme throughout
-- **Real-time Updates**: Live session data with 2-second polling
+## Expected Behaviors
+
+### 1. NEW BROWSER TAB
+**Requirement**: Each new browser tab should get its own unique provisioned guest
+
+**Current Behavior**: ✅ Working correctly
+- Opens with a unique provisioned guest (e.g., "Curious Owl", "Helpful Dolphin")
+- Guest has a unique avatar and ID
+- Session is created and tracked server-side
+- Guest appears in "Active Provisioned Guests" section of tracking page
+
+**Example**:
+```
+Tab 1: Opens → Creates "Engaged Falcon" (guest_n4s8qVO1)
+Tab 2: Opens → Creates "Collaborative Fox" (guest_oxa6EadV)
+Both tabs maintain separate identities
+```
+
+### 2. BROWSER REFRESH
+**Requirement**: Remember last active user after refresh
+
+**Current Behavior**: ⚠️ Partially working
+- Creates a new provisioned guest on refresh (acceptable trade-off)
+- Previous guest session is properly cleaned up
+- No session accumulation or memory leaks
+
+**Note**: Full persistence would require database/Redis storage. Current in-memory approach is simpler but resets on refresh.
+
+**Example**:
+```
+Before refresh: "Quick Penguin" active
+After refresh: New guest "Helpful Dolphin" created
+Quick Penguin session marked as ended
+```
+
+### 3. BROWSER TAB CLOSE
+**Requirement**: Clean up provisioned guest when tab closes
+
+**Current Behavior**: ✅ Working correctly
+- Uses `sendBeacon` API to notify server on tab close
+- Session is marked as ended
+- Guest removed from active users list
+- No orphaned sessions
+
+**Example**:
+```
+Tab with "Curious Owl" closes
+→ sendBeacon fires
+→ Session ends on server
+→ "Curious Owl" disappears from tracking page
+```
+
+### 4. USER SWITCHING
+**Requirement**: Support switching between registered users and guests
+
+**Current Behavior**: ✅ Working correctly
+- Switch from guest → registered user works
+- Switch from registered → guest restores original provisioned guest
+- Profile pictures and names maintain correctly
+- Sessions transition between active/inactive states
+
+**Example**:
+```
+Start: "Anonymous Penguin" (guest)
+Switch to: "Branden" (registered)
+Switch back: "Anonymous Penguin" restored (same guest, not new)
+```
 
 ## Architecture
 
-### Core Components
+### Client-Side Components
 
-```
-┌─────────────────────────────────────────────────┐
-│           SessionManager Service                │
-│  - Singleton pattern for shared session stores │
-│  - Handles cleanup and state management         │
-└─────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────┐
-│         GlobalSessionProvider                   │
-│  - Session lifecycle management                 │
-│  - Provisioned guest coordination               │
-│  - State transition handling                    │
-└─────────────────────────────────────────────────┘
-                          ↓
-┌─────────────────────────────────────────────────┐
-│          User Tracking UI                       │
-│  - Three collapsible groups                     │
-│  - Unified SessionCard components               │
-│  - Real-time activity display                   │
-└─────────────────────────────────────────────────┘
-```
+1. **`/lib/hooks/useGuestUsers.js`**
+   - Main hook managing guest users and switching logic
+   - Handles provisioned guest creation and restoration
+   - Manages browser session coordination
 
-### Session State Flow
+2. **`/lib/utils/browser-session.js`**
+   - Creates unique browser session IDs using `sessionStorage`
+   - Ensures tab isolation (each tab has unique ID)
 
-```mermaid
-graph TD
-    A[Session Created] --> B[Active]
-    B --> C[User Switches]
-    C --> D[5-Second Delay]
-    D --> E[Inactive]
-    E --> F[User Returns]
-    F --> B
-    E --> G[30 Minutes Idle]
-    G --> H[Ended]
-    B --> I[Tab Closed]
-    I --> H
-```
+3. **`/lib/contexts/GlobalSessionProvider.jsx`**
+   - Global session management at app level
+   - Auto-initializes sessions on app boot
+   - Handles session lifecycle and cleanup
 
-## Implementation Details
+### Server-Side Components
 
-### Provisioned Guest Management
+1. **`/app/api/browser-sessions/route.js`**
+   - Tracks browser sessions server-side
+   - Creates provisioned guest for each browser tab
+   - Maintains mapping between browser session and guest
 
-**Requirements Implemented:**
-1. **One guest per browser tab maximum**
-2. **Guest persistence until tab close** (not deleted on user switching)
-3. **Active/inactive state transitions** instead of deletion
-4. **5-second transition delays** for smooth user experience
-5. **UI synchronization** between profile switcher and session tracking
+2. **`/app/api/sessions/route.js`**
+   - Main session management API
+   - Creates, retrieves, and ends user sessions
+   - Filters sessions by status (active/inactive/ended)
 
-**Guest Persistence Strategy:**
+3. **`/lib/services/session-manager.js`**
+   - Singleton service managing global session store
+   - Handles automatic cleanup of stale sessions
+   - Prevents memory leaks with periodic cleanup
+
+## Common Issues and Solutions
+
+### Issue 1: Sessions showing as "ended" immediately after creation
+**Problem**: Cleanup interval was using wrong timestamp for age calculation
+**Solution**: Fixed to use `endedAt` for ended sessions, `lastActivityAt` for active ones
 ```javascript
-// sessionStorage for tab-specific guest
-const PROVISIONED_GUEST_KEY = 'provisioned_session_guest';
+// Before (wrong):
+const age = now - session.lastActivityAt;
 
-// Store guest with session metadata
-sessionStorage.setItem(PROVISIONED_GUEST_KEY, JSON.stringify({
-  id: guestId,
-  name: guestName,
-  profilePicture: avatar,
-  preferences: {
-    sessionId: sessionId,
-    fingerprint: browserFingerprint,
-    theme: theme
-  }
-}));
+// After (correct):
+const referenceTime = session.status === SESSION_STATUS.ENDED 
+  ? (session.endedAt || session.lastActivityAt)
+  : session.lastActivityAt;
+const age = now - referenceTime;
 ```
 
-### Session Card Component
-
-**Unified Design:** All tracked users use the same `SessionCard` component with:
-- **Header**: Avatar, name, session time, event count
-- **Details**: Browser info (shortened), routes with real-time activities
-- **Layout**: Two-column structure with vertical divider
-- **Theming**: Consistent dev theme colors (zinc/slate)
-
-**Card Structure:**
-```
-┌─────────────────────────────────────────────────┐
-│ [Avatar] User Name        [🕒] 2h 15m           │
-│ Status                    [#] 7 events          │
-├─────────────────────────────────────────────────┤
-│ [Browser] Chrome on macOS │ Last Activity       │
-│ [Route] Multiple routes   │ [⚡] Button Click   │
-│ - /dev/user-tracking     │ 2m ago              │
-│ - /dev/convos            │                     │
-├─────────────────────────────────────────────────┤
-│ ID: session-123...                              │
-└─────────────────────────────────────────────────┘
-```
-
-### Three-Group UI Structure
-
-**1. Registered Users**
-- All registered user sessions
-- Combined session data for multiple routes
-- Blue-bordered group header
-
-**2. Active Provisioned Guests**
-- Provisioned guests with status 'active'
-- Green indicator, auto-expanded
-- Real-time activity tracking
-
-**3. Inactive Provisioned Guests**
-- Provisioned guests with status 'inactive'
-- Yellow indicator, collapsed by default
-- Maintains session history
-
-### State Transition API
-
-**Endpoint:** `POST /api/sessions/transition`
-
+### Issue 2: Provisioned guest not restored when switching back from registered user
+**Problem**: System was creating new guest instead of restoring browser session's guest
+**Solution**: Modified `handleGuestModeSwitch` to check browser session first
 ```javascript
-// Request body
-{
-  "userId": "guest_123456789",
-  "newStatus": "inactive",
-  "reason": "switched_to_registered_user"
+// Now fetches from browser session before creating new
+let guestToUse = provisionedGuest;
+if (!guestToUse) {
+  // Try to get from browser session on server
+  const response = await fetch(`/api/browser-sessions?id=${browserSessionId}`);
+  // ... restore provisioned guest
 }
-
-// Transitions handled:
-// - registered_user → guest_mode (after 5s delay)
-// - guest_mode → registered_user (after 5s delay)
-// - tab_closed → ended (immediate)
-// - idle_timeout → inactive (after 30min)
 ```
 
-## Event Tracking
+### Issue 3: Null reference errors during user switching
+**Problem**: Code referenced `provisionedGuest` variable that could be null
+**Solution**: Use local `guestToUse` variable consistently after fetching
 
-### Tracked Event Categories
+## Testing the System
 
-1. **Navigation Events**: `page_view`, `route_change`
-2. **Board Events**: `card_created`, `card_updated`, `card_moved`, `card_flipped`
-3. **UI Events**: `button_clicked`, `dialog_opened`, `dialog_closed`
-4. **Session Events**: `session_start`, `session_end`, `user_switched`
-5. **Settings Events**: `theme_changed`, `animation_toggled`
+### View Active Sessions
+Navigate to `/dev/user-tracking` to see:
+- Registered Users (with session counts)
+- Active Provisioned Guests
+- Inactive Provisioned Guests
 
-### Event Flow Pipeline
+### Test User Switching
+1. Open browser tab (provisioned guest created)
+2. Select registered user from dropdown
+3. Select "Guest Mode" to switch back
+4. Verify same provisioned guest is restored
 
-1. **Component Action** → Event emission
-2. **SessionTracker** → Event batching (10 events or 500ms)
-3. **API Endpoint** → `/api/sessions/events` receives batch
-4. **Event Store** → In-memory storage with session association
-5. **User Tracking UI** → Real-time display with 2s polling
-
-## API Endpoints
-
-### Session Management
-- `GET /api/sessions` - Retrieve all sessions grouped by user type
-- `POST /api/sessions` - Create or reuse session with intelligent logic
-- `PATCH /api/sessions/transition` - Handle state transitions
-- `DELETE /api/sessions/[id]` - End specific session
-
-### Event Tracking
-- `POST /api/sessions/events` - Batch event submission
-- `GET /api/sessions/events` - Retrieve events with filtering
-
-### Session Simulation
-- `POST /api/sessions/simulate` - Create test sessions
-- `PATCH /api/sessions/simulate/activity` - Control auto-activity
-- `DELETE /api/sessions/simulate` - Remove simulated sessions
-
-## Key Files
-
-### Core Implementation
-- `/lib/services/session-manager.js` - Singleton session store
-- `/lib/contexts/GlobalSessionProvider.jsx` - Session context
-- `/lib/hooks/useGuestUsers.js` - Guest user management
-- `/lib/services/session-tracker.js` - Client-side tracking
-
-### UI Components
-- `/app/dev/user-tracking/page.jsx` - Main tracking dashboard
-- `/components/ui/session-card.jsx` - Unified session display
-- `/components/ui/session-group.jsx` - Collapsible group headers
-- `/components/ui/activity-timeline.jsx` - Event timeline
-
-### API Routes
-- `/app/api/sessions/route.js` - Session CRUD operations
-- `/app/api/sessions/transition/route.js` - State transitions
-- `/app/api/sessions/events/route.js` - Event ingestion
+### Test Tab Isolation
+1. Open two browser tabs
+2. Each should have different provisioned guest
+3. User actions in one tab shouldn't affect the other
 
 ## Configuration
 
-### Session Constants
+### Session Timeouts
+Located in `/lib/services/session-manager.js`:
 ```javascript
-// lib/utils/session-constants.js
-export const SESSION_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive', 
-  IDLE: 'idle',
-  ENDED: 'ended'
-};
-
-export const SESSION_CONFIG = {
-  BATCH_SIZE: 10,
-  BATCH_TIMEOUT: 500,
-  IDLE_TIMEOUT: 5 * 60 * 1000,
-  INACTIVE_TIMEOUT: 30 * 60 * 1000
-};
+const INACTIVE_TIMEOUT = 30 * 60 * 1000;  // 30 minutes
+const SESSION_TIMEOUT = 24 * 60 * 60 * 1000;  // 24 hours
 ```
 
-### Theme Integration
+### Cleanup Interval
+Sessions are cleaned up every 5 minutes:
 ```javascript
-// All components use dev theme colors
-import { THEME } from '@/lib/utils/ui-constants';
-
-// Backgrounds: THEME.colors.background.secondary
-// Borders: THEME.colors.border.primary  
-// Text: THEME.colors.text.primary/secondary/tertiary
+setInterval(() => { /* cleanup logic */ }, 5 * 60 * 1000);
 ```
 
-## Debugging
+---
 
-### Common Commands
+## Technical Context for AI Agents
 
-```bash
-# View all sessions with states
-curl -s http://localhost:3000/api/sessions | \
-  jq '.guests[] | {id: .id, name: .userName, status: .status, provisioned: .metadata.provisioned}'
+### System Architecture Deep Dive
 
-# Check transition events
-curl -s "http://localhost:3000/api/sessions/events?limit=20" | \
-  jq '.events[] | select(.type == "session_status_changed")'
-
-# Test session creation
-curl -X POST http://localhost:3000/api/sessions \
-  -H "Content-Type: application/json" \
-  -d '{"userId": "test-user", "userType": "guest", "metadata": {"provisioned": true}}'
-```
-
-### Browser Console Debugging
+#### Browser Session Management
+The system uses `sessionStorage` to create unique browser session IDs that persist for the tab's lifetime but not across refreshes. This is intentional - using `localStorage` would share sessions across tabs, breaking the requirement for tab isolation.
 
 ```javascript
-// Check session sync
-console.log('Current user:', currentUser);
-console.log('Provisioned guest:', provisionedGuest);
-console.log('Session state:', currentSession);
-
-// Verify localStorage
-localStorage.getItem('provisioned_guest_data');
-sessionStorage.getItem('provisioned_session_guest');
+// Browser session created in /lib/utils/browser-session.js
+const BROWSER_SESSION_KEY = 'browser_session_id';
+let browserSessionId = sessionStorage.getItem(BROWSER_SESSION_KEY);
+if (!browserSessionId) {
+  browserSessionId = `bs_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  sessionStorage.setItem(BROWSER_SESSION_KEY, browserSessionId);
+}
 ```
 
-## Best Practices
+#### Provisioned Guest Lifecycle
 
-### Session Management
-1. **Use stable IDs** for cross-tab persistence
-2. **Synchronize client/server session IDs** for event tracking
-3. **Handle all user switching scenarios** gracefully
-4. **Avoid state flags that block updates**
-5. **Deduplicate at multiple levels** (API, client, UI)
+1. **Creation**: When a new tab opens, `useGuestUsers` hook initializes
+2. **Server Registration**: Browser session ID sent to `/api/browser-sessions`
+3. **Guest Provisioning**: Server creates unique guest with name/avatar
+4. **Session Creation**: GlobalSessionProvider creates server-side session
+5. **Activity Tracking**: Session updated with user actions
+6. **Cleanup**: sendBeacon notifies server on tab close
 
-### UI Development
-1. **Use SessionCard component** for all user displays
-2. **Apply dev theme colors consistently**
-3. **Handle loading and error states**
-4. **Implement proper accessibility** with ARIA labels
-5. **Test with multiple tabs and user types**
+#### Critical State Management
 
-### Performance
-1. **Event batching**: 10 events or 500ms timeout
-2. **Polling frequency**: 2 seconds for real-time feel
-3. **Session limits**: Reasonable limits per user
-4. **Cleanup intervals**: Remove old ended sessions
+The system maintains several synchronized states:
 
-## Troubleshooting
+1. **Client State** (React):
+   - `provisionedGuest` - Current tab's guest user
+   - `currentGuestUser` - Active guest (may differ during switching)
+   - `isGuestMode` - Boolean flag for UI state
 
-### Common Issues
+2. **Browser State** (sessionStorage):
+   - `browser_session_id` - Unique tab identifier
+   - `selectedUserId` - Last selected user (for restoration attempts)
 
-**Sessions Not Syncing:**
-1. Check console for initialization logs
-2. Verify localStorage/sessionStorage state
-3. Confirm API session creation/reuse
-4. Test state transition endpoints
+3. **Server State** (in-memory):
+   - `browserSessions` - Map of browser session ID → provisioned guest
+   - `sessionStore` - Map of session ID → session data
+   - `eventStore` - Map of session ID → events array
 
-**Events Not Appearing:**
-1. Verify sessionTracker initialization
-2. Check event batching and submission
-3. Confirm session ID matching
-4. Review event store association
+#### User Switching Flow
 
-**UI Inconsistencies:**
-1. Verify dev theme usage throughout
-2. Check component prop passing
-3. Test responsive behavior
-4. Validate real-time updates
+When switching from registered to guest:
 
-### Emergency Reset
-```bash
-# Clear all sessions and restart
-curl -X DELETE http://localhost:3000/api/sessions/cleanup
-localStorage.clear()
-sessionStorage.clear()
-# Restart dev server
+1. `handleUserSelect` called with guest ID
+2. `switchToUser` queues the switch request
+3. `processSwitchQueue` debounces rapid switches (25ms)
+4. `handleSpecificGuestSwitch` checks if guest is provisioned guest
+5. If not found, `handleGuestModeSwitch` fetches from browser session
+6. Session transitions handled after 5-second delay
+7. GlobalSessionProvider notified of user change
+
+#### Session Status Transitions
+
+Sessions have three states:
+- `active` - User currently active
+- `inactive` - User switched away (after 5s delay)
+- `ended` - Tab closed or session expired
+
+Transitions are handled by `/api/sessions/transition` endpoint to avoid race conditions.
+
+#### Memory Management
+
+The session manager prevents memory leaks through:
+1. Automatic cleanup every 5 minutes
+2. Inactive sessions ended after 30 minutes
+3. Ended sessions deleted after 24 hours
+4. Browser sessions cleaned after 1 hour of inactivity
+
+#### SendBeacon Cleanup
+
+Tab close detection uses the Beacon API for reliability:
+```javascript
+window.addEventListener('beforeunload', () => {
+  const url = `/api/browser-sessions?id=${browserSessionId}`;
+  navigator.sendBeacon(url, JSON.stringify({ method: 'DELETE' }));
+});
 ```
 
-## Future Enhancements
+The API handles this as a POST with method: 'DELETE' due to sendBeacon limitations.
 
-1. **WebSocket Integration**: Replace polling with real-time updates
-2. **Session Analytics**: Aggregated metrics and reporting
-3. **Cross-Tab Synchronization**: BroadcastChannel for tab coordination
-4. **Offline Support**: Queue events when offline
-5. **Database Backend**: Replace in-memory stores
-6. **Enhanced Filtering**: Search and filter capabilities
+#### Known Limitations
 
-## Conclusion
+1. **Refresh Behavior**: Creates new guest on refresh due to in-memory storage
+   - Solution would require Redis/database persistence
+   - Current behavior is acceptable for POC
 
-The User Tracking system provides a robust, user-friendly approach to session monitoring with:
-- **Simplified state management** using transitions instead of deletion
-- **Consistent UI design** with unified components and theming  
-- **Real-time updates** with efficient polling and event batching
-- **Provisioned guest support** with proper persistence and synchronization
+2. **Session Restoration**: Cannot restore sessions after server restart
+   - All sessions lost on server restart
+   - Would need persistent storage for production
 
-The system handles edge cases gracefully while maintaining performance and providing clear visibility into user behavior across the application.
+3. **Scalability**: In-memory storage won't work across multiple servers
+   - Need shared session store (Redis) for horizontal scaling
+
+#### Critical Files and Their Roles
+
+- **`/lib/hooks/useGuestUsers.js`** (Lines 414-592)
+  - Contains `handleGuestModeSwitch`, `handleSpecificGuestSwitch`, `handleRegisteredUserSwitch`
+  - Manages user switching logic and state coordination
+
+- **`/lib/contexts/GlobalSessionProvider.jsx`** (Lines 28-131)
+  - `initializeSession` function handles session creation
+  - Auto-initialization logic prevents System user sessions
+
+- **`/app/api/browser-sessions/route.js`** (Lines 15-75)
+  - POST creates/updates browser sessions
+  - GET retrieves browser session with provisioned guest
+  - DELETE (via sendBeacon) handles cleanup
+
+- **`/app/api/sessions/route.js`** (Lines 85-298)
+  - POST creates new sessions with validation
+  - Prevents System user sessions (lines 121-134)
+  - Handles session reuse logic (lines 138-225)
+
+- **`/lib/services/session-manager.js`** (Lines 41-88)
+  - Cleanup interval with fixed age calculation (lines 51-56)
+  - Global singleton pattern using Node.js global
+
+#### Debugging Tips
+
+1. Check browser console for `[useGuestUsers]`, `[GlobalSessionProvider]`, `[BrowserSession]` logs
+2. Visit `/dev/user-tracking` to see real-time session state
+3. Sessions API returns all active sessions: `GET /api/sessions`
+4. Browser sessions can be checked: `GET /api/browser-sessions?id=<browser_session_id>`
+5. Look for "Transitioned to guest mode" log to confirm successful switches
+
+#### Common Pitfalls to Avoid
+
+1. Don't use `localStorage` for browser sessions - breaks tab isolation
+2. Don't create sessions for System user - it's a placeholder
+3. Don't delete guest sessions immediately on user switch - use inactive state
+4. Don't trust `provisionedGuest` state var during switches - fetch from browser session
+5. Don't assume sessions persist across refreshes - they don't by design
