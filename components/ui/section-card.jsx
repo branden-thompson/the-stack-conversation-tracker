@@ -9,6 +9,7 @@
 
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { THEME, getThemeClasses } from '@/lib/utils/ui-constants';
 
 /**
  * Section Header Component
@@ -16,10 +17,10 @@ import { cn } from '@/lib/utils';
 export function SectionHeader({ title, controls, className }) {
   return (
     <div className={cn(
-      "flex items-center justify-between border-b border-stone-200 dark:border-stone-700 pb-3 mb-4",
+      `flex items-center justify-between border-b ${THEME.colors.border.primary} pb-3 mb-4`,
       className
     )}>
-      <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-200">
+      <h3 className={`text-lg font-semibold ${THEME.colors.text.primary}`}>
         {title}
       </h3>
       {controls && (
@@ -50,7 +51,7 @@ export function SectionFooter({ controls, pagination, className }) {
   
   return (
     <div className={cn(
-      "flex items-center justify-between border-t border-stone-200 dark:border-stone-700 pt-3 mt-4",
+      `flex items-center justify-between border-t ${THEME.colors.border.primary} pt-3 mt-4`,
       className
     )}>
       <div className="flex items-center gap-2">
@@ -80,7 +81,7 @@ export function SectionCard({
   return (
     <Card 
       className={cn(
-        "p-4 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700",
+        getThemeClasses('section'),
         className
       )}
       {...props}

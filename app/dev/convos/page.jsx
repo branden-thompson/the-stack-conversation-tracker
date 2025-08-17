@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DevHeader } from '@/components/ui/dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { RefreshCw, Download } from 'lucide-react';
+import { THEME } from '@/lib/utils/ui-constants';
 
 function fmtDuration(ms) {
   if (!ms || ms < 0) return '00:00:00';
@@ -18,7 +19,7 @@ function fmtDuration(ms) {
 
 function JSONPreview({ value }) {
   return (
-    <pre className="text-xs bg-stone-100 dark:bg-stone-800 rounded p-2 overflow-auto max-h-40">
+    <pre className={`text-xs ${THEME.colors.background.tertiary} rounded p-2 overflow-auto max-h-40`}>
       {JSON.stringify(value, null, 2)}
     </pre>
   );
@@ -31,7 +32,7 @@ const typeColor = (type) => {
     case 'card.updated': return 'bg-amber-500';
     case 'card.deleted': return 'bg-rose-500';
     case 'card.flipped': return 'bg-pink-500';
-    default:             return 'bg-stone-400';
+    default:             return 'bg-zinc-400';
   }
 };
 
@@ -196,7 +197,7 @@ export default function DevConvos() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-stone-50 dark:bg-stone-900">
+    <div className={`h-screen flex flex-col ${THEME.colors.background.primary}`}>
       {/* Header */}
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -204,13 +205,13 @@ export default function DevConvos() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 text-stone-900 dark:text-stone-100 min-h-0">
+      <div className={`flex-1 grid grid-cols-[320px_1fr] gap-4 p-6 ${THEME.colors.text.primary} min-h-0`}>
       {/* LEFT: conversations list */}
-      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
-        <div className="p-3 border-b border-stone-200 dark:border-stone-700">
+      <div className={`flex flex-col rounded-lg border ${THEME.colors.border.primary} overflow-hidden`}>
+        <div className={`p-3 border-b ${THEME.colors.border.primary}`}>
           <div className="flex gap-2">
             <input
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
+              className={`flex-1 border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
               placeholder="New conversation name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -228,22 +229,22 @@ export default function DevConvos() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto divide-y divide-stone-200 dark:divide-stone-800">
+        <div className={`flex-1 overflow-auto divide-y ${THEME.colors.border.primary}`}>
           {loading && <div className="p-3 text-sm">Loading…</div>}
           {error && <div className="p-3 text-sm text-red-500">{error}</div>}
           {safeItems.map((c) => (
             <div
               key={c.id}
-              className={`p-3 cursor-pointer ${selected?.id === c.id ? 'bg-stone-100 dark:bg-stone-800' : ''}`}
+              className={`p-3 cursor-pointer ${selected?.id === c.id ? THEME.colors.background.tertiary : ''}`}
               onClick={() => setSelectedId(c.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="font-semibold truncate">{c.name}</div>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700">
+                <span className={`text-xs px-2 py-0.5 rounded-full ${THEME.colors.background.accent}`}>
                   {c.status}
                 </span>
               </div>
-              <div className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+              <div className={`text-xs ${THEME.colors.text.light} mt-1`}>
                 {new Date(c.createdAt).toLocaleString()}
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -311,19 +312,19 @@ export default function DevConvos() {
       </div>
 
       {/* RIGHT: details + filters up top, middle split (timeline/events), emit bar fixed at bottom */}
-      <div className="flex flex-col rounded-lg border border-stone-200 dark:border-stone-700 overflow-hidden min-h-0">
+      <div className={`flex flex-col rounded-lg border ${THEME.colors.border.primary} overflow-hidden min-h-0`}>
         {/* Details */}
-        <div className="p-4 border-b border-stone-200 dark:border-stone-700">
+        <div className={`p-4 border-b ${THEME.colors.border.primary}`}>
           {selected ? (
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{selected.name}</div>
-                <div className="text-xs text-stone-400 dark:text-stone-500">
+                <div className={`text-xs ${THEME.colors.text.light}`}>
                   id: {selected.id}
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm px-3 py-1 rounded-full bg-stone-200 dark:bg-stone-700">
+                <span className={`text-sm px-3 py-1 rounded-full ${THEME.colors.background.accent}`}>
                   {selected.status}
                 </span>
                 <span className="text-sm font-mono">{runtime}</span>
@@ -362,14 +363,14 @@ export default function DevConvos() {
               </div>
             </div>
           ) : (
-            <div className="text-sm text-stone-400 dark:text-stone-500">Select a conversation from the left.</div>
+            <div className={`text-sm ${THEME.colors.text.muted}`}>Select a conversation from the left.</div>
           )}
         </div>
 
         {/* Filters */}
-        <div className="p-3 border-b border-stone-200 dark:border-stone-700 flex items-center gap-2">
+        <div className={`p-3 border-b ${THEME.colors.border.primary} flex items-center gap-2`}>
           <select
-            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
+            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -381,13 +382,13 @@ export default function DevConvos() {
             <option value="card.flipped">card.flipped</option>
           </select>
           <input
-            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600 flex-1"
+            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary} flex-1`}
             placeholder="Search in type or payload…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <select
-            className="border rounded px-2 py-1 bg-white dark:bg-stone-800 border-stone-300 dark:border-stone-600"
+            className={`border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
             value={sortDir}
             onChange={(e) => setSortDir(e.target.value)}
           >
@@ -400,14 +401,14 @@ export default function DevConvos() {
         <div className="flex-1 overflow-hidden min-h-0">
           <div className="grid grid-cols-2 h-full min-h-0">
             {/* Timeline (left column) */}
-            <section className="h-full flex flex-col border-r border-stone-200 dark:border-stone-700 min-h-0">
-              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 flex-shrink-0">Timeline</div>
+            <section className={`h-full flex flex-col border-r ${THEME.colors.border.primary} min-h-0`}>
+              <div className={`px-4 py-2 text-sm font-semibold border-b ${THEME.colors.border.primary} ${THEME.colors.background.tertiary} flex-shrink-0`}>Timeline</div>
               <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
                 {selected ? (
                   timeline.length ? (
                     <ol className="relative ml-5">
                       {/* vertical rail */}
-                      <span className="absolute left-0 top-0 bottom-0 w-px bg-stone-300 dark:bg-stone-700" />
+                      <span className={`absolute left-0 top-0 bottom-0 w-px ${THEME.colors.border.secondary}`} />
                       {timeline.map((e) => (
                         <li key={e.id} className="relative pl-4 py-2">
                           {/* dot */}
@@ -420,39 +421,39 @@ export default function DevConvos() {
                             <div className="text-sm font-medium">
                               {typeLabel(e.type)}
                             </div>
-                            <div className="text-xs font-mono text-stone-400 dark:text-stone-500 dark:text-stone-400">
+                            <div className={`text-xs font-mono ${THEME.colors.text.light}`}>
                               {new Date(e.at).toLocaleString()}
                             </div>
                           </div>
-                          <div className="text-xs text-stone-600 dark:text-stone-400 mt-1">
+                          <div className={`text-xs ${THEME.colors.text.tertiary} mt-1`}>
                             {summarizePayload(e.type, e.payload)}
                           </div>
                         </li>
                       ))}
                     </ol>
                   ) : (
-                    <div className="p-6 text-sm text-stone-400 dark:text-stone-500">No timeline entries.</div>
+                    <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>No timeline entries.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-stone-400 dark:text-stone-500">Select a conversation to view timeline.</div>
+                  <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>Select a conversation to view timeline.</div>
                 )}
               </div>
             </section>
 
             {/* Events (right column) */}
             <section className="h-full flex flex-col min-h-0">
-              <div className="px-4 py-2 text-sm font-semibold border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 flex-shrink-0">Events</div>
+              <div className={`px-4 py-2 text-sm font-semibold border-b ${THEME.colors.border.primary} ${THEME.colors.background.tertiary} flex-shrink-0`}>Events</div>
               <div className="flex-1 overflow-y-auto min-h-0">
                 {selected ? (
                   filtered.length ? (
-                    <ul className="divide-y divide-stone-200 dark:divide-stone-800">
+                    <ul className={`divide-y ${THEME.colors.border.primary}`}>
                       {filtered.map((e) => (
                         <li key={e.id} className="p-3">
                           <div className="flex items-center justify-between">
                             <div className="font-mono text-xs opacity-80">
                               {new Date(e.at).toLocaleString()}
                             </div>
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-700">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${THEME.colors.background.accent}`}>
                               {e.type}
                             </span>
                           </div>
@@ -463,10 +464,10 @@ export default function DevConvos() {
                       ))}
                     </ul>
                   ) : (
-                    <div className="p-6 text-sm text-stone-400 dark:text-stone-500">No events.</div>
+                    <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>No events.</div>
                   )
                 ) : (
-                  <div className="p-6 text-sm text-stone-400 dark:text-stone-500">Select a conversation to view events.</div>
+                  <div className={`p-6 text-sm ${THEME.colors.text.muted}`}>Select a conversation to view events.</div>
                 )}
               </div>
             </section>
@@ -475,7 +476,7 @@ export default function DevConvos() {
 
         {/* EMIT BAR: fixed at bottom of right column */}
         {selected && (
-          <div className="p-3 border-t border-stone-200 dark:border-stone-700 flex flex-wrap gap-2">
+          <div className={`p-3 border-t ${THEME.colors.border.primary} flex flex-wrap gap-2`}>
             <Button
               variant="secondary"
               onClick={() => logEvent(selected.id, 'card.created', { id: crypto.randomUUID(), type: 'topic' })}

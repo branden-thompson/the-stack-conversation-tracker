@@ -19,7 +19,7 @@ import {
   Dot,
 } from 'recharts';
 import { cn } from '@/lib/utils';
-import { CHART_CONFIG } from '@/lib/utils/ui-constants';
+import { CHART_CONFIG, THEME } from '@/lib/utils/ui-constants';
 
 /**
  * Custom tooltip component for hover details
@@ -32,17 +32,17 @@ function CustomTooltip({ active, payload, label, formatter }) {
 
   return (
     <div className={cn(
-      "bg-white dark:bg-stone-800 p-3 rounded-lg shadow-lg border border-stone-200 dark:border-stone-700",
+      `${THEME.colors.background.secondary} p-3 rounded-lg ${THEME.shadows.lg} border ${THEME.colors.border.primary}`,
       CHART_CONFIG.fonts.primary
     )}>
       {formatter ? (
         formatter(data.value, label, metadata)
       ) : (
         <>
-          <p className="font-semibold text-sm text-stone-800 dark:text-stone-200">
+          <p className={`font-semibold text-sm ${THEME.colors.text.primary}`}>
             {label}
           </p>
-          <p className="text-sm text-stone-600 dark:text-stone-400">
+          <p className={`text-sm ${THEME.colors.text.secondary}`}>
             Value: {data.value}
           </p>
         </>
@@ -102,10 +102,10 @@ export function LineChart({
   if (chartData.length === 0) {
     return (
       <div className={cn(
-        'flex items-center justify-center bg-stone-50 dark:bg-stone-900 rounded-lg',
+        `flex items-center justify-center ${THEME.colors.background.primary} rounded-lg`,
         className
       )} style={{ height }}>
-        <p className="text-stone-500 dark:text-stone-400">No data available</p>
+        <p className={THEME.colors.text.muted}>No data available</p>
       </div>
     );
   }
@@ -121,7 +121,7 @@ export function LineChart({
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="currentColor"
-              className="text-stone-200 dark:text-stone-700"
+              className={THEME.colors.text.light}
             />
           )}
           
@@ -144,7 +144,7 @@ export function LineChart({
                 fontFamily: CHART_CONFIG.fonts.primaryFamily
               },
             }}
-            className="text-stone-600 dark:text-stone-400"
+            className={THEME.colors.text.secondary}
           />
           
           <YAxis
@@ -167,7 +167,7 @@ export function LineChart({
                 fontFamily: CHART_CONFIG.fonts.primaryFamily
               },
             }}
-            className="text-stone-600 dark:text-stone-400"
+            className={THEME.colors.text.secondary}
           />
           
           <Tooltip

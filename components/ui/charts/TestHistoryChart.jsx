@@ -58,7 +58,7 @@ function multiLineTooltipFormatter(payload, label) {
       className="space-y-2"
       style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
     >
-      <div className="font-semibold text-sm text-stone-800 dark:text-stone-200 border-b border-stone-200 dark:border-stone-700 pb-1">
+      <div className="font-semibold text-sm text-zinc-800 dark:text-zinc-200 border-b border-zinc-200 dark:border-zinc-700 pb-1">
         {formatFullDate(label)}
       </div>
       
@@ -68,14 +68,14 @@ function multiLineTooltipFormatter(payload, label) {
           <div className="font-medium">Test Results:</div>
           <div className="pl-2 space-y-1">
             <div className="flex justify-between gap-4">
-              <span className="text-stone-600 dark:text-stone-400">Passed:</span>
+              <span className="text-zinc-600 dark:text-zinc-400">Passed:</span>
               <span className="font-medium text-green-600 dark:text-green-400">
                 {metadata.passed} / {metadata.totalTests}
               </span>
             </div>
             {metadata.failed > 0 && (
               <div className="flex justify-between gap-4">
-                <span className="text-stone-600 dark:text-stone-400">Failed:</span>
+                <span className="text-zinc-600 dark:text-zinc-400">Failed:</span>
                 <span className="font-medium text-red-600 dark:text-red-400">
                   {metadata.failed}
                 </span>
@@ -98,7 +98,7 @@ function multiLineTooltipFormatter(payload, label) {
                     className="inline-block w-2 h-2 rounded-full" 
                     style={{ backgroundColor: entry.color }} 
                   />
-                  <span className="text-stone-600 dark:text-stone-400">
+                  <span className="text-zinc-600 dark:text-zinc-400">
                     {entry.name}:
                   </span>
                 </span>
@@ -236,7 +236,7 @@ export function TestHistoryChart({
         className="flex items-center gap-4"
         style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
       >
-        <div className="text-sm text-stone-600 dark:text-stone-400">
+        <div className="text-sm text-zinc-600 dark:text-zinc-400">
           <span className="font-medium">Last {chartData.length} runs</span>
         </div>
         
@@ -244,7 +244,7 @@ export function TestHistoryChart({
           <div className={`flex items-center gap-1 text-sm ${
             trend.direction === 'up' ? 'text-green-600 dark:text-green-400' :
             trend.direction === 'down' ? 'text-red-600 dark:text-red-400' :
-            'text-stone-600 dark:text-stone-400'
+            'text-zinc-600 dark:text-zinc-400'
           }`}>
             {trend.direction === 'up' ? (
               <TrendingUp className="w-4 h-4" />
@@ -255,8 +255,8 @@ export function TestHistoryChart({
           </div>
         )}
         
-        <div className="text-sm text-stone-600 dark:text-stone-400">
-          Avg: <span className="font-medium text-stone-800 dark:text-stone-200">{avgSuccessRate}%</span>
+        <div className="text-sm text-zinc-600 dark:text-zinc-400">
+          Avg: <span className="font-medium text-zinc-800 dark:text-zinc-200">{avgSuccessRate}%</span>
         </div>
       </div>
 
@@ -277,33 +277,33 @@ export function TestHistoryChart({
           xFormatter={formatDateForAxis}
           yFormatter={(value) => `${value}%`}
           tooltipFormatter={multiLineTooltipFormatter}
-          className="bg-stone-50 dark:bg-stone-900 rounded-lg p-4"
+          className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4"
         />
       ) : (
         <div 
-          className="overflow-x-auto bg-white dark:bg-stone-800 rounded-lg p-4"
+          className="overflow-x-auto bg-white dark:bg-zinc-800 rounded-lg p-4"
           style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
         >
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-200 dark:border-stone-700 text-left">
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300" 
+              <tr className="border-b border-zinc-200 dark:border-zinc-700 text-left">
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300" 
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Date</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Tests</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Pass</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Fail</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Success</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Stmt</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Branch</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Func</th>
-                <th className="px-2 py-1.5 text-stone-600 dark:text-stone-300 text-right"
+                <th className="px-2 py-1.5 text-zinc-600 dark:text-zinc-300 text-right"
                     style={{ fontSize: CHART_CONFIG.fonts.table.headerSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>Lines</th>
               </tr>
             </thead>
@@ -314,7 +314,7 @@ export function TestHistoryChart({
                   : '0.0';
                   
                 return (
-                  <tr key={index} className="border-b border-stone-100 dark:border-stone-800">
+                  <tr key={index} className="border-b border-zinc-100 dark:border-zinc-800">
                     <td className="px-2 py-1.5" style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {formatFullDate(run.date)}
                     </td>

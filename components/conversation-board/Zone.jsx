@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
-import { CARD_LAYOUT } from '@/lib/utils/ui-constants';
+import { CARD_LAYOUT, APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
 
 /* ---------- Layout / stacking constants ---------- */
 const STACK_GAP_PX = CARD_LAYOUT.stackGap;
@@ -154,8 +154,8 @@ export function Zone({
         {isDraggingCard && (
           <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-md shadow-md border border-gray-200 dark:border-gray-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Drop here</p>
+              <div className={`${getAppThemeClasses('dropdown')} px-3 py-2 rounded-md`}>
+                <p className={`text-sm font-medium ${APP_THEME.colors.text.secondary}`}>Drop here</p>
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export function Zone({
           );
         })}
         {cards.length === 0 && (
-          <div className="absolute inset-2 flex items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+          <div className={`absolute inset-2 flex items-center justify-center ${APP_THEME.colors.text.light} border-2 border-dashed ${APP_THEME.colors.border.secondary} rounded-lg`}>
             <div className="text-center">
               <p className="text-sm font-medium">Drop cards here</p>
               <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
@@ -217,8 +217,8 @@ export function Zone({
         {isDraggingCard && (
           <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="bg-white dark:bg-gray-800 px-3 py-2 rounded-md shadow-md border border-gray-200 dark:border-gray-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Drop here</p>
+              <div className={`${getAppThemeClasses('dropdown')} px-3 py-2 rounded-md`}>
+                <p className={`text-sm font-medium ${APP_THEME.colors.text.secondary}`}>Drop here</p>
               </div>
             </div>
           </div>
@@ -265,7 +265,7 @@ export function Zone({
               );
             })
           ) : (
-            <div className="absolute inset-2 flex items-center justify-center text-gray-400 dark:text-gray-500 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+            <div className={`absolute inset-2 flex items-center justify-center ${APP_THEME.colors.text.light} border-2 border-dashed ${APP_THEME.colors.border.secondary} rounded-lg`}>
               <div className="text-center">
                 <p className="text-sm font-medium">Drop cards here</p>
                 <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
@@ -291,8 +291,7 @@ export function Zone({
       className={cn(
         'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden transition-all duration-200',
         // zone surface w/ dark support
-        'bg-white border-gray-200',
-        'dark:bg-gray-900 dark:border-gray-700',
+        getAppThemeClasses('zone'),
         zoneConfig.className,
         // Enhanced drop feedback
         isOver && 'ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20',
@@ -301,13 +300,13 @@ export function Zone({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-3 bg-white/70 dark:bg-gray-800/70 border-b border-gray-200 dark:border-gray-700">
+      <div className={`flex items-center justify-between p-3 ${getAppThemeClasses('zone-header')} border-b`}>
         <div className="flex flex-col text-left">
-          <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+          <h3 className={`font-semibold text-sm ${APP_THEME.colors.text.primary}`}>
             {titleOverride ?? zoneConfig.title}
           </h3>
           {zoneConfig.description ? (
-            <p className="text-xs text-gray-600 dark:text-gray-300">{zoneConfig.description}</p>
+            <p className={`text-xs ${APP_THEME.colors.text.tertiary}`}>{zoneConfig.description}</p>
           ) : null}
         </div>
 
@@ -316,7 +315,7 @@ export function Zone({
             size="sm"
             variant="secondary"
             /* Restore visible outline in both themes while keeping secondary look */
-            className="shrink-0 border border-gray-300 dark:border-gray-600 bg-transparent dark:bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+            className={`shrink-0 border ${APP_THEME.colors.border.secondary} bg-transparent ${APP_THEME.colors.background.hover}`}
             onClick={handleOrganizePersist}
           >
             Organize

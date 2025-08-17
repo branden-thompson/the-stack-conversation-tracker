@@ -18,6 +18,9 @@ import { Card } from '@/components/ui/card';
 import SectionCard from '@/components/ui/section-card';
 import { TestHistoryChart } from '@/components/ui/charts/TestHistoryChart';
 import { GroupedCoverageTable } from '@/components/ui/grouped-coverage-table';
+import { MetricCard } from '@/components/ui/metric-card';
+import { StatusBadge, TestStatusBadge } from '@/components/ui/status-badge';
+import { CoverageBar } from '@/components/ui/coverage-bar';
 import { 
   Play,
   Download,
@@ -232,7 +235,7 @@ export default function TestsDashboardPage() {
   );
 
   return (
-    <div className="h-screen flex flex-col bg-stone-50 dark:bg-stone-900">
+    <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900">
       {/* Header */}
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -244,7 +247,7 @@ export default function TestsDashboardPage() {
         <div className="max-w-7xl mx-auto space-y-6">
           
           {/* Test Status Banner */}
-          <Card className="p-4 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
+          <Card className="p-4 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {testState.status === 'running' ? (
@@ -261,7 +264,7 @@ export default function TestsDashboardPage() {
                      `${testState.results.unit.failed} Tests Failing`}
                   </h2>
                   {testState.lastRun && (
-                    <p className="text-sm text-stone-500 dark:text-stone-400">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
                       Last run: {new Date(testState.lastRun).toLocaleString()}
                     </p>
                   )}
@@ -269,8 +272,8 @@ export default function TestsDashboardPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-stone-400 dark:text-stone-500" />
-                  <span className="text-sm text-stone-500 dark:text-stone-400">{testState.results.unit.duration}</span>
+                  <Clock className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
+                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{testState.results.unit.duration}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => runTests('unit')}>
@@ -294,51 +297,53 @@ export default function TestsDashboardPage() {
             </div>
           </Card>
 
-          {/* Coverage Summary */}
-          <Card className="p-4 bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${
-                  testState.coverage.statements >= 90 ? 'text-green-600' :
-                  testState.coverage.statements >= 70 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {testState.coverage.statements.toFixed(1)}%
-                </div>
-                <div className="text-sm text-stone-500 dark:text-stone-400">Statements</div>
-              </div>
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${
-                  testState.coverage.branches >= 90 ? 'text-green-600' :
-                  testState.coverage.branches >= 70 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {testState.coverage.branches.toFixed(1)}%
-                </div>
-                <div className="text-sm text-stone-500 dark:text-stone-400">Branches</div>
-              </div>
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${
-                  testState.coverage.functions >= 90 ? 'text-green-600' :
-                  testState.coverage.functions >= 70 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {testState.coverage.functions.toFixed(1)}%
-                </div>
-                <div className="text-sm text-stone-500 dark:text-stone-400">Functions</div>
-              </div>
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${
-                  testState.coverage.lines >= 90 ? 'text-green-600' :
-                  testState.coverage.lines >= 70 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
-                  {testState.coverage.lines.toFixed(1)}%
-                </div>
-                <div className="text-sm text-stone-500 dark:text-stone-400">Lines</div>
-              </div>
-            </div>
-          </Card>
+          {/* Coverage Summary with MetricCards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <MetricCard
+              label="Statements"
+              value={testState.coverage.statements}
+              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.statements || 0).reverse()}
+              description="Code execution coverage"
+              actionable={{
+                text: "View uncovered statements",
+                onClick: () => coverageTableControl?.scrollIntoView?.()
+              }}
+              size="md"
+            />
+            <MetricCard
+              label="Branches"
+              value={testState.coverage.branches}
+              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.branches || 0).reverse()}
+              description="Conditional paths tested"
+              actionable={{
+                text: "Improve branch coverage",
+                onClick: () => coverageTableControl?.scrollIntoView?.()
+              }}
+              size="md"
+            />
+            <MetricCard
+              label="Functions"
+              value={testState.coverage.functions}
+              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.functions || 0).reverse()}
+              description="Functions executed"
+              actionable={{
+                text: "Find untested functions",
+                onClick: () => coverageTableControl?.scrollIntoView?.()
+              }}
+              size="md"
+            />
+            <MetricCard
+              label="Lines"
+              value={testState.coverage.lines}
+              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.lines || 0).reverse()}
+              description="Line-by-line coverage"
+              actionable={{
+                text: "Show uncovered lines",
+                onClick: () => coverageTableControl?.scrollIntoView?.()
+              }}
+              size="md"
+            />
+          </div>
 
           {/* File-by-File Coverage */}
           <SectionCard

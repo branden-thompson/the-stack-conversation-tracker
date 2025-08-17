@@ -18,6 +18,7 @@ import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
+import { APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
 
 
 
@@ -210,10 +211,10 @@ function BoardInner({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-600 dark:text-gray-300" />
-          <p className="text-gray-600 dark:text-gray-300">Loading conversation board...</p>
+          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
+          <p className={APP_THEME.colors.text.tertiary}>Loading conversation board...</p>
         </div>
       </div>
     );
@@ -221,7 +222,7 @@ function BoardInner({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
         <div className="text-center text-red-600">
           <p className="mb-4">Error loading board: {error}</p>
           <Button onClick={refreshCards} variant="outline" className="h-10 leading-none">
@@ -235,7 +236,7 @@ function BoardInner({
 
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className={`h-screen flex flex-col ${getAppThemeClasses('page')}`}>
         {/* Header */}
         <AppHeader
           onOpenTray={() => setTrayOpen(true)}

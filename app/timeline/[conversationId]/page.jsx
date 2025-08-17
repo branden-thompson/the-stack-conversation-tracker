@@ -7,6 +7,7 @@ import { ConversationSelector } from '@/components/timeline/ConversationSelector
 import { AppHeader } from '@/components/ui/app-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { useConversations } from '@/lib/hooks/useConversations';
+import { APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
 import { RefreshCw, Calendar, MessageCircle, List, TreePine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -92,10 +93,10 @@ export default function TimelinePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-600 dark:text-gray-300" />
-          <p className="text-gray-600 dark:text-gray-300">Loading conversations...</p>
+          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
+          <p className={APP_THEME.colors.text.tertiary}>Loading conversations...</p>
         </div>
       </div>
     );
@@ -103,7 +104,7 @@ export default function TimelinePage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
         <div className="text-center text-red-600">
           <p className="mb-4">Error loading conversations: {error}</p>
           <Button onClick={refresh} variant="outline" className="h-10 leading-none">
@@ -116,7 +117,7 @@ export default function TimelinePage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className={`h-screen flex flex-col ${getAppThemeClasses('page')}`}>
       {/* Header */}
       <AppHeader
         title="Timeline Explorer"
@@ -129,7 +130,7 @@ export default function TimelinePage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Enhanced Header with All Controls */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className={`${getAppThemeClasses('header')} px-6 py-4`}>
           {/* Top Row: Conversation Selector and Refresh */}
           <div className="flex items-center justify-between mb-4">
             <ConversationSelector 
@@ -147,27 +148,27 @@ export default function TimelinePage() {
               {/* Left: Conversation Title and Details */}
               <div className="flex items-center gap-6">
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  <h1 className={`text-xl font-bold ${APP_THEME.colors.text.primary}`}>
                     {selectedConversation.name}
                   </h1>
                 </div>
                 
                 <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
                     <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className={APP_THEME.colors.text.tertiary}>
                       {formatDate(selectedConversation.createdAt)}
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
                     <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className="text-gray-600 dark:text-gray-300">
+                    <span className={APP_THEME.colors.text.tertiary}>
                       {events.length} events
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-gray-700 rounded">
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
                     <div className="relative">
                       <span className={`w-2.5 h-2.5 rounded-full flex ${
                         selectedConversation.status === 'active' ? 'bg-green-500' :
@@ -186,13 +187,13 @@ export default function TimelinePage() {
               </div>
 
               {/* Right: View Mode Toggle */}
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-1 flex gap-1">
+              <div className={`${APP_THEME.colors.background.tertiary} rounded-lg p-1 flex gap-1`}>
                 <button
                   onClick={() => setViewMode('tree')}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm ${
                     viewMode === 'tree'
-                      ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600 dark:text-emerald-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                      ? `${APP_THEME.colors.background.secondary} shadow-sm text-emerald-600 dark:text-emerald-400`
+                      : `${APP_THEME.colors.text.tertiary} hover:${APP_THEME.colors.text.secondary}`
                   }`}
                 >
                   <TreePine className="w-4 h-4" />
@@ -202,8 +203,8 @@ export default function TimelinePage() {
                   onClick={() => setViewMode('list')}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm ${
                     viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                      ? `${APP_THEME.colors.background.secondary} shadow-sm text-blue-600 dark:text-blue-400`
+                      : `${APP_THEME.colors.text.tertiary} hover:${APP_THEME.colors.text.secondary}`
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -226,7 +227,7 @@ export default function TimelinePage() {
           ) : eventsLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-gray-600 dark:text-gray-300" />
+                <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
                 <p className="text-gray-600 dark:text-gray-300">Loading timeline...</p>
               </div>
             </div>

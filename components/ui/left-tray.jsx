@@ -10,6 +10,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { X, MessageSquare, TestTube, Home, BarChart3, History } from 'lucide-react';
+import { THEME } from '@/lib/utils/ui-constants';
 
 export function LeftTray({
   isOpen,
@@ -35,14 +36,14 @@ export function LeftTray({
   // Dynamic color schemes based on page type
   const colorScheme = isDevPage ? {
     // App pages: Blue/cyan theme for technical feel
-    bg: 'bg-stone-50 dark:bg-stone-900',
-    border: 'border-stone-200 dark:border-stone-700',
-    headerBg: 'bg-stone-100 dark:bg-stone-800',
-    headerBorder: 'border-stone-200 dark:border-stone-700',
-    headerText: 'text-stone-900 dark:text-stone-100',
-    sectionText: 'text-stone-600 dark:text-stone-300',
-    divider: 'border-stone-200 dark:border-stone-700',
-    footerBorder: 'border-stone-200 dark:border-stone-700'
+    bg: THEME.colors.background.primary,
+    border: THEME.colors.border.primary,
+    headerBg: THEME.colors.background.tertiary,
+    headerBorder: THEME.colors.border.primary,
+    headerText: THEME.colors.text.primary,
+    sectionText: THEME.colors.text.secondary,
+    divider: THEME.colors.border.primary,
+    footerBorder: THEME.colors.border.primary
   } : {
     // Dev pages:  Warm stone theme for conversation focus
     bg: 'bg-slate-50 dark:bg-slate-900',

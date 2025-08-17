@@ -9,6 +9,7 @@
 
 import { CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { THEME } from '@/lib/utils/ui-constants';
 
 /**
  * Get status icon based on coverage percentage
@@ -35,18 +36,18 @@ function FileRow({ file }) {
   const monoStyle = { fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' };
   
   return (
-    <tr className="border-b border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
+    <tr className={`border-b ${THEME.colors.border.primary} ${THEME.colors.background.hover} ${THEME.transitions.colors}`}>
       <td className="px-3 py-1.5" style={monoStyle}>
         <div className="flex items-center gap-2">
           {getStatusIcon(file.statements.percentage)}
-          <span className="text-xs text-stone-700 dark:text-stone-300">{file.name}</span>
+          <span className={`text-xs ${THEME.colors.text.secondary}`}>{file.name}</span>
         </div>
       </td>
       <td className="px-3 py-1.5 text-right" style={monoStyle}>
         <div className={cn("text-[15px]", getColorClass(file.statements.percentage))}>
           {file.statements.percentage.toFixed(1)}%
         </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
+        <div className={`text-[10px] ${THEME.colors.text.muted}`}>
           {file.statements.covered}/{file.statements.total}
         </div>
       </td>
@@ -54,7 +55,7 @@ function FileRow({ file }) {
         <div className={cn("text-[15px]", getColorClass(file.branches.percentage))}>
           {file.branches.percentage.toFixed(1)}%
         </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
+        <div className={`text-[10px] ${THEME.colors.text.muted}`}>
           {file.branches.covered}/{file.branches.total}
         </div>
       </td>
@@ -62,7 +63,7 @@ function FileRow({ file }) {
         <div className={cn("text-[15px]", getColorClass(file.functions.percentage))}>
           {file.functions.percentage.toFixed(1)}%
         </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
+        <div className={`text-[10px] ${THEME.colors.text.muted}`}>
           {file.functions.covered}/{file.functions.total}
         </div>
       </td>
@@ -70,7 +71,7 @@ function FileRow({ file }) {
         <div className={cn("text-[15px]", getColorClass(file.lines.percentage))}>
           {file.lines.percentage.toFixed(1)}%
         </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
+        <div className={`text-[10px] ${THEME.colors.text.muted}`}>
           {file.lines.covered}/{file.lines.total}
         </div>
       </td>
@@ -99,39 +100,39 @@ export function CoverageTable({ files = [] }) {
     <div className="overflow-x-auto -mx-4 px-4">
       <table className="w-full">
         <thead>
-          <tr className="border-b-2 border-stone-300 dark:border-stone-600">
+          <tr className={`border-b-2 ${THEME.colors.border.secondary}`}>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-left"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-left`}
               style={monoStyle}
             >
               File
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Statements
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Branches
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Functions
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Lines
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Uncovered
@@ -161,7 +162,7 @@ export function CoverageInsights({ files = [] }) {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <h4 
-          className="font-semibold text-stone-700 dark:text-stone-300 mb-2 text-sm"
+          className={`font-semibold ${THEME.colors.text.secondary} mb-2 text-sm`}
           style={monoStyle}
         >
           High Coverage Files (≥90%)
@@ -175,7 +176,7 @@ export function CoverageInsights({ files = [] }) {
                 style={monoStyle}
               >
                 <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />
-                <span className="truncate flex-1 text-stone-700 dark:text-stone-300">
+                <span className={`truncate flex-1 ${THEME.colors.text.secondary}`}>
                   {file.name}
                 </span>
                 <span className="text-green-600 dark:text-green-400 text-[13px]">
@@ -184,7 +185,7 @@ export function CoverageInsights({ files = [] }) {
               </li>
             ))
           ) : (
-            <li className="text-xs text-stone-500 dark:text-stone-400" style={monoStyle}>
+            <li className={`text-xs ${THEME.colors.text.muted}`} style={monoStyle}>
               No files with ≥90% coverage
             </li>
           )}
@@ -193,7 +194,7 @@ export function CoverageInsights({ files = [] }) {
       
       <div>
         <h4 
-          className="font-semibold text-stone-700 dark:text-stone-300 mb-2 text-sm"
+          className={`font-semibold ${THEME.colors.text.secondary} mb-2 text-sm`}
           style={monoStyle}
         >
           Needs Attention (&lt;70%)
@@ -207,7 +208,7 @@ export function CoverageInsights({ files = [] }) {
                 style={monoStyle}
               >
                 <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
-                <span className="truncate flex-1 text-stone-700 dark:text-stone-300">
+                <span className={`truncate flex-1 ${THEME.colors.text.secondary}`}>
                   {file.name}
                 </span>
                 <span className="text-red-600 dark:text-red-400 text-[13px]">
@@ -216,7 +217,7 @@ export function CoverageInsights({ files = [] }) {
               </li>
             ))
           ) : (
-            <li className="text-xs text-stone-500 dark:text-stone-400" style={monoStyle}>
+            <li className={`text-xs ${THEME.colors.text.muted}`} style={monoStyle}>
               All files have ≥70% coverage
             </li>
           )}

@@ -15,6 +15,7 @@
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Menu } from 'lucide-react';
+import { THEME, getThemeClasses } from '@/lib/utils/ui-constants';
 
 const TOOLBAR_H = 40;
 const DIVIDER_MX = 'mx-6';
@@ -35,7 +36,7 @@ export function DevHeader({
   className = "",
 }) {
   return (
-    <header className={`bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-700 px-6 py-3 shadow-sm ${className}`}>
+    <header className={`${THEME.colors.background.primary} border-b ${THEME.colors.border.primary} px-6 py-3 ${THEME.shadows.sm} ${className}`}>
       <div className="flex items-center justify-between">
         {/* Left: Hamburger + Title */}
         <div className={`flex items-center ${HEADER_SIDE_GAP}`}>
@@ -51,9 +52,9 @@ export function DevHeader({
             </Button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{title}</h1>
+            <h1 className={`text-2xl font-bold ${THEME.colors.text.primary}`}>{title}</h1>
             {subtitle && (
-              <p className="text-xs text-stone-500 dark:text-stone-400">
+              <p className={`text-xs ${THEME.colors.text.muted}`}>
                 {subtitle}
               </p>
             )}
@@ -71,7 +72,7 @@ export function DevHeader({
           {rightControls && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px bg-stone-200 dark:bg-stone-700 ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px ${THEME.colors.border.primary} ${DIVIDER_MX}`} />
               
               {/* Custom controls */}
               <div className="flex items-center gap-2">

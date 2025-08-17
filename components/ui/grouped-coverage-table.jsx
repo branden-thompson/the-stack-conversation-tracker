@@ -10,7 +10,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronRight, CheckCircle2, AlertTriangle, XCircle, FolderOpen, Folder, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CoverageBar, CoverageBarMini } from '@/components/ui/coverage-bar';
+import { StatusBadge, CoverageBadge } from '@/components/ui/status-badge';
 import { cn } from '@/lib/utils';
+import { THEME } from '@/lib/utils/ui-constants';
 
 /**
  * Get status icon based on coverage percentage
@@ -28,6 +31,15 @@ function getColorClass(percentage) {
   if (percentage >= 90) return 'text-green-600 dark:text-green-400';
   if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
   return 'text-red-600 dark:text-red-400';
+}
+
+/**
+ * Determine test status from coverage percentage
+ */
+function getCoverageStatus(percentage) {
+  if (percentage >= 90) return 'passing';
+  if (percentage >= 70) return 'warning';
+  return 'failing';
 }
 
 /**
@@ -92,45 +104,61 @@ function FileRow({ file, isNested = false }) {
   
   return (
     <tr className={cn(
-      "border-b border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors",
-      isNested && "bg-stone-50/50 dark:bg-stone-800/25"
+      "border-b border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors",
+      isNested && "bg-zinc-50/50 dark:bg-zinc-800/25"
     )}>
-      <td className="py-1.5" style={monoStyle}>
+      <td className="py-2" style={monoStyle}>
         <div className={cn("flex items-center gap-2", isNested ? "pl-10 pr-3" : "px-3")}>
           {getStatusIcon(file.statements.percentage)}
-          <span className="text-xs text-stone-700 dark:text-stone-300">{file.name}</span>
+          <span className="text-xs text-zinc-700 dark:text-zinc-300">{file.name}</span>
         </div>
       </td>
-      <td className="px-3 py-1.5 text-right" style={monoStyle}>
-        <div className={cn("text-[15px]", getColorClass(file.statements.percentage))}>
-          {file.statements.percentage.toFixed(1)}%
-        </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
-          {file.statements.covered}/{file.statements.total}
-        </div>
-      </td>
-      <td className="px-3 py-1.5 text-right" style={monoStyle}>
-        <div className={cn("text-[15px]", getColorClass(file.branches.percentage))}>
-          {file.branches.percentage.toFixed(1)}%
-        </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
-          {file.branches.covered}/{file.branches.total}
+      <td className="px-3 py-2">
+        <div className="space-y-1">
+          <CoverageBar
+            covered={file.statements.covered}
+            total={file.statements.total}
+            percentage={file.statements.percentage}
+            height="sm"
+            showValues={false}
+            className="max-w-[120px]"
+          />
         </div>
       </td>
-      <td className="px-3 py-1.5 text-right" style={monoStyle}>
-        <div className={cn("text-[15px]", getColorClass(file.functions.percentage))}>
-          {file.functions.percentage.toFixed(1)}%
-        </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
-          {file.functions.covered}/{file.functions.total}
+      <td className="px-3 py-2">
+        <div className="space-y-1">
+          <CoverageBar
+            covered={file.branches.covered}
+            total={file.branches.total}
+            percentage={file.branches.percentage}
+            height="sm"
+            showValues={false}
+            className="max-w-[120px]"
+          />
         </div>
       </td>
-      <td className="px-3 py-1.5 text-right" style={monoStyle}>
-        <div className={cn("text-[15px]", getColorClass(file.lines.percentage))}>
-          {file.lines.percentage.toFixed(1)}%
+      <td className="px-3 py-2">
+        <div className="space-y-1">
+          <CoverageBar
+            covered={file.functions.covered}
+            total={file.functions.total}
+            percentage={file.functions.percentage}
+            height="sm"
+            showValues={false}
+            className="max-w-[120px]"
+          />
         </div>
-        <div className="text-[10px] text-stone-500 dark:text-stone-400">
-          {file.lines.covered}/{file.lines.total}
+      </td>
+      <td className="px-3 py-2">
+        <div className="space-y-1">
+          <CoverageBar
+            covered={file.lines.covered}
+            total={file.lines.total}
+            percentage={file.lines.percentage}
+            height="sm"
+            showValues={false}
+            className="max-w-[120px]"
+          />
         </div>
       </td>
       <td className="px-3 py-1.5 text-right" style={monoStyle}>
@@ -153,30 +181,43 @@ function FileRow({ file, isNested = false }) {
  */
 function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle }) {
   const monoStyle = { fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' };
+  const overallCoverage = (
+    aggregateCoverage.statements.percentage + 
+    aggregateCoverage.branches.percentage + 
+    aggregateCoverage.functions.percentage + 
+    aggregateCoverage.lines.percentage
+  ) / 4;
   
   return (
     <>
       <tr 
-        className="border-b-2 border-stone-300 dark:border-stone-600 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 cursor-pointer transition-colors"
+        className="border-b-2 border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
         onClick={onToggle}
       >
         <td className="px-3 py-2" style={monoStyle}>
-          <div className="flex items-center gap-2">
-            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            {isExpanded ? <FolderOpen className="w-4 h-4 text-blue-500" /> : <Folder className="w-4 h-4 text-blue-500" />}
-            <span className="text-sm font-medium text-stone-800 dark:text-stone-200">
-              {groupName}
-            </span>
-            <span className="text-xs text-stone-500 dark:text-stone-400">
-              ({files.length} files)
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              {isExpanded ? <FolderOpen className="w-4 h-4 text-blue-500" /> : <Folder className="w-4 h-4 text-blue-500" />}
+              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+                {groupName}
+              </span>
+              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                ({files.length} files)
+              </span>
+            </div>
+            <CoverageBadge
+              value={overallCoverage}
+              size="md"
+              showLabel={false}
+            />
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
           <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.statements.percentage))}>
             {aggregateCoverage.statements.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-stone-500 dark:text-stone-400">
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
             {aggregateCoverage.statements.covered}/{aggregateCoverage.statements.total}
           </div>
         </td>
@@ -184,7 +225,7 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
           <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.branches.percentage))}>
             {aggregateCoverage.branches.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-stone-500 dark:text-stone-400">
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
             {aggregateCoverage.branches.covered}/{aggregateCoverage.branches.total}
           </div>
         </td>
@@ -192,7 +233,7 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
           <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.functions.percentage))}>
             {aggregateCoverage.functions.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-stone-500 dark:text-stone-400">
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
             {aggregateCoverage.functions.covered}/{aggregateCoverage.functions.total}
           </div>
         </td>
@@ -200,7 +241,7 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
           <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.lines.percentage))}>
             {aggregateCoverage.lines.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-stone-500 dark:text-stone-400">
+          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
             {aggregateCoverage.lines.covered}/{aggregateCoverage.lines.total}
           </div>
         </td>
@@ -210,7 +251,7 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
               <div className="text-[14px]">
                 {aggregateCoverage.totalUncoveredLines} lines
               </div>
-              <div className="text-[10px] text-stone-500 dark:text-stone-400">
+              <div className="text-[10px] text-zinc-500 dark:text-zinc-400">
                 uncovered
               </div>
             </div>
@@ -346,39 +387,39 @@ export function GroupedCoverageTable({ files = [], fileGroups = {}, onControlsRe
     <div className="overflow-x-auto -mx-4 px-4">
       <table className="w-full">
         <thead>
-          <tr className="border-b-2 border-stone-300 dark:border-stone-600">
+          <tr className={`border-b-2 ${THEME.colors.border.secondary}`}>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-left"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-left`}
               style={monoStyle}
             >
               File / Group
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Statements
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Branches
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Functions
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Lines
             </th>
             <th 
-              className="px-3 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 text-right"
+              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Uncovered
