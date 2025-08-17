@@ -198,11 +198,11 @@ export function CompactUserSelector({
                     <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                       Theme
                     </div>
-                    <div className="flex items-center gap-1" role="group" aria-label="Theme toggle">
+                    <div className="flex items-center gap-2" role="group" aria-label="Theme toggle">
                       <Button
                         variant={themeControls.currentTheme === 'light' ? 'default' : 'outline'}
                         size="sm"
-                        className="h-8 px-2 text-xs"
+                        className="h-8 px-2 text-xs flex-1"
                         aria-pressed={themeControls.currentTheme === 'light'}
                         aria-label="Light theme"
                         title="Light"
@@ -215,7 +215,7 @@ export function CompactUserSelector({
                       <Button
                         variant={themeControls.currentTheme === 'dark' ? 'default' : 'outline'}
                         size="sm"
-                        className="h-8 px-2 text-xs"
+                        className="h-8 px-2 text-xs flex-1"
                         aria-pressed={themeControls.currentTheme === 'dark'}
                         aria-label="Dark theme"
                         title="Dark"
@@ -228,7 +228,7 @@ export function CompactUserSelector({
                       <Button
                         variant={themeControls.theme === 'system' ? 'default' : 'outline'}
                         size="sm"
-                        className="h-8 px-2 text-xs"
+                        className="h-8 px-2 text-xs flex-1"
                         aria-pressed={themeControls.theme === 'system'}
                         aria-label="System theme"
                         title="System"

@@ -137,21 +137,25 @@ export function EventActions({
   className
 }) {
   return (
-    <ButtonGroup 
-      spacing={compact ? 'sm' : 'md'}
-      variant="toolbar"
-      className={className}
-    >
-      {eventTypes.map((eventType) => (
-        <Button
-          key={eventType.type}
-          size={compact ? 'sm' : 'default'}
-          variant="outline"
-          onClick={() => onEmitEvent?.(eventType.type, eventType.payload)}
-        >
-          {eventType.label}
-        </Button>
-      ))}
-    </ButtonGroup>
+    <div className={cn("flex justify-center items-center w-full", className)}>
+      <div className={cn(
+        "flex gap-2 justify-center items-center px-3 py-2 rounded-md w-full max-w-4xl",
+        THEME.colors.background.tertiary,
+        THEME.colors.border.primary,
+        'border'
+      )}>
+        {eventTypes.map((eventType) => (
+          <Button
+            key={eventType.type}
+            size={compact ? 'sm' : 'default'}
+            variant="outline"
+            onClick={() => onEmitEvent?.(eventType.type, eventType.payload)}
+            className="flex-1 max-w-[200px]"
+          >
+            {eventType.label}
+          </Button>
+        ))}
+      </div>
+    </div>
   );
 }

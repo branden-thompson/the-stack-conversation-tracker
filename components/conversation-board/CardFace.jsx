@@ -24,7 +24,7 @@ import {
   getResponsiveCardHeights,
   getControlRailDimensions,
 } from '@/lib/utils/ui-constants';
-import { getTypeLabel } from '@/lib/utils/card-type-constants';
+import { getTypeLabel, getCardTextStyle, CARD_TEXT_STYLES } from '@/lib/utils/card-type-constants';
 import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 
@@ -226,11 +226,11 @@ export function CardFace({
               placeholder="Enter card content..."
             />
           ) : (
-            <div className="w-full max-w-[46ch] text-sm sm:text-base lg:text-lg text-center leading-relaxed whitespace-pre-wrap break-words px-1 sm:px-2 text-gray-800 dark:text-gray-100">
+            <div className={`w-full max-w-[46ch] ${CARD_TEXT_STYLES.content.text} text-center leading-relaxed whitespace-pre-wrap break-words px-1 sm:px-2 ${CARD_TEXT_STYLES.content.color}`}>
               {content && content.trim().length > 0 ? (
                 content
               ) : (
-                <span className="italic text-gray-400 dark:text-gray-200/90">
+                <span className={CARD_TEXT_STYLES.content.placeholder}>
                   Double-click to add content...
                 </span>
               )}
@@ -242,12 +242,15 @@ export function CardFace({
       {/* Footer */}
       <div
         className="px-2 sm:px-3 pb-2 sm:pb-3 pt-1 text-sm mt-auto"
-        style={{ paddingRight: controlRailWidth + (screenWidth < BREAKPOINTS.mobile ? 6 : 8), minHeight: footerMinHeight }}
+        style={{ 
+          paddingRight: controlRailWidth + (screenWidth < BREAKPOINTS.mobile ? 6 : 8), 
+          minHeight: footerMinHeight
+        }}
       >
-        <div className="flex flex-col items-start gap-1 text-gray-700 dark:text-gray-300">
+        <div className="flex flex-col items-start gap-1">
           <div className="flex items-center gap-2">
-            <Calendar className={`${screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
-            <span className={screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[12px]"}>{dateText}</span>
+            <Calendar className={`${screenWidth < BREAKPOINTS.mobile ? CARD_TEXT_STYLES.icons.calendar.mobile : CARD_TEXT_STYLES.icons.calendar.desktop} ${CARD_TEXT_STYLES.icons.calendar.color}`} />
+            <span className={getCardTextStyle('footer.date', screenWidth)}>{dateText}</span>
           </div>
           
           {/* User info */}
@@ -260,8 +263,8 @@ export function CardFace({
                   size="xs"
                   className="ring-1 ring-gray-200 dark:ring-gray-700"
                 />
-                <span className={`${screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[11px]"} text-gray-600 dark:text-gray-400`}>
-                  Created by: {createdByUser.name}
+                <span className={getCardTextStyle('footer.createdBy', screenWidth)}>
+                  Author: {createdByUser.name}
                 </span>
               </div>
             )}
@@ -274,8 +277,8 @@ export function CardFace({
                   size="xs"
                   className="ring-1 ring-blue-200 dark:ring-blue-700"
                 />
-                <span className={`${screenWidth < BREAKPOINTS.mobile ? "text-[10px]" : "text-[11px]"} text-blue-600 dark:text-blue-400`}>
-                  Assigned to: {assignedToUser.name}
+                <span className={getCardTextStyle('footer.assignedTo', screenWidth)}>
+                  Assignee: {assignedToUser.name}
                 </span>
               </div>
             )}
