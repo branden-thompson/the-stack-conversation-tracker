@@ -145,7 +145,7 @@ export function AppHeader({
   };
 
   return (
-    <header className={`${dynamicTheme.colors.background.header} ${dynamicTheme.colors.border.primary} px-3 sm:px-4 lg:px-6 py-2 lg:py-3`}>
+    <header className={`${dynamicTheme.colors.background.header} border-b ${dynamicTheme.colors.border.secondary} px-3 sm:px-4 lg:px-6 py-2 lg:py-3`}>
       <div className="flex items-center justify-between">
         {/* Left: Hamburger + Title */}
         <div className={`flex items-center ${HEADER_SIDE_GAP}`}>

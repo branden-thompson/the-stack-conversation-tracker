@@ -31,6 +31,102 @@
       "assignedToUserId": null,
       "createdAt": "2025-08-18T02:37:12.714Z",
       "updatedAt": "2025-08-18T06:07:41.404Z"
+    },
+    {
+      "id": "tTYUuLnd7q-5L0heu7kpO",
+      "type": "guess",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:15:52.269Z",
+      "updatedAt": "2025-08-18T07:15:52.269Z"
+    },
+    {
+      "id": "0y44s-4SpFJS5nycgOSGC",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:15:53.667Z",
+      "updatedAt": "2025-08-18T07:15:53.667Z"
+    },
+    {
+      "id": "x0UbBqUwcTYP31dPV8WW1",
+      "type": "fact",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:15:56.590Z",
+      "updatedAt": "2025-08-18T07:15:56.590Z"
+    },
+    {
+      "id": "w_uOgApcp8VskQVCCorLK",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:15:58.035Z",
+      "updatedAt": "2025-08-18T07:15:58.035Z"
+    },
+    {
+      "id": "OvTAF1lDh3RTSCCrU2tAB",
+      "type": "question",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:15:59.262Z",
+      "updatedAt": "2025-08-18T07:15:59.262Z"
+    },
+    {
+      "id": "Snis2q00eAjz2sHERZ7q_",
+      "type": "accusation",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_aH_Upd6N",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T07:16:07.765Z",
+      "updatedAt": "2025-08-18T07:16:07.765Z"
     }
   ],
   "users": [
