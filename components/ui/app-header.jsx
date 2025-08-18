@@ -23,6 +23,7 @@ import { ActiveUsersDisplay } from '@/components/ui/active-users-display';
 import { ColorThemeSelector } from '@/components/ui/color-theme-selector';
 import { useTheme } from 'next-themes';
 import { useAppTheme, useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
+import { cn } from '@/lib/utils';
 import { 
   Plus, 
   RefreshCw, 
@@ -471,25 +472,31 @@ export function AppHeader({
                         Animations
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant={animationsEnabled ? 'default' : 'outline'}
-                          size="sm"
-                          className="h-8 px-2 text-xs flex-1"
+                        <button
+                          className={cn(
+                            "h-8 px-2 text-xs flex-1 rounded-sm border transition-colors flex items-center justify-center",
+                            animationsEnabled 
+                              ? `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border-transparent` 
+                              : `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+                          )}
                           onClick={() => onAnimationsToggle?.(true)}
                           disabled={!onAnimationsToggle}
                         >
                           <Sparkles className="h-3 w-3 mr-1" />
                           On
-                        </Button>
-                        <Button
-                          variant={!animationsEnabled ? 'default' : 'outline'}
-                          size="sm"
-                          className="h-8 px-2 text-xs flex-1"
+                        </button>
+                        <button
+                          className={cn(
+                            "h-8 px-2 text-xs flex-1 rounded-sm border transition-colors flex items-center justify-center",
+                            !animationsEnabled 
+                              ? `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border-transparent` 
+                              : `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+                          )}
                           onClick={() => onAnimationsToggle?.(false)}
                           disabled={!onAnimationsToggle}
                         >
                           Off
-                        </Button>
+                        </button>
                       </div>
                       {!animationsEnabled && (
                         <p className={`text-[10px] ${dynamicTheme.colors.text.muted}`}>

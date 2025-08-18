@@ -201,10 +201,13 @@ export function CompactUserSelector({
                       Theme
                     </div>
                     <div className="flex items-center gap-2" role="group" aria-label="Theme toggle">
-                      <Button
-                        variant={themeControls.currentTheme === 'light' ? 'default' : 'outline'}
-                        size="sm"
-                        className="h-8 px-2 text-xs flex-1"
+                      <button
+                        className={cn(
+                          "h-8 px-2 text-xs flex-1 rounded-sm border transition-colors flex items-center justify-center",
+                          themeControls.currentTheme === 'light' 
+                            ? `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border-transparent` 
+                            : `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+                        )}
                         aria-pressed={themeControls.currentTheme === 'light'}
                         aria-label="Light theme"
                         title="Light"
@@ -212,12 +215,15 @@ export function CompactUserSelector({
                       >
                         <Sun className="h-3 w-3 mr-1" />
                         Light
-                      </Button>
+                      </button>
 
-                      <Button
-                        variant={themeControls.currentTheme === 'dark' ? 'default' : 'outline'}
-                        size="sm"
-                        className="h-8 px-2 text-xs flex-1"
+                      <button
+                        className={cn(
+                          "h-8 px-2 text-xs flex-1 rounded-sm border transition-colors flex items-center justify-center",
+                          themeControls.currentTheme === 'dark' 
+                            ? `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border-transparent` 
+                            : `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+                        )}
                         aria-pressed={themeControls.currentTheme === 'dark'}
                         aria-label="Dark theme"
                         title="Dark"
@@ -225,12 +231,15 @@ export function CompactUserSelector({
                       >
                         <Moon className="h-3 w-3 mr-1" />
                         Dark
-                      </Button>
+                      </button>
 
-                      <Button
-                        variant={themeControls.theme === 'system' ? 'default' : 'outline'}
-                        size="sm"
-                        className="h-8 px-2 text-xs flex-1"
+                      <button
+                        className={cn(
+                          "h-8 px-2 text-xs flex-1 rounded-sm border transition-colors flex items-center justify-center",
+                          themeControls.theme === 'system' 
+                            ? `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border-transparent` 
+                            : `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+                        )}
                         aria-pressed={themeControls.theme === 'system'}
                         aria-label="System theme"
                         title="System"
@@ -238,7 +247,7 @@ export function CompactUserSelector({
                       >
                         <Laptop className="h-3 w-3 mr-1" />
                         Auto
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -329,7 +338,7 @@ export function CompactUserSelector({
 
                 {onCreateUser && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-blue-600 dark:text-blue-400 flex items-center gap-2"
+                    className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm text-blue-600 dark:text-blue-400 flex items-center gap-2`}
                     onClick={() => handleUserSelect('action:create-user')}
                   >
                     <Plus className="w-4 h-4" />
@@ -339,7 +348,7 @@ export function CompactUserSelector({
 
                 {currentUser && onEditUser && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-green-600 dark:text-green-400 flex items-center gap-2"
+                    className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm text-green-600 dark:text-green-400 flex items-center gap-2`}
                     onClick={() => handleUserSelect('action:edit-current')}
                   >
                     <Edit3 className="w-4 h-4" />
@@ -349,7 +358,7 @@ export function CompactUserSelector({
 
                 {onManageUsers && (
                   <button
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-purple-600 dark:text-purple-400 flex items-center gap-2"
+                    className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm text-purple-600 dark:text-purple-400 flex items-center gap-2`}
                     onClick={() => handleUserSelect('action:manage-users')}
                   >
                     <Users className="w-4 h-4" />
@@ -362,7 +371,7 @@ export function CompactUserSelector({
                   <>
                     <div className={`border-t ${dynamicTheme.colors.border.primary} my-1`} />
                     <button
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2"
+                      className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2`}
                       onClick={() => {
                         setIsOpen(false);
                         onLogout();
