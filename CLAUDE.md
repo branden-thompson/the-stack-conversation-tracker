@@ -38,12 +38,22 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 4. Cleaned up console.log statements (66% reduction)
 5. Fixed Next.js 15 async params/cookies warnings
 6. Fixed build errors in /dev/tests page
+7. Enhanced SessionCard styling with proper visual hierarchy (2025-08-18)
+8. Added card background colors to UI theme constants (2025-08-18)
 
 ### Development Notes
 - When making changes, always check if files already exist before creating new ones
 - Use the existing project structure and conventions
 - Docker configuration is already set up in `/docker/` directory
 - The project uses a unified user management system for both app and dev pages
+- **Theme System**: Always use theme constants from `/lib/utils/ui-constants.js`
+  - `THEME.colors.background.card` for card backgrounds in dev pages
+  - `APP_THEME.colors.background.card` for card backgrounds in main app
+  - Never hardcode colors directly in components
+- **CSS Values**: Avoid CSS calc() functions when possible - use direct rem/px values instead
+  - ❌ Bad: `'calc(1rem - 4px)'` (expensive calculation)
+  - ✅ Good: `'0.75rem'` (direct value, since 1rem = 16px, 0.75rem = 12px)
+  - Calculations are expensive and should only be used when absolutely necessary
 
 ### Documentation Guidelines
 **📁 Project Hygiene Documentation**

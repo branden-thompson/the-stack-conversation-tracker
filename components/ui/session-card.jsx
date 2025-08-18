@@ -128,7 +128,7 @@ export function SessionCard({
       <div 
         className={cn(
           "flex items-center gap-3 p-3 rounded-lg border",
-          THEME.colors.background.secondary,
+          THEME.colors.background.card,
           THEME.colors.border.primary,
           className
         )}
@@ -222,7 +222,7 @@ export function SessionCard({
     <div 
       className={cn(
         "rounded-lg border p-4 space-y-3",
-        THEME.colors.background.secondary,
+        THEME.colors.background.card,
         THEME.colors.border.primary,
         className
       )}

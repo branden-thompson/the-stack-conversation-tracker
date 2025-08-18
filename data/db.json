@@ -14,7 +14,23 @@
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-17T00:42:08.365Z",
-      "updatedAt": "2025-08-18T00:13:01.129Z"
+      "updatedAt": "2025-08-18T02:37:00.345Z"
+    },
+    {
+      "id": "P0ECBKR6MmnN0XrVu-XiO",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-18T02:37:12.714Z",
+      "updatedAt": "2025-08-18T02:37:12.714Z"
     }
   ],
   "users": [

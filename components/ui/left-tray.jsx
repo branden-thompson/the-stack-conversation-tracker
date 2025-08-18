@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { X, MessageSquare, TestTube, Home, BarChart3, History, Users } from 'lucide-react';
+import { X, MessageSquare, TestTube, Layers, BarChart3, History, Users } from 'lucide-react';
 import { THEME } from '@/lib/utils/ui-constants';
 
 export function LeftTray({
@@ -101,8 +101,8 @@ export function LeftTray({
                   className="w-full justify-start" 
                   onClick={() => { router.push('/'); onClose(); }}
                 >
-                  <Home className="w-4 h-4 mr-2" />
-                  Main App
+                  <Layers className="w-4 h-4 mr-2" />
+                  The Conversation Stack
                 </Button>
                 <Button 
                   variant={pathname?.startsWith('/timeline') ? 'default' : 'ghost'}
@@ -136,7 +136,7 @@ export function LeftTray({
                   onClick={() => { router.push('/dev/convos'); onClose(); }}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Event Tracking
+                  Card Tracking
                 </Button>
                 <Button 
                   variant={pathname === '/dev/user-tracking' ? 'default' : 'outline'}

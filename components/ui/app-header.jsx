@@ -19,6 +19,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { CompactUserSelector } from '@/components/ui/compact-user-selector';
 import { ConversationControls } from '@/components/ui/conversation-controls';
+import { ActiveUsersDisplay } from '@/components/ui/active-users-display';
 import { useTheme } from 'next-themes';
 import { 
   Plus, 
@@ -396,6 +397,24 @@ export function AppHeader({
                   onConversationResumeOrStart={onConversationResumeOrStart}
                   onConversationPause={onConversationPause}
                   onConversationStop={onConversationStop}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Active Users Display - Between conversation controls and user profile */}
+          {showConversationControls && (
+            <>
+              {/* Divider before active users */}
+              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
+              
+              {/* Active Users with responsive min-width */}
+              <div className="hidden lg:flex min-w-[120px] xl:min-w-[160px] 2xl:min-w-[200px]">
+                <ActiveUsersDisplay 
+                  className="w-full"
+                  size="sm"
+                  showLabel={true}
+                  maxVisible={undefined} // Let component determine responsive limits
                 />
               </div>
             </>
