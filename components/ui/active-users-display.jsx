@@ -34,7 +34,7 @@ export function ActiveUsersDisplay({
   const [showOverflow, setShowOverflow] = useState(false);
   const dynamicTheme = useDynamicAppTheme();
   
-  // Use optimized stable active users hook
+  // Use optimized stable active users hook with faster polling for better UX
   const {
     activeUsers,
     loading,
@@ -45,7 +45,7 @@ export function ActiveUsersDisplay({
     getPerformanceStats
   } = useStableActiveUsers({
     maxVisible,
-    pollInterval: 5000
+    pollInterval: 2000 // Reduced from 5000ms to 2000ms for better responsiveness
   });
   
   // Performance monitoring - disabled by default
