@@ -199,7 +199,7 @@ export function AppHeader({
                 {onOpenNewCard && (
                   <Button
                     onClick={onOpenNewCard}
-                    className={`${actionBtnClass} ${buttonClasses.default}`}
+                    className={`${actionBtnClass} ${buttonClasses.default} !border-2 !${dynamicTheme.colors.border.strong}`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">New Card</span>
