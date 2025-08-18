@@ -42,6 +42,7 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 8. Added card background colors to UI theme constants (2025-08-18)
 
 ### Development Notes
+- NEVER NEVER NEVER add unprompted features unless you specifically ask to create them
 - When making changes, always check if files already exist before creating new ones
 - Use the existing project structure and conventions
 - Docker configuration is already set up in `/docker/` directory

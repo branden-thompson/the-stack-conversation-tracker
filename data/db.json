@@ -14,7 +14,7 @@
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-17T00:42:08.365Z",
-      "updatedAt": "2025-08-18T02:37:00.345Z"
+      "updatedAt": "2025-08-18T06:07:39.325Z"
     },
     {
       "id": "P0ECBKR6MmnN0XrVu-XiO",
@@ -30,7 +30,7 @@
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T02:37:12.714Z",
-      "updatedAt": "2025-08-18T02:37:12.714Z"
+      "updatedAt": "2025-08-18T06:07:41.404Z"
     }
   ],
   "users": [
@@ -41,7 +41,8 @@
       "profilePicture": "/system-avatar.png",
       "preferences": {
         "theme": "system",
-        "animationsEnabled": true
+        "animationsEnabled": true,
+        "colorTheme": "gray"
       },
       "createdAt": "2025-08-15T15:24:14.525Z",
       "updatedAt": "2025-08-15T21:44:31.298Z",
@@ -64,7 +65,8 @@
       "isSystemUser": false,
       "profilePicture": "/uploads/profile-pictures/spf6lSu8SSOxZIOsYlYVd-1755280669052.png",
       "preferences": {
-        "animationsEnabled": true
+        "animationsEnabled": true,
+        "colorTheme": "gray"
       },
       "createdAt": "2025-08-15T17:19:59.480Z",
       "updatedAt": "2025-08-16T18:04:30.442Z",
