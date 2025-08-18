@@ -9,7 +9,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { X, MessageSquare, TestTube, Layers, BarChart3, History, Users } from 'lucide-react';
+import { X, MessageSquare, TestTube, Layers, BarChart3, History, Users, Monitor } from 'lucide-react';
 import { THEME } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
@@ -164,6 +164,14 @@ export function LeftTray({
                 >
                   <Users className="w-4 h-4 mr-2" />
                   User Tracking
+                </Button>
+                <Button 
+                  variant={pathname === '/dev/performance' ? 'default' : 'outline'}
+                  className={`w-full justify-start ${pathname === '/dev/performance' ? buttonClasses.default : buttonClasses.outline}`}
+                  onClick={() => { router.push('/dev/performance'); onClose(); }}
+                >
+                  <Monitor className="w-4 h-4 mr-2" />
+                  Performance Monitoring
                 </Button>
               </div>
             </div>

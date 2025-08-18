@@ -55,8 +55,18 @@ export function ConversationControls({
               {runtime}
             </div>
             {activeConversation && (
-              <div className="text-xs text-green-600 dark:text-green-400">
-                • Tracking
+              <div className={`text-xs ${
+                activeConversation.status === 'active' 
+                  ? 'text-green-600 dark:text-green-400'
+                  : activeConversation.status === 'paused'
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-gray-500 dark:text-gray-400'
+              }`}>
+                • {activeConversation.status === 'active' 
+                    ? 'Tracking' 
+                    : activeConversation.status === 'paused' 
+                    ? 'Paused' 
+                    : 'Stopped'}
               </div>
             )}
           </div>
