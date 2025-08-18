@@ -8,21 +8,24 @@
 import { NextResponse } from 'next/server';
 import { SESSION_STATUS } from '@/lib/utils/session-constants';
 import sessionManager from '@/lib/services/session-manager';
+import { withCache, invalidateCachePattern } from '@/lib/cache/api-cache';
 
 // Get stores from session manager
 const { sessionStore, eventStore, simulatedSessions } = sessionManager;
 
 export async function GET(request) {
   try {
-    // Stores are now from sessionManager
-    // GET - sessionStore size check
+    // Try cache first for sessions data
+    const cache = withCache('sessions');
+    const cachedData = cache.get();
     
+    if (cachedData) {
+      return NextResponse.json(cachedData);
+    }
+    
+    // Cache miss - fetch fresh data
     // Get all active sessions from store
     const allSessions = Array.from(sessionStore.values());
-    
-    // Check SESSION_STATUS.ENDED value
-    
-    // All sessions retrieved
     
     const regularSessions = allSessions
       .filter(session => session.status !== SESSION_STATUS.ENDED)
@@ -30,8 +33,6 @@ export async function GET(request) {
         ...session,
         events: eventStore.get(session.id) || [],
       }));
-    
-    // After filtering sessions
     
     // Get simulated sessions
     const simSessions = Array.from(simulatedSessions?.values() || [])
@@ -58,12 +59,17 @@ export async function GET(request) {
       }
     });
 
-    return NextResponse.json({
+    const data = {
       grouped,
       guests,
       total: sessions.length,
       timestamp: Date.now(),
-    });
+    };
+    
+    // Cache the result
+    cache.set(data);
+
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error fetching sessions:', error);
     return NextResponse.json(
@@ -297,22 +303,17 @@ export async function POST(request) {
     // Session object created
 
     // Store session - with extra validation
-    // About to store session
-    const beforeSize = sessionStore.size;
     sessionStore.set(session.id, session);
-    const afterSize = sessionStore.size;
     
     // Also initialize in event store
     eventStore.set(session.id, []);
     
-    // Store operation completed
-    // New session created
-    
-    // Current sessions in store
+    // Invalidate sessions cache since we created/modified a session
+    invalidateCachePattern('api:sessions');
+    invalidateCachePattern('api:session:');
     
     // Verify the session was stored correctly
     const storedSession = sessionStore.get(session.id);
-    // Verified stored session
 
     return NextResponse.json(session, { status: 201 });
   } catch (error) {
@@ -350,6 +351,10 @@ export async function DELETE(request) {
 
     // Keep in store for a while for historical data
     sessionStore.set(sessionId, session);
+    
+    // Invalidate sessions cache since we modified a session
+    invalidateCachePattern('api:sessions');
+    invalidateCachePattern('api:session:');
 
     return NextResponse.json({ 
       success: true, 

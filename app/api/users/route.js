@@ -13,6 +13,7 @@ import {
 import { withOptionalAuth, withPermission } from '@/lib/auth/middleware';
 import { PERMISSIONS } from '@/lib/types/auth';
 import { filterUsersForDisplay } from '@/lib/auth/permissions';
+import { withCache, invalidateCachePattern } from '@/lib/cache/api-cache';
 
 /**
  * GET /api/users
@@ -20,7 +21,32 @@ import { filterUsersForDisplay } from '@/lib/auth/permissions';
  */
 export const GET = withOptionalAuth(async (request) => {
   try {
+    // Try cache first
+    const cache = withCache('users');
+    const cachedUsers = cache.get();
+    
+    if (cachedUsers) {
+      // Apply same filtering logic to cached data
+      if (!request.authenticated) {
+        const basicUsers = cachedUsers.map(user => ({
+          id: user.id,
+          name: user.name,
+          profilePicture: user.profilePicture,
+          isSystemUser: user.isSystemUser,
+          isActive: user.isActive !== false
+        }));
+        return NextResponse.json(basicUsers);
+      }
+      
+      const filteredUsers = filterUsersForDisplay(cachedUsers, request.user);
+      return NextResponse.json(filteredUsers);
+    }
+    
+    // Cache miss - fetch from database
     const users = await getAllUsers();
+    
+    // Cache the raw user data
+    cache.set(users);
     
     // If not authenticated, return basic user info for collaboration
     if (!request.authenticated) {
@@ -63,6 +89,11 @@ export const POST = withPermission(PERMISSIONS.USER_CREATE)(async (request) => {
     }
 
     const newUser = await createUser(userData);
+    
+    // Invalidate users cache since we created a new user
+    invalidateCachePattern('api:users');
+    invalidateCachePattern('api:user:');
+    
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {
     console.error('Error creating user:', error);
