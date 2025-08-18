@@ -15,23 +15,14 @@ const { sessionStore, eventStore, simulatedSessions } = sessionManager;
 export async function GET(request) {
   try {
     // Stores are now from sessionManager
-    console.log('[Sessions API] GET - sessionStore size:', sessionStore.size, 'keys:', Array.from(sessionStore.keys()));
+    // GET - sessionStore size check
     
     // Get all active sessions from store
     const allSessions = Array.from(sessionStore.values());
     
-    // Debug: Check if SESSION_STATUS.ENDED is what we expect
-    console.log('[Sessions API] SESSION_STATUS.ENDED value:', SESSION_STATUS.ENDED);
+    // Check SESSION_STATUS.ENDED value
     
-    console.log('[Sessions API] All sessions:', allSessions.map(s => ({
-      id: s.id.substring(0,8), 
-      status: s.status,
-      statusIsEnded: s.status === SESSION_STATUS.ENDED,
-      statusIsActive: s.status === SESSION_STATUS.ACTIVE,
-      statusValue: `"${s.status}"`,
-      userName: s.userName,
-      createdAt: new Date(s.startedAt).toISOString()
-    })));
+    // All sessions retrieved
     
     const regularSessions = allSessions
       .filter(session => session.status !== SESSION_STATUS.ENDED)
@@ -40,7 +31,7 @@ export async function GET(request) {
         events: eventStore.get(session.id) || [],
       }));
     
-    console.log('[Sessions API] After filtering (not ENDED):', regularSessions.length);
+    // After filtering sessions
     
     // Get simulated sessions
     const simSessions = Array.from(simulatedSessions?.values() || [])
@@ -93,7 +84,7 @@ export async function POST(request) {
       
       if (sessionId && sessionStore.has(sessionId)) {
         const session = sessionStore.get(sessionId);
-        console.log('[Sessions API] Ending session via sendBeacon:', sessionId);
+        // Ending session via sendBeacon
         session.status = SESSION_STATUS.ENDED;
         session.endedAt = Date.now();
         return NextResponse.json({ success: true, message: 'Session ended' });
@@ -107,7 +98,7 @@ export async function POST(request) {
     
     const { userId, userType, browser, metadata, sessionId: existingSessionId } = body;
     
-    console.log('[Sessions API] POST request received:', { userId, userType, isSystemUser: metadata?.isSystemUser });
+    // POST request received
 
     // Validate userId
     if (!userId || userId === 'undefined' || userId === 'null') {
@@ -120,7 +111,7 @@ export async function POST(request) {
     
     // CRITICAL: Don't create sessions for system user
     if (userId === 'system' || metadata?.isSystemUser === true) {
-      console.log('[Sessions API] Skipping session creation for system user:', userId);
+      // Skipping session creation for system user
       return NextResponse.json(
         { 
           id: 'system-no-session',
@@ -133,7 +124,7 @@ export async function POST(request) {
       );
     }
 
-    console.log('[Sessions API] Session request for user:', userId, userType, 'Existing ID:', existingSessionId);
+    // Session request for user
 
     // Check if we should reuse an existing session
     if (existingSessionId && sessionStore.has(existingSessionId)) {
@@ -158,7 +149,7 @@ export async function POST(request) {
           });
         }
         
-        console.log('[Sessions API] Reusing existing session:', existingSessionId);
+        // Reusing existing session
         return NextResponse.json(existingSession, { status: 200 });
       }
     }
@@ -171,7 +162,7 @@ export async function POST(request) {
       }
     }
     
-    console.log('[Sessions API] Found', userSessions.length, 'existing sessions for user:', userId);
+    // Found existing sessions for user
     
     const currentRoute = metadata?.route || '/';
     
@@ -188,7 +179,7 @@ export async function POST(request) {
         mostRecent.session.lastActivityAt = Date.now();
         mostRecent.session.currentRoute = currentRoute;
         
-        console.log('[Sessions API] Reusing provisioned guest session, updating route:', mostRecent.id, currentRoute);
+        // Reusing provisioned guest session, updating route
         return NextResponse.json(mostRecent.session, { status: 200 });
       } else if (!isProvisionedGuest) {
         // For anonymous guests, create separate sessions per route to track different tabs
@@ -203,7 +194,7 @@ export async function POST(request) {
             // Update the session
             exactRouteMatch.session.lastActivityAt = Date.now();
             
-            console.log('[Sessions API] Reusing anonymous guest session for same route:', exactRouteMatch.id, currentRoute);
+            // Reusing anonymous guest session for same route
             return NextResponse.json(exactRouteMatch.session, { status: 200 });
           }
         }
@@ -253,14 +244,14 @@ export async function POST(request) {
         }
         
         if (allGuestSessions.length > 0) {
-          console.log(`[Sessions API] Switching to registered user, ending ${allGuestSessions.length} guest sessions`);
+          // Switching to registered user, ending guest sessions
           allGuestSessions.forEach(({ session }) => {
             session.status = SESSION_STATUS.ENDED;
             session.endedAt = Date.now();
           });
         }
         
-        console.log('[Sessions API] Reusing registered user session, updating route:', mostRecent.id, currentRoute);
+        // Reusing registered user session, updating route
         return NextResponse.json(mostRecent.session, { status: 200 });
       }
     }
@@ -275,13 +266,13 @@ export async function POST(request) {
       userSessions.sort((a, b) => a.session.lastActivityAt - b.session.lastActivityAt);
       const oldest = userSessions[0];
       
-      console.log('[Sessions API] Too many sessions, ending oldest:', oldest.id);
+      // Too many sessions, ending oldest
       oldest.session.status = SESSION_STATUS.ENDED;
       oldest.session.endedAt = Date.now();
     }
 
     // Create new session only if no valid existing session
-    console.log('[Sessions API] Creating session with SESSION_STATUS.ACTIVE:', SESSION_STATUS.ACTIVE);
+    // Creating session with active status
     
     const session = {
       id: existingSessionId || crypto.randomUUID(),
@@ -303,10 +294,10 @@ export async function POST(request) {
       metadata: metadata || {},
     };
     
-    console.log('[Sessions API] Session object created with status:', session.status);
+    // Session object created
 
     // Store session - with extra validation
-    console.log('[Sessions API] About to store session with ID:', session.id);
+    // About to store session
     const beforeSize = sessionStore.size;
     sessionStore.set(session.id, session);
     const afterSize = sessionStore.size;
@@ -314,24 +305,14 @@ export async function POST(request) {
     // Also initialize in event store
     eventStore.set(session.id, []);
     
-    console.log('[Sessions API] Store operation - Before:', beforeSize, 'After:', afterSize);
-    console.log('[Sessions API] New session created:', session.id, 
-      'User:', session.userName, 
-      'Type:', session.userType,
-      'Status:', session.status,
-      'Total sessions:', sessionStore.size);
+    // Store operation completed
+    // New session created
     
-    // Debug: Log all current sessions
-    console.log('[Sessions API] Current sessions in store:', 
-      Array.from(sessionStore.keys()));
+    // Current sessions in store
     
     // Verify the session was stored correctly
     const storedSession = sessionStore.get(session.id);
-    console.log('[Sessions API] Verified stored session:', {
-      found: !!storedSession,
-      id: storedSession?.id,
-      status: storedSession?.status
-    });
+    // Verified stored session
 
     return NextResponse.json(session, { status: 201 });
   } catch (error) {

@@ -55,7 +55,7 @@ export async function PATCH(request, { params }) {
       }
       
       session.currentRoute = body.route;
-      console.log(`[Sessions API] Updated route for session ${id}: ${body.route}, history:`, session.routeHistory.map(r => r.route));
+      // Updated route for session
     }
     
     if (body.status !== undefined) {
@@ -99,7 +99,7 @@ export async function DELETE(request, { params }) {
     session.status = 'ended';
     session.endedAt = Date.now();
     
-    console.log(`[Sessions API] Ended session ${id}`);
+    // Ended session
     
     return NextResponse.json({
       success: true,

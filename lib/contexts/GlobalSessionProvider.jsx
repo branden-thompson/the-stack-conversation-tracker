@@ -19,8 +19,7 @@ export function GlobalSessionProvider({ children }) {
   const hasInitialized = useRef(false);
   const pathname = usePathname();
   
-  // Debug: Verify component is mounting
-  console.log('[GlobalSessionProvider] RENDERING, pathname:', pathname, 'hasInitialized:', hasInitialized.current, 'timestamp:', Date.now());
+  // Component render tracking
   
   /**
    * Initialize or update session for a user
@@ -28,7 +27,7 @@ export function GlobalSessionProvider({ children }) {
   const initializeSession = useCallback(async (user) => {
     // If no user provided, try to get provisioned guest from browser session first
     if (!user) {
-      console.log('[GlobalSessionProvider] No user provided, checking browser session for provisioned guest');
+      // No user provided, checking browser session for provisioned guest
       
       // Get browser session ID and check for provisioned guest from server
       const browserSessionId = getBrowserSessionId();
@@ -36,34 +35,31 @@ export function GlobalSessionProvider({ children }) {
       
       // If no browser session ID (SSR or not ready), skip for now
       if (!browserSessionId) {
-        console.log('[GlobalSessionProvider] No browser session ID available, skipping guest initialization');
+        // No browser session ID available, skipping guest initialization
         return;
       }
       
       if (browserSessionId) {
         try {
-          console.log('[GlobalSessionProvider] Fetching browser session:', browserSessionId);
           const response = await fetch(`/api/browser-sessions?id=${browserSessionId}`);
-          console.log('[GlobalSessionProvider] Browser session response:', response.status);
           if (response.ok) {
             const browserSession = await response.json();
-            console.log('[GlobalSessionProvider] Browser session data:', browserSession);
+            // Browser session data retrieved
             if (browserSession.provisionedGuest) {
               provisionedGuest = browserSession.provisionedGuest;
-              console.log('[GlobalSessionProvider] Using provisioned guest from browser session:', 
-                provisionedGuest.name, provisionedGuest.id);
+              // Using provisioned guest from browser session
             } else {
-              console.log('[GlobalSessionProvider] No provisioned guest in browser session');
+              // No provisioned guest in browser session
             }
           } else {
-            console.log('[GlobalSessionProvider] Browser session response not OK:', response.status);
+            // Browser session response not OK
           }
         } catch (error) {
           console.error('[GlobalSessionProvider] Error fetching browser session:', error);
         }
       }
       
-      console.log('[GlobalSessionProvider] After browser session check, provisionedGuest:', provisionedGuest);
+      // After browser session check
       
       // Fallback to client-side provisioning if needed
       if (!provisionedGuest) {
@@ -74,7 +70,7 @@ export function GlobalSessionProvider({ children }) {
           console.error('[GlobalSessionProvider] Failed to get provisioned guest');
           return;
         }
-        console.log('[GlobalSessionProvider] Using client-provisioned guest:', provisionedGuest.name, provisionedGuest.id);
+        // Using client-provisioned guest
       }
       
       const guestUser = {
@@ -100,7 +96,7 @@ export function GlobalSessionProvider({ children }) {
         },
       };
       
-      console.log('[GlobalSessionProvider] Creating provisioned guest session:', guestUser.name, 'metadata:', sessionData.metadata);
+      // Creating provisioned guest session
       
       try {
         const response = await fetch('/api/sessions', {
@@ -109,11 +105,11 @@ export function GlobalSessionProvider({ children }) {
           body: JSON.stringify(sessionData),
         });
         
-        console.log('[GlobalSessionProvider] Session API response:', response.status, response.ok);
+        // Session API response received
         
         if (response.ok) {
           const session = await response.json();
-          console.log('[GlobalSessionProvider] Provisioned guest session created:', session.id, session);
+          // Provisioned guest session created
           setCurrentSession(session);
           storeSessionId(session.id, guestUser.id);
           
@@ -133,38 +129,33 @@ export function GlobalSessionProvider({ children }) {
     
     // Now validate user object after potentially fetching provisioned guest
     if (!user || !user.id || user.id === 'undefined' || user.id === 'null') {
-      console.log('[GlobalSessionProvider] Invalid or missing user after provisioned guest check');
+      // Invalid or missing user after provisioned guest check
       return;
     }
     
     // CRITICAL: Don't create sessions for system user
     if (user.id === 'system' || user.isSystemUser) {
-      console.log('[GlobalSessionProvider] Skipping session for system user');
+      // Skipping session for system user
       return;
     }
     
     // Skip if already have a session for the exact same user
     if (currentSession?.userId === user?.id && currentSession?.userType === (user?.isGuest ? 'guest' : 'registered')) {
-      console.log('[GlobalSessionProvider] Session already exists for user:', user?.name || 'guest');
+      // Session already exists for user
       return;
     }
     
     // Handle user switching scenarios
     if (currentSession) {
-      console.log('[GlobalSessionProvider] User switch detected:', {
-        from: currentSession.userName,
-        to: user?.name || 'guest',
-        fromType: currentSession.userType,
-        toType: user ? (user.isGuest ? 'guest' : 'registered') : 'guest'
-      });
+      // User switch detected
     }
     
-    console.log('[GlobalSessionProvider] Initializing session for user:', user.name);
+    // Initializing session for user
     
     // Check for stored session ID
     const storedSessionId = getStoredSessionId(user.id);
     if (storedSessionId) {
-      console.log('[GlobalSessionProvider] Found stored session:', storedSessionId);
+      // Found stored session
     }
     
     // Determine user type
@@ -188,7 +179,7 @@ export function GlobalSessionProvider({ children }) {
       },
     };
     
-    console.log('[GlobalSessionProvider] Creating session for user:', user.name, 'isGuest:', user.isGuest, 'metadata:', sessionData.metadata);
+    // Creating session for user
     
     try {
       // Create or reuse session on server
@@ -201,7 +192,7 @@ export function GlobalSessionProvider({ children }) {
       if (response.ok) {
         const session = await response.json();
         const isNewSession = response.status === 201;
-        console.log('[GlobalSessionProvider] Session', isNewSession ? 'created' : 'reused', ':', session.id);
+        // Session created or reused
         
         setCurrentSession(session);
         storeSessionId(session.id, user.id);
@@ -278,20 +269,20 @@ export function GlobalSessionProvider({ children }) {
   
   // Auto-initialize a guest session on app boot - using ref to track
   useEffect(() => {
-    console.log('[GlobalSessionProvider] useEffect running, hasInitialized:', hasInitialized.current);
+    // useEffect running
     
     // Only run once
     if (hasInitialized.current) {
-      console.log('[GlobalSessionProvider] Already initialized, skipping');
+      // Already initialized, skipping
       return;
     }
     
-    console.log('[GlobalSessionProvider] Component mounted at', Date.now(), 'initializing session...');
+    // Component mounted, initializing session
     hasInitialized.current = true;
     
     // Delay to ensure browser is ready
     const timer = setTimeout(() => {
-      console.log('[GlobalSessionProvider] Starting session initialization for path:', pathname);
+      // Starting session initialization
       initializeSession(null);
     }, 500);
     
@@ -304,7 +295,7 @@ export function GlobalSessionProvider({ children }) {
     
     const previousRoute = sessionTracker.currentSession?.currentRoute;
     
-    console.log('[GlobalSessionProvider] Route change detected:', previousRoute, '->', pathname);
+    // Route change detected
     
     // Only emit if route actually changed
     if (previousRoute && previousRoute !== pathname) {
@@ -319,7 +310,7 @@ export function GlobalSessionProvider({ children }) {
     
     // Always update the server-side session route
     if (currentSession.id) {
-      console.log('[GlobalSessionProvider] Updating server session route:', currentSession.id, pathname);
+      // Updating server session route
       fetch(`/api/sessions/${currentSession.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

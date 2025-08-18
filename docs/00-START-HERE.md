@@ -69,15 +69,35 @@ docs/
 
 ## 🔄 Recently Added/Updated:
 
+- **2025-08-17:** Post-feature cleanup - Removed 200+ console.logs, organized test files
+- **2025-08-17:** Added `/docs/ai-context/post-feature-work-cleanup.md` - Cleanup process guide
+- **2025-08-17:** Added `/docs/development/essential-logging.md` - Documents remaining logs
 - **2025-08-16:** Reorganized docs structure for better AI agent navigation
 - **2025-08-16:** Added `DEBUG_LOGGING.md` - Critical for performance
 - **2025-08-15:** Added `SWITCHING-SOLUTION.md` - User switching bug fix
+
+## 🎯 Key Learnings from Recent Development:
+
+### Post-Feature Cleanup is Essential
+After implementing major features (like provisioned guest system), always:
+1. **Remove debug console.logs** - They accumulate quickly during development
+2. **Organize test files** - Don't leave test scripts in root directory
+3. **Document what remains** - Explain why certain logs are kept
+4. **Update documentation** - Reflect the current state of the codebase
+
+See `/docs/ai-context/post-feature-work-cleanup.md` for detailed cleanup process.
+
+### Console.log Best Practices
+- **Keep**: Error handlers, auth events, cleanup operations
+- **Remove**: Debug flow tracking, state logging, verbose initialization
+- **Document**: Essential logs in `/docs/development/essential-logging.md`
 
 ## 💡 Quick Tips:
 
 1. **For AI Agents:** Always check for a `CLAUDE.md` or similar file in `/docs/ai-context/` before starting work
 2. **For Developers:** Run through `/docs/development/` before making your first commit
 3. **For Debugging:** Check `/docs/troubleshooting/` first - your issue might already be solved
+4. **For Cleanup:** Follow `/docs/ai-context/post-feature-work-cleanup.md` after feature work
 
 ---
 

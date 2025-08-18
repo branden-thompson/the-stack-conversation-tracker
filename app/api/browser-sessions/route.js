@@ -33,17 +33,14 @@ export async function GET(request) {
     const browserSession = browserSessions.get(browserSessionId);
     
     if (!browserSession) {
-      console.log('[BrowserSessions API] Browser session not found:', browserSessionId);
+      // Browser session not found
       return NextResponse.json(
         { error: 'Browser session not found' },
         { status: 404 }
       );
     }
     
-    console.log('[BrowserSessions API] Retrieved browser session:', browserSessionId, {
-      activeUserId: browserSession.activeUserId,
-      activeUserType: browserSession.activeUserType
-    });
+    // Retrieved browser session
     
     return NextResponse.json(browserSession);
   } catch (error) {
@@ -85,14 +82,14 @@ export async function POST(request) {
         );
       }
       
-      console.log('[BrowserSessions API] Ending browser session (via sendBeacon):', browserSessionId);
+      // Ending browser session (via sendBeacon)
       
       // Mark any active sessions for the provisioned guest as ended
       if (browserSession.provisionedGuest) {
         for (const [id, session] of sessionStore.entries()) {
           if (session.userId === browserSession.provisionedGuest.id && 
               session.status === 'active') {
-            console.log('[BrowserSessions API] Ending provisioned guest session:', id);
+            // Ending provisioned guest session
             session.status = 'ended';
             session.endedAt = Date.now();
           }
@@ -128,7 +125,7 @@ export async function POST(request) {
     
     if (!browserSession) {
       // Create new browser session
-      console.log('[BrowserSessions API] Creating new browser session:', browserSessionId);
+      // Creating new browser session
       
       // Generate a provisioned guest for this browser session
       const existingUsers = Array.from(sessionStore.values())
@@ -155,17 +152,13 @@ export async function POST(request) {
       
       browserSessions.set(browserSessionId, browserSession);
       
-      console.log('[BrowserSessions API] Created browser session with provisioned guest:', 
-        provisionedGuest.name, provisionedGuest.id);
+      // Created browser session with provisioned guest
       
       return NextResponse.json(browserSession, { status: 201 });
     }
     
     // Update existing browser session
-    console.log('[BrowserSessions API] Updating browser session:', browserSessionId, {
-      oldUser: browserSession.activeUserId,
-      newUser: activeUserId
-    });
+    // Updating browser session
     
     // Update active user if provided
     if (activeUserId !== undefined) {
@@ -217,10 +210,7 @@ export async function DELETE(request) {
       );
     }
     
-    console.log('[BrowserSessions API] Ending browser session:', browserSessionId, {
-      activeUserId: browserSession.activeUserId,
-      provisionedGuestId: browserSession.provisionedGuest?.id
-    });
+    // Ending browser session
     
     // Mark any active sessions for the provisioned guest as ended
     if (browserSession.provisionedGuest) {
