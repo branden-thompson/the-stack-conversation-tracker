@@ -14,7 +14,7 @@
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:46.081Z",
-      "updatedAt": "2025-08-18T17:24:46.296Z"
+      "updatedAt": "2025-08-18T20:24:11.810Z"
     },
     {
       "id": "qWd3mQ7EzJCY5UOTl7cHh",
@@ -26,11 +26,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": false,
+      "faceUp": true,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
-      "updatedAt": "2025-08-18T17:24:45.074Z"
+      "updatedAt": "2025-08-18T20:24:14.857Z"
     },
     {
       "id": "c9xbohV-rs7BQqF1vSRKI",
@@ -42,11 +42,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": true,
+      "faceUp": false,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:48.044Z",
-      "updatedAt": "2025-08-18T17:33:01.366Z"
+      "updatedAt": "2025-08-18T20:27:42.821Z"
     }
   ],
   "users": [

@@ -18,7 +18,6 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { 
   Monitor, 
-  Zap, 
   Clock, 
   MemoryStick, 
   Activity, 
@@ -45,7 +44,10 @@ export default function PerformancePage() {
     summary,
     metrics,
     overheadImpact,
+    circuitBreakerStatus,
+    emergencyDisabled,
     toggleMonitoring,
+    emergencyDisable,
     getPerformanceSummary,
     getHealthStatus,
     flushMetrics
@@ -92,9 +94,9 @@ export default function PerformancePage() {
     }
   };
 
-  // Quick stats component
+  // Quick stats component - focusing on working metrics only
   const QuickStats = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -103,22 +105,11 @@ export default function PerformancePage() {
               <p className={`text-2xl font-bold ${THEME.colors.text.primary}`}>
                 {realtimeData?.api ? `${realtimeData.api.averageResponseTime.toFixed(0)}ms` : '-'}
               </p>
-            </div>
-            <Clock className={`h-8 w-8 ${THEME.colors.status.info.icon}`} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Navigation</p>
-              <p className={`text-2xl font-bold ${THEME.colors.text.primary}`}>
-                {realtimeData?.navigation ? `${realtimeData.navigation.averageNavigationTime.toFixed(0)}ms` : '-'}
+              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+                {realtimeData?.api ? `${realtimeData.api.totalRequests} requests` : 'No data'}
               </p>
             </div>
-            <Zap className={`h-8 w-8 ${THEME.colors.status.warning.icon}`} />
+            <Clock className={`h-8 w-8 ${THEME.colors.status.info.icon}`} />
           </div>
         </CardContent>
       </Card>
@@ -131,6 +122,9 @@ export default function PerformancePage() {
               <p className={`text-2xl font-bold ${THEME.colors.text.primary}`}>
                 {realtimeData?.memory ? `${(realtimeData.memory.currentUsage / 1048576).toFixed(1)}MB` : '-'}
               </p>
+              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+                {realtimeData?.memory ? `Peak: ${(realtimeData.memory.peakUsage / 1048576).toFixed(1)}MB` : 'No data'}
+              </p>
             </div>
             <MemoryStick className={`h-8 w-8 ${THEME.colors.text.secondary}`} />
           </div>
@@ -141,10 +135,14 @@ export default function PerformancePage() {
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Health Status</p>
+              <p className={`text-sm ${THEME.colors.text.tertiary}`}>System Health</p>
               <div className="mt-1">
                 {healthStatus ? getHealthIndicator(healthStatus.status) : <Badge variant="outline">Loading</Badge>}
               </div>
+              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+                {healthStatus?.issues?.length > 0 ? `${healthStatus.issues.length} issues` : 
+                 healthStatus?.warnings?.length > 0 ? `${healthStatus.warnings.length} warnings` : 'All systems normal'}
+              </p>
             </div>
             <Activity className={`h-8 w-8 ${THEME.colors.status.success.icon}`} />
           </div>
@@ -168,12 +166,23 @@ export default function PerformancePage() {
             <Switch
               checked={isEnabled}
               onCheckedChange={toggleMonitoring}
+              disabled={emergencyDisabled || (circuitBreakerStatus?.isTripped && !isEnabled)}
               id="monitoring-toggle"
               className="data-[state=checked]:bg-zinc-600 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-700"
             />
-            <label htmlFor="monitoring-toggle" className="text-sm font-medium">
-              {isEnabled ? 'Monitoring Enabled' : 'Monitoring Disabled'}
-            </label>
+            <div className="flex flex-col">
+              <label htmlFor="monitoring-toggle" className="text-sm font-medium">
+                {emergencyDisabled ? 'Emergency Disabled' : 
+                 circuitBreakerStatus?.isTripped ? 'Circuit Breaker Tripped' :
+                 isEnabled ? 'Monitoring Enabled' : 'Monitoring Disabled'}
+              </label>
+              {(emergencyDisabled || circuitBreakerStatus?.isTripped) && (
+                <span className="text-xs text-red-600 dark:text-red-400">
+                  {emergencyDisabled ? 'Check environment variables or localStorage' :
+                   `Tripped due to safety limits (${circuitBreakerStatus?.consecutiveErrors} errors)`}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -194,10 +203,22 @@ export default function PerformancePage() {
             variant="outline" 
             size="sm"
             onClick={() => flushMetrics()}
+            disabled={!isEnabled}
             className="border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
             Flush Metrics
           </Button>
+          
+          {isEnabled && !emergencyDisabled && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={emergencyDisable}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Emergency Stop
+            </Button>
+          )}
 
           <div className={`text-sm ${THEME.colors.text.tertiary}`}>
             Session: {summary?.sessionId?.slice(-8) || 'N/A'} | 
@@ -205,6 +226,9 @@ export default function PerformancePage() {
             Metrics: {metrics?.length || 0}
             {overheadImpact && (
               <> | Overhead: {overheadImpact.averageCollectionTime?.toFixed(2)}ms avg</>
+            )}
+            {circuitBreakerStatus && (
+              <> | Errors: {circuitBreakerStatus.totalErrors}/{circuitBreakerStatus.totalOperations}</>
             )}
           </div>
           
@@ -292,22 +316,64 @@ export default function PerformancePage() {
           </TabsContent>
         </Tabs>
 
-        {/* Performance Impact Warning */}
-        {overheadImpact && overheadImpact.averageCollectionTime > 5 && (
-          <Card className={`${THEME.colors.status.warning.border} ${THEME.colors.status.warning.bg}`}>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className={`h-5 w-5 ${THEME.colors.status.warning.icon} mt-0.5`} />
-                <div>
-                  <p className={`text-sm font-medium ${THEME.colors.status.warning.text}`}>Performance Impact Detected</p>
-                  <p className={`text-sm ${THEME.colors.status.warning.text}`}>
-                    Monitoring overhead is {overheadImpact.averageCollectionTime.toFixed(2)}ms on average. 
-                    Consider reducing metrics collection frequency or disabling detailed tracking.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Safety Status and Warnings */}
+        {(emergencyDisabled || circuitBreakerStatus?.isTripped || (overheadImpact && overheadImpact.averageCollectionTime > 5)) && (
+          <div className="space-y-4">
+            {/* Emergency Disabled Warning */}
+            {emergencyDisabled && (
+              <Card className="border-red-500 bg-red-50 dark:bg-red-950">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-2">
+                    <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-red-800 dark:text-red-200">Emergency Controls Active</p>
+                      <p className="text-sm text-red-700 dark:text-red-300">
+                        Performance monitoring is disabled via emergency controls. Check environment variables (NEXT_PUBLIC_PERF_MONITORING_DISABLED) or localStorage flags.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Circuit Breaker Warning */}
+            {circuitBreakerStatus?.isTripped && (
+              <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-orange-800 dark:text-orange-200">Circuit Breaker Activated</p>
+                      <p className="text-sm text-orange-700 dark:text-orange-300">
+                        Monitoring was automatically disabled due to safety limits. 
+                        {circuitBreakerStatus.consecutiveErrors} consecutive errors detected. 
+                        Will auto-recover in {Math.round((300000 - (Date.now() - (circuitBreakerStatus.trippedAt || 0))) / 60000)} minutes.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Performance Impact Warning */}
+            {overheadImpact && overheadImpact.averageCollectionTime > 5 && (
+              <Card className={`${THEME.colors.status.warning.border} ${THEME.colors.status.warning.bg}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className={`h-5 w-5 ${THEME.colors.status.warning.icon} mt-0.5`} />
+                    <div>
+                      <p className={`text-sm font-medium ${THEME.colors.status.warning.text}`}>Performance Impact Detected</p>
+                      <p className={`text-sm ${THEME.colors.status.warning.text}`}>
+                        Monitoring overhead is {overheadImpact.averageCollectionTime.toFixed(2)}ms on average. 
+                        {overheadImpact.averageCollectionTime > 10 ? 'Monitoring will be automatically disabled at 15ms average.' :
+                         'Consider reducing metrics collection frequency or disabling detailed tracking.'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
       </div>
     );

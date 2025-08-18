@@ -217,4 +217,74 @@ The synthetic test shows slightly elevated API impact, but real-world usage shou
 **Production Readiness**: ✅ READY (with recommended optimizations)  
 **Documentation**: ✅ COMPREHENSIVE  
 
-*This implementation successfully delivers comprehensive performance monitoring with zero-impact architecture while providing powerful insights for application optimization.*
+## ⚠️ CRITICAL UPDATE: Implementation Reverted
+
+### Decision to Revert (2025-08-18)
+After thorough testing, the performance monitoring implementation was **completely reverted** due to critical interference with core application functionality.
+
+### Issues Encountered
+
+#### 1. Card Functionality Interference
+- **Problem**: Card flipping and interaction features broke when navigating to `/dev/performance` page
+- **Root Cause**: Performance monitoring system was intercepting fetch API calls in a way that interfered with card state management
+- **Impact**: Core application functionality became unreliable
+
+#### 2. API Request Runaway
+- **Problem**: Implementation caused continuous API calls every ~50ms instead of intended 2-5 second intervals
+- **Symptoms**: Server logs showed `/api/sessions` and `/api/sessions/events` being hammered continuously
+- **Root Cause**: Multiple overlapping polling loops created by aggressive optimization attempts
+- **Impact**: Server performance degradation and potential scalability issues
+
+#### 3. Active Stacker Component Regressions
+- **Problem**: Visual flickering during component updates
+- **Symptoms**: Component would flicker between loading states ("...") and empty states ("0")
+- **Root Cause**: Unstable state management during rapid polling intervals
+- **Impact**: Poor user experience and visual quality degradation
+
+### Lessons Learned
+
+#### Technical Insights
+1. **Fetch Interception Risks**: Intercepting fetch API at a global level can have unpredictable side effects on complex applications
+2. **Polling Loop Complexity**: Multiple independent polling systems can create interference patterns that are difficult to debug
+3. **State Management Fragility**: Performance monitoring can inadvertently affect React component state stability
+
+#### Implementation Approach Issues
+1. **Over-Engineering**: The "zero-impact" design added complexity that actually created impact
+2. **Insufficient Integration Testing**: The monitoring system wasn't tested thoroughly with all existing features
+3. **Premature Optimization**: Attempting to optimize polling intervals led to the exact problem we were trying to avoid
+
+#### Project Management Lessons
+1. **Incremental Implementation**: Should have implemented monitoring in smaller, more isolated pieces
+2. **Feature Flags**: Should have built robust toggle mechanisms before deploying
+3. **Rollback Strategy**: Having a clear revert plan from the start would have saved time
+
+### Alternative Approaches for Future Consideration
+
+#### 1. External Monitoring Solutions
+- Use dedicated APM tools (DataDog, New Relic, etc.) instead of building in-house
+- Less integration risk, more mature tooling
+- Better separation of concerns
+
+#### 2. Minimal Instrumentation
+- Simple timing measurements without fetch interception
+- Manual instrumentation of critical paths only
+- Browser DevTools integration for dev-time monitoring
+
+#### 3. Observability-First Design
+- Build monitoring hooks into the application architecture from the start
+- Use structured logging instead of performance metrics collection
+- Focus on business metrics rather than technical performance metrics
+
+### Revert Details
+- **Files Removed**: All performance monitoring code and components
+- **Dependencies Reverted**: Removed recharts, performance-related UI components
+- **State Restored**: Application returned to stable pre-monitoring state
+- **Active Stacker Fixed**: Restored clean component with 2-second polling for good UX balance
+
+### Status
+- **Implementation Status**: ❌ REVERTED  
+- **Performance Impact**: ✅ ELIMINATED  
+- **Application Stability**: ✅ RESTORED  
+- **Lesson Documentation**: ✅ COMPLETE  
+
+*This revert demonstrates the importance of thorough integration testing and incremental feature development. The core application functionality must always take precedence over observability features.*

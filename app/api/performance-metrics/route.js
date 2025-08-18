@@ -6,13 +6,21 @@
  */
 
 import { NextResponse } from 'next/server';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, copyFile, rename } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
 
 const METRICS_DIR = path.join(process.cwd(), 'data', 'performance');
 const DAILY_METRICS_FILE = (date) => path.join(METRICS_DIR, `metrics-${date}.json`);
 const SUMMARY_FILE = path.join(METRICS_DIR, 'performance-summary.json');
+
+// Safety limits for data protection
+const SAFETY_LIMITS = {
+  MAX_FILE_SIZE_MB: 10,
+  MAX_METRICS_PER_SESSION: 1000,
+  MAX_SESSIONS_PER_DAY: 500,
+  MAX_METRIC_SIZE_KB: 100
+};
 
 // Ensure metrics directory exists
 async function ensureMetricsDirectory() {
@@ -45,14 +53,118 @@ async function readDailyMetrics(date) {
   }
 }
 
-// Write daily metrics file
+/**
+ * Validate metrics data structure to prevent corruption
+ */
+function validateMetricsData(data) {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Metrics data must be an object');
+  }
+  
+  if (!data.date || typeof data.date !== 'string') {
+    throw new Error('Metrics data must have a valid date string');
+  }
+  
+  if (!data.sessions || typeof data.sessions !== 'object') {
+    throw new Error('Metrics data must have a sessions object');
+  }
+  
+  // Check session limits
+  const sessionCount = Object.keys(data.sessions).length;
+  if (sessionCount > SAFETY_LIMITS.MAX_SESSIONS_PER_DAY) {
+    throw new Error(`Too many sessions: ${sessionCount} > ${SAFETY_LIMITS.MAX_SESSIONS_PER_DAY}`);
+  }
+  
+  // Check metrics per session
+  for (const [sessionId, session] of Object.entries(data.sessions)) {
+    if (!session.metrics || !Array.isArray(session.metrics)) {
+      throw new Error(`Session ${sessionId} must have metrics array`);
+    }
+    
+    if (session.metrics.length > SAFETY_LIMITS.MAX_METRICS_PER_SESSION) {
+      throw new Error(`Session ${sessionId} has too many metrics: ${session.metrics.length} > ${SAFETY_LIMITS.MAX_METRICS_PER_SESSION}`);
+    }
+  }
+  
+  // Check data size
+  const dataString = JSON.stringify(data);
+  const sizeKB = Buffer.byteLength(dataString, 'utf8') / 1024;
+  const sizeMB = sizeKB / 1024;
+  
+  if (sizeMB > SAFETY_LIMITS.MAX_FILE_SIZE_MB) {
+    throw new Error(`Metrics file too large: ${sizeMB.toFixed(2)}MB > ${SAFETY_LIMITS.MAX_FILE_SIZE_MB}MB`);
+  }
+  
+  return { sizeKB, sizeMB, sessionCount };
+}
+
+/**
+ * Atomic write operation with backup and validation
+ */
+async function safeWriteMetrics(filePath, data) {
+  // Validate data structure first
+  const validation = validateMetricsData(data);
+  
+  await ensureMetricsDirectory();
+  
+  // Create backup if file exists
+  if (existsSync(filePath)) {
+    const backupPath = filePath + '.backup';
+    try {
+      await copyFile(filePath, backupPath);
+    } catch (error) {
+      console.warn(`Failed to create backup for ${filePath}:`, error.message);
+      // Continue anyway - backup failure shouldn't block writes
+    }
+  }
+  
+  // Atomic write using temporary file
+  const tempPath = filePath + '.tmp';
+  const dataString = JSON.stringify(data, null, 2);
+  
+  try {
+    await writeFile(tempPath, dataString, 'utf8');
+    await rename(tempPath, filePath); // Atomic on most filesystems
+    
+    return {
+      success: true,
+      validation,
+      filePath,
+      timestamp: Date.now()
+    };
+  } catch (error) {
+    // Clean up temp file if it exists
+    try {
+      if (existsSync(tempPath)) {
+        await require('fs/promises').unlink(tempPath);
+      }
+    } catch (cleanupError) {
+      console.warn('Failed to cleanup temp file:', cleanupError.message);
+    }
+    throw error;
+  }
+}
+
+// Write daily metrics file with safety measures
 async function writeDailyMetrics(date, data) {
   try {
-    await ensureMetricsDirectory();
-    const filePath = DAILY_METRICS_FILE(date);
-    await writeFile(filePath, JSON.stringify(data, null, 2));
+    const result = await safeWriteMetrics(DAILY_METRICS_FILE(date), data);
+    
+    // Log successful write with metrics
+    console.log(`[Performance Metrics] Successfully wrote ${date} metrics:`, {
+      sessions: result.validation.sessionCount,
+      sizeMB: result.validation.sizeMB.toFixed(2),
+      file: path.basename(result.filePath)
+    });
+    
+    return result;
   } catch (error) {
-    console.error(`Failed to write metrics for ${date}:`, error);
+    console.error(`[Performance Metrics] Failed to write metrics for ${date}:`, {
+      error: error.message,
+      date,
+      timestamp: new Date().toISOString()
+    });
+    throw error;
   }
 }
 
