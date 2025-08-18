@@ -20,7 +20,8 @@ import { useButtonTracking } from '@/lib/hooks/useButtonTracking';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
-import { APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
+import { APP_THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 
 
@@ -88,6 +89,9 @@ function BoardInner({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [layoutKey, setLayoutKey] = useState(0);
+  
+  // Get dynamic theme
+  const dynamicTheme = useDynamicAppTheme();
   
   // Enable global button tracking
   useButtonTracking();
@@ -274,10 +278,10 @@ function BoardInner({
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
+      <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
         <div className="text-center">
-          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
-          <p className={APP_THEME.colors.text.tertiary}>Loading conversation board...</p>
+          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${dynamicTheme.colors.text.tertiary}`} />
+          <p className={dynamicTheme.colors.text.tertiary}>Loading conversation board...</p>
         </div>
       </div>
     );
@@ -285,7 +289,7 @@ function BoardInner({
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
+      <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
         <div className="text-center text-red-600">
           <p className="mb-4">Error loading board: {error}</p>
           <Button onClick={refreshCards} variant="outline" className="h-10 leading-none">
@@ -299,7 +303,7 @@ function BoardInner({
 
 
   return (
-    <div className={`h-screen flex flex-col ${getAppThemeClasses('page')}`}>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.page}`}>
         {/* Header */}
         <AppHeader
           onOpenTray={() => {

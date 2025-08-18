@@ -20,7 +20,9 @@ import { Button } from '@/components/ui/button';
 import { CompactUserSelector } from '@/components/ui/compact-user-selector';
 import { ConversationControls } from '@/components/ui/conversation-controls';
 import { ActiveUsersDisplay } from '@/components/ui/active-users-display';
+import { ColorThemeSelector } from '@/components/ui/color-theme-selector';
 import { useTheme } from 'next-themes';
+import { useAppTheme, useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { 
   Plus, 
   RefreshCw, 
@@ -34,7 +36,7 @@ import {
   MessageCircle,
   Sparkles // For animations toggle
 } from 'lucide-react';
-import { UI_HEIGHTS, APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
+import { UI_HEIGHTS, APP_THEME } from '@/lib/utils/ui-constants';
 
 const TOOLBAR_H = UI_HEIGHTS.toolbar;
 const DIVIDER_MX = 'mx-2 lg:mx-3';
@@ -109,6 +111,8 @@ export function AppHeader({
   const actionBtnClass = `h-[${TOOLBAR_H}px] leading-none`;
   const iconBtnClass = `h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px] p-0 leading-none`;
   const { theme, setTheme, systemTheme } = useTheme();
+  const { colorTheme, setColorTheme } = useAppTheme();
+  const dynamicTheme = useDynamicAppTheme();
   
   // Enhanced theme controls that handle both regular users and guests
   const handleThemeChange = useCallback((newTheme) => {
@@ -119,6 +123,11 @@ export function AppHeader({
     // Always update the global theme
     setTheme(newTheme);
   }, [isGuestMode, updateGuestPreferences, setTheme]);
+
+  // Color theme change handler
+  const handleColorThemeChange = useCallback((newColorTheme) => {
+    setColorTheme(newColorTheme);
+  }, [setColorTheme]);
   
   const themeControls = {
     theme,
@@ -128,7 +137,7 @@ export function AppHeader({
   };
 
   return (
-    <header className={`${getAppThemeClasses('header')} px-3 sm:px-4 lg:px-6 py-2 lg:py-3`}>
+    <header className={`${dynamicTheme.colors.background.header} ${dynamicTheme.colors.border.primary} px-3 sm:px-4 lg:px-6 py-2 lg:py-3`}>
       <div className="flex items-center justify-between">
         {/* Left: Hamburger + Title */}
         <div className={`flex items-center ${HEADER_SIDE_GAP}`}>
@@ -242,7 +251,7 @@ export function AppHeader({
                     </Button>
                     
                     {isAppOverflowOpen && (
-                      <div className={`absolute top-[42px] right-0 z-50 ${getAppThemeClasses('dropdown')} rounded-md min-w-[160px]`}>
+                      <div className={`absolute top-[42px] right-0 z-50 ${dynamicTheme.colors.background.dropdown} rounded-md min-w-[160px]`}>
                         <div className="p-1">
                           {onRefreshCards && (
                             <button
@@ -311,7 +320,7 @@ export function AppHeader({
                 
                 {/* Conversation Menu */}
                 {isConversationOverflowOpen && (
-                  <div className={`absolute top-[42px] right-0 z-50 ${getAppThemeClasses('dropdown')} rounded-md min-w-[200px]`}>
+                  <div className={`absolute top-[42px] right-0 z-50 ${dynamicTheme.colors.background.dropdown} rounded-md min-w-[200px]`}>
                     <div className="p-2">
                       {/* Status Display */}
                       <div className={`px-2 py-1 text-sm border-b ${APP_THEME.colors.border.primary} mb-2`}>
@@ -439,6 +448,15 @@ export function AppHeader({
                   onManageUsers={onManageUsers}
                   themeControls={themeControls}
                   additionalPreferences={[
+                    // Color theme selector - positioned below Light/Dark/System as specified
+                    <div key="color-theme" className="space-y-2">
+                      <ColorThemeSelector
+                        currentColorTheme={colorTheme}
+                        currentTheme={theme === 'system' ? systemTheme : theme}
+                        systemTheme={systemTheme}
+                        onColorThemeChange={handleColorThemeChange}
+                      />
+                    </div>,
                     // Animations toggle
                     <div key="animations" className="space-y-2">
                       <div className={`text-xs font-medium ${APP_THEME.colors.text.tertiary} uppercase tracking-wide`}>

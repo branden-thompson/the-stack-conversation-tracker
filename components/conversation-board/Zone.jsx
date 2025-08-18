@@ -13,7 +13,8 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
-import { CARD_LAYOUT, APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
+import { CARD_LAYOUT, APP_THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /* ---------- Layout / stacking constants ---------- */
 const STACK_GAP_PX = CARD_LAYOUT.stackGap;
@@ -58,6 +59,8 @@ export function Zone({
     data: { type: 'zone', accepts: 'card' },
   });
 
+  // Get dynamic theme
+  const dynamicTheme = useDynamicAppTheme();
 
   const zoneConfig = ZONES?.[zoneId] ?? {
     title: titleOverride ?? 'Zone',
@@ -154,8 +157,8 @@ export function Zone({
         {isDraggingCard && (
           <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`${getAppThemeClasses('dropdown')} px-3 py-2 rounded-md`}>
-                <p className={`text-sm font-medium ${APP_THEME.colors.text.secondary}`}>Drop here</p>
+              <div className={`${dynamicTheme.colors.background.dropdown} px-3 py-2 rounded-md`}>
+                <p className={`text-sm font-medium ${dynamicTheme.colors.text.secondary}`}>Drop here</p>
               </div>
             </div>
           </div>
@@ -186,7 +189,7 @@ export function Zone({
           );
         })}
         {cards.length === 0 && (
-          <div className={`absolute inset-2 flex items-center justify-center ${APP_THEME.colors.text.light} border-2 border-dashed ${APP_THEME.colors.border.secondary} rounded-lg`}>
+          <div className={`absolute inset-2 flex items-center justify-center ${dynamicTheme.colors.text.light} border-2 border-dashed ${dynamicTheme.colors.border.secondary} rounded-lg`}>
             <div className="text-center">
               <p className="text-sm font-medium">Drop cards here</p>
               <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
@@ -217,8 +220,8 @@ export function Zone({
         {isDraggingCard && (
           <div className="absolute inset-0 bg-blue-100/50 dark:bg-blue-900/20 border-2 border-dashed border-blue-400 dark:border-blue-500 rounded-lg z-10 pointer-events-none">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`${getAppThemeClasses('dropdown')} px-3 py-2 rounded-md`}>
-                <p className={`text-sm font-medium ${APP_THEME.colors.text.secondary}`}>Drop here</p>
+              <div className={`${dynamicTheme.colors.background.dropdown} px-3 py-2 rounded-md`}>
+                <p className={`text-sm font-medium ${dynamicTheme.colors.text.secondary}`}>Drop here</p>
               </div>
             </div>
           </div>
@@ -265,7 +268,7 @@ export function Zone({
               );
             })
           ) : (
-            <div className={`absolute inset-2 flex items-center justify-center ${APP_THEME.colors.text.light} border-2 border-dashed ${APP_THEME.colors.border.secondary} rounded-lg`}>
+            <div className={`absolute inset-2 flex items-center justify-center ${dynamicTheme.colors.text.light} border-2 border-dashed ${dynamicTheme.colors.border.secondary} rounded-lg`}>
               <div className="text-center">
                 <p className="text-sm font-medium">Drop cards here</p>
                 <p className="text-xs mt-1 opacity-75">Drag cards from other zones</p>
@@ -290,8 +293,9 @@ export function Zone({
     <div
       className={cn(
         'relative h-full w-full flex flex-col rounded-lg border-2 overflow-hidden transition-all duration-200',
-        // zone surface w/ dark support
-        getAppThemeClasses('zone'),
+        // zone surface w/ dynamic theme support
+        dynamicTheme.colors.background.zone,
+        dynamicTheme.colors.border.primary,
         zoneConfig.className,
         // Enhanced drop feedback
         isOver && 'ring-2 ring-blue-400 ring-offset-2 ring-offset-white dark:ring-offset-gray-900 border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20',
@@ -300,13 +304,13 @@ export function Zone({
       )}
     >
       {/* Header */}
-      <div className={`flex items-center justify-between p-3 ${getAppThemeClasses('zone-header')} border-b`}>
+      <div className={`flex items-center justify-between p-3 ${dynamicTheme.colors.background.zoneHeader} ${dynamicTheme.colors.border.primary} border-b`}>
         <div className="flex flex-col text-left">
-          <h3 className={`font-semibold text-sm ${APP_THEME.colors.text.primary}`}>
+          <h3 className={`font-semibold text-sm ${dynamicTheme.colors.text.primary}`}>
             {titleOverride ?? zoneConfig.title}
           </h3>
           {zoneConfig.description ? (
-            <p className={`text-xs ${APP_THEME.colors.text.tertiary}`}>{zoneConfig.description}</p>
+            <p className={`text-xs ${dynamicTheme.colors.text.tertiary}`}>{zoneConfig.description}</p>
           ) : null}
         </div>
 
@@ -315,7 +319,7 @@ export function Zone({
             size="sm"
             variant="secondary"
             /* Restore visible outline in both themes while keeping secondary look */
-            className={`shrink-0 border ${APP_THEME.colors.border.secondary} bg-transparent ${APP_THEME.colors.background.hover}`}
+            className={`shrink-0 border ${dynamicTheme.colors.border.secondary} bg-transparent ${dynamicTheme.colors.background.hover}`}
             onClick={handleOrganizePersist}
           >
             Organize
