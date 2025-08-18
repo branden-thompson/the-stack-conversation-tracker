@@ -42,6 +42,7 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 8. Added card background colors to UI theme constants (2025-08-18)
 9. **React Query Migration** - Successfully migrated all hooks to React Query with safety switches (2025-08-18)
 10. **Bag n Tag Cleanup** - Deprecated legacy hooks after successful React Query migration (2025-08-18)
+11. **Synthwave84 Theme** - Implemented custom dark-mode exclusive retro-futuristic theme (2025-08-18)
 
 ### Development Notes
 - NEVER NEVER NEVER add unprompted features unless you specifically ask to create them
@@ -88,6 +89,24 @@ When a major migration or refactor is successfully completed, use the "Bag n Tag
 7. **Remember**: Files can be restored by moving them out of `/deprecated` folders if needed
 
 **Terminology**: "Bag n Tag", "Bag and Tag", or "Bag-n-Tag" all refer to this deprecation process.
+
+### Custom Theme Implementation
+**🎨 Adding New Color Themes**
+When implementing custom themes, follow this established pattern:
+
+1. **Create theme file** in `/lib/themes/color-themes/[theme-name].js`
+2. **Follow mathematical color generation** - use existing theme ratios for consistency
+3. **Add import and registration** in `/lib/themes/theme-loader.js`
+4. **Update color previews** in `/components/ui/color-theme-selector.jsx`
+5. **Consider dark-only themes** with `darkOnly: true` flag for specialized aesthetics
+6. **Test across all theme-aware components** to ensure universal coverage
+7. **Document in project hygiene** for implementation tracking
+
+**Example: Synthwave84 Theme (2025-08-18)**
+- Dark-mode exclusive retro-futuristic theme
+- Base colors: Blue-Purple backgrounds, Hot-Pink borders, Hot Teal text
+- Balanced approach: Maintains readability while preserving aesthetic
+- Universal application: All theme-aware elements styled consistently
 
 ## Commands to Remember
 ```bash

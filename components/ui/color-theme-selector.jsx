@@ -27,20 +27,30 @@ export function ColorThemeSelector({
   const [availableThemes, setAvailableThemes] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   
-  // Load available themes on mount
+  // Determine effective theme for preview
+  const effectiveTheme = currentTheme === 'system' ? systemTheme : currentTheme;
+  const isDark = effectiveTheme === 'dark';
+  
+  // Load available themes on mount and filter by light/dark mode
   useEffect(() => {
     try {
-      const themes = getAvailableColorThemes();
-      setAvailableThemes(themes);
+      const allThemes = getAvailableColorThemes();
+      
+      // Filter themes based on current mode
+      // Dark-only themes should only appear in dark mode
+      const filteredThemes = allThemes.filter(theme => {
+        if (theme.darkOnly && effectiveTheme !== 'dark') {
+          return false; // Hide dark-only themes in light mode
+        }
+        return true;
+      });
+      
+      setAvailableThemes(filteredThemes);
     } catch (error) {
       console.warn('Failed to load color themes:', error);
       setAvailableThemes([getDefaultColorTheme()]);
     }
-  }, []);
-
-  // Determine effective theme for preview
-  const effectiveTheme = currentTheme === 'system' ? systemTheme : currentTheme;
-  const isDark = effectiveTheme === 'dark';
+  }, [effectiveTheme]); // Re-filter when theme mode changes
 
   const handleThemeSelect = (themeId) => {
     if (onColorThemeChange) {
@@ -94,6 +104,7 @@ export function ColorThemeSelector({
                 currentThemeObj.id === 'blue' && (isDark ? 'bg-sky-900' : 'bg-sky-100'),
                 currentThemeObj.id === 'green' && (isDark ? 'bg-emerald-900' : 'bg-emerald-100'),
                 currentThemeObj.id === 'purple' && (isDark ? 'bg-violet-900' : 'bg-violet-100'),
+                currentThemeObj.id === 'synthwave' && (isDark ? 'bg-[#201a2a]' : 'bg-gray-100'),
               )} />
               <div className={cn(
                 "w-3 h-3 rounded-full border border-gray-300",
@@ -101,6 +112,7 @@ export function ColorThemeSelector({
                 currentThemeObj.id === 'blue' && (isDark ? 'bg-sky-950' : 'bg-sky-50'),
                 currentThemeObj.id === 'green' && (isDark ? 'bg-emerald-950' : 'bg-emerald-50'),
                 currentThemeObj.id === 'purple' && (isDark ? 'bg-violet-950' : 'bg-violet-50'),
+                currentThemeObj.id === 'synthwave' && (isDark ? 'bg-[#f52baf]' : 'bg-gray-50'),
               )} />
             </div>
             
@@ -146,6 +158,7 @@ export function ColorThemeSelector({
                       theme.id === 'blue' && (isDark ? 'bg-sky-900' : 'bg-sky-100'),
                       theme.id === 'green' && (isDark ? 'bg-emerald-900' : 'bg-emerald-100'),
                       theme.id === 'purple' && (isDark ? 'bg-violet-900' : 'bg-violet-100'),
+                      theme.id === 'synthwave' && (isDark ? 'bg-[#201a2a]' : 'bg-gray-100'),
                     )} />
                     <div className={cn(
                       "w-3 h-3 rounded-full border border-gray-300",
@@ -153,6 +166,7 @@ export function ColorThemeSelector({
                       theme.id === 'blue' && (isDark ? 'bg-sky-950' : 'bg-sky-50'),
                       theme.id === 'green' && (isDark ? 'bg-emerald-950' : 'bg-emerald-50'),
                       theme.id === 'purple' && (isDark ? 'bg-violet-950' : 'bg-violet-50'),
+                      theme.id === 'synthwave' && (isDark ? 'bg-[#f52baf]' : 'bg-gray-50'),
                     )} />
                   </div>
                   
