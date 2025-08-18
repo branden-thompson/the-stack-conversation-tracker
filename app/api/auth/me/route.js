@@ -7,7 +7,7 @@
 
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie, shouldRefreshSession, createSessionToken, setSessionCookie } from '@/lib/auth/session';
-import { getUserById, readData } from '@/lib/db/database';
+import { getUserById, getAllUsers } from '@/lib/db/database';
 
 export async function GET(request) {
   try {
@@ -22,8 +22,7 @@ export async function GET(request) {
     }
 
     // Get fresh user data from storage
-    const data = await readData();
-    const users = data.users || [];
+    const users = await getAllUsers();
     const currentUser = users.find(u => u.id === session.user.id);
 
     if (!currentUser) {

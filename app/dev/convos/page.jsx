@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTabVisibility } from '@/lib/hooks/useTabVisibility';
 import { useConversations } from '@/lib/hooks/useConversations';
 import { Button } from '@/components/ui/button';
 import { DevHeader } from '@/components/ui/dev-header';
@@ -82,17 +83,22 @@ export default function DevConvos() {
   const [sortDir, setSortDir] = useState('desc'); // 'asc' | 'desc'
   const [trayOpen, setTrayOpen] = useState(false);
   
+  // Smart polling based on tab visibility
+  const isTabVisible = useTabVisibility();
 
   const selected = useMemo(
     () => safeItems.find((c) => c.id === (selectedId || activeId)) || null,
     [safeItems, selectedId, activeId]
   );
 
-  // Poll events for the selected conversation
+  // Poll events for the selected conversation with smart tab visibility
   useEffect(() => {
     let t;
     async function run() {
       if (!selected) { setEvents([]); return; }
+      // Only fetch when tab is visible (smart polling optimization)
+      if (!isTabVisible) return;
+      
       try {
         const data = await listEvents(selected.id);
         setEvents(data);
@@ -105,15 +111,27 @@ export default function DevConvos() {
       t = setInterval(run, DEV_LAYOUT.eventPollInterval);
     }
     return () => t && clearInterval(t);
-  }, [selected, poll, listEvents]);
+  }, [selected, poll, listEvents, isTabVisible]);
 
-  // Auto-refresh conversations list every 2 seconds
+  // Auto-refresh conversations list with smart tab visibility
   useEffect(() => {
     const interval = setInterval(() => {
-      refresh();
+      // Only refresh when tab is visible (smart polling optimization)
+      if (isTabVisible) {
+        refresh();
+      }
     }, DEV_LAYOUT.conversationRefreshInterval);
     return () => clearInterval(interval);
-  }, [refresh]);
+  }, [refresh, isTabVisible]);
+
+  // Immediate sync when tab becomes visible
+  useEffect(() => {
+    if (isTabVisible && selected) {
+      // Sync immediately when user returns to tab
+      refresh();
+      listEvents(selected.id).then(setEvents).catch(() => {});
+    }
+  }, [isTabVisible, selected, refresh, listEvents]);
 
   // Filtered + sorted list for the Events table (right panel)
   const filtered = useMemo(() => {
