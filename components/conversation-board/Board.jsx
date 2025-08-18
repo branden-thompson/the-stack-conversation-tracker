@@ -12,7 +12,7 @@ import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
 import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
 import { useCards } from '@/lib/hooks/useCards';
-import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
+import { useUserManagement } from '@/lib/hooks/useUserManagement';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { useGlobalSession } from '@/lib/contexts/GlobalSessionProvider';
@@ -398,10 +398,6 @@ function BoardInner({
 }
 
 export default function Board() {
-  const [userProfileOpen, setUserProfileOpen] = useState(false);
-  const [userProfileMode, setUserProfileMode] = useState('create');
-  const [editingUser, setEditingUser] = useState(null);
-
   const {
     cards,
     loading,
@@ -414,84 +410,31 @@ export default function Board() {
   } = useCards();
 
   const {
+    // User data
     allUsers: users,
     currentUser,
-    switchUser,
-    createUser,
-    updateUser,
-    deleteUser,
     isGuestMode,
-    updateGuestUserName,
-    updateGuestPreferences,
-    createNewGuestUser,
     guestUsers,
     sessionTimeRemaining,
-    isCurrentUserGuest,
     provisionedGuest,
-  } = useGuestUsers();
-
-  const handleUserSelect = (selectedUser) => {
-    switchUser(selectedUser.id);
-  };
-
-  const handleCreateUser = (userData) => {
-    // Guests can't create registered users - offer to create another guest or upgrade
-    if (isCurrentUserGuest) {
-      // For now, just create a new guest user
-      createNewGuestUser();
-      return;
-    }
     
-    // Open dialog in create mode for registered users
-    setEditingUser(null);
-    setUserProfileMode('create');
-    setUserProfileOpen(true);
-  };
-
-  const handleEditUser = (user) => {
-    // Handle guest user name editing differently
-    if (user?.isGuest && isCurrentUserGuest && user.id === currentUser?.id) {
-      const newName = prompt('Enter new name:', user.name);
-      if (newName && newName.trim()) {
-        updateGuestUserName(newName.trim());
-      }
-      return;
-    }
+    // User management handlers
+    handleUserSelect,
+    handleCreateUser,
+    handleEditUser,
+    handleManageUsers,
+    handleUserSave,
+    handleUserDelete,
     
-    // Open dialog in edit mode for registered users
-    setEditingUser(user);
-    setUserProfileMode('edit');
-    setUserProfileOpen(true);
-  };
-
-  const handleManageUsers = () => {
-    if (isCurrentUserGuest) {
-      // Show guest-specific options
-      alert('Guest users have limited management capabilities. You can create additional guests or edit your own name.');
-      return;
-    }
+    // Guest-specific
+    updateGuestPreferences,
     
-    // For registered users, open create dialog - later this could be a dedicated management page
-    handleCreateUser();
-  };
-
-  const handleUserSave = async (userData, userId) => {
-    if (userId) {
-      // Update existing user
-      await updateUser(userId, userData);
-    } else {
-      // Create new user
-      await createUser(userData);
-    }
-  };
-
-  const handleUserDelete = async (userId) => {
-    await deleteUser(userId);
-    // If we deleted the current user, switch to system
-    if (userId === currentUser?.id) {
-      switchUser('system');
-    }
-  };
+    // Dialog state
+    userProfileOpen,
+    setUserProfileOpen,
+    userProfileMode,
+    editingUser,
+  } = useUserManagement();
 
   return (
     <>

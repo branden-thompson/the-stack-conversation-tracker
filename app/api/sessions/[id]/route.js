@@ -11,7 +11,7 @@ const { sessionStore } = sessionManager;
 // PATCH /api/sessions/[id] - Update session properties
 export async function PATCH(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     
     // Find session in the store
@@ -84,7 +84,7 @@ export async function PATCH(request, { params }) {
 // DELETE /api/sessions/[id] - End a specific session
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     
     const session = sessionStore.get(id);
     

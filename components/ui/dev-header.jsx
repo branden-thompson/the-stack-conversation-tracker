@@ -19,7 +19,7 @@ import { CompactUserSelector } from '@/components/ui/compact-user-selector';
 import { Menu } from 'lucide-react';
 import { THEME, getThemeClasses, UI_HEIGHTS } from '@/lib/utils/ui-constants';
 import { useTheme } from 'next-themes';
-import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
+import { useUserManagement } from '@/lib/hooks/useUserManagement';
 
 const TOOLBAR_H = UI_HEIGHTS.toolbar;
 const DIVIDER_MX = 'mx-6';
@@ -36,22 +36,27 @@ export function DevHeader({
   title = "Developer Operations Center",
   subtitle = "See the inside of The Stack",
   
-  // User management
+  // User management (optional overrides)
   showUserSelector = true,
+  onCreateUser: onCreateUserOverride,
+  onEditUser: onEditUserOverride,
+  onManageUsers: onManageUsersOverride,
   
   // Additional styling
   className = "",
 }) {
-  // User management hooks
+  // Use unified user management hook
   const {
     allUsers,
     currentUser,
-    switchUser,
-    createNewGuestUser,
+    handleUserSelect,
+    handleCreateUser,
+    handleEditUser,
+    handleManageUsers,
     updateGuestPreferences,
     isGuestMode,
     provisionedGuest,
-  } = useGuestUsers();
+  } = useUserManagement();
 
   // Theme controls
   const { theme, setTheme, systemTheme } = useTheme();
@@ -73,13 +78,10 @@ export function DevHeader({
     currentTheme: theme === 'system' ? systemTheme : theme
   };
 
-  const handleUserSelect = useCallback((user) => {
-    if (user.id === 'guest' || user.isGuest) {
-      switchUser('guest');
-    } else {
-      switchUser(user.id);
-    }
-  }, [switchUser]);
+  // Use override handlers if provided, otherwise use defaults from hook
+  const onCreateUser = onCreateUserOverride || handleCreateUser;
+  const onEditUser = onEditUserOverride || handleEditUser;
+  const onManageUsers = onManageUsersOverride || handleManageUsers;
   return (
     <header className={`${THEME.colors.background.primary} border-b ${THEME.colors.border.primary} px-6 py-3 ${THEME.shadows.sm} ${className}`}>
       <div className="flex items-center justify-between">
@@ -135,8 +137,11 @@ export function DevHeader({
                   currentUser={currentUser}
                   provisionedGuest={provisionedGuest}
                   onUserSelect={handleUserSelect}
+                  onCreateUser={onCreateUser}
+                  onEditUser={onEditUser}
+                  onManageUsers={onManageUsers}
                   themeControls={themeControls}
-                  showManagementActions={false}
+                  showManagementActions={true}
                   showUserPreferences={true}
                 />
               </div>
