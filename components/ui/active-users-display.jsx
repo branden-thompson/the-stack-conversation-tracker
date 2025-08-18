@@ -14,6 +14,7 @@ import { useUserTracking } from '@/lib/hooks/useUserTracking';
 import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
 import { cn } from '@/lib/utils';
 import { APP_THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { SESSION_STATUS } from '@/lib/utils/session-constants';
 
 // Responsive limits for profile display
@@ -33,6 +34,7 @@ export function ActiveUsersDisplay({
 }) {
   const [hoveredUser, setHoveredUser] = useState(null);
   const [showOverflow, setShowOverflow] = useState(false);
+  const dynamicTheme = useDynamicAppTheme();
   
   // Get user tracking data
   const { sessions, loading, error } = useUserTracking({
@@ -121,7 +123,7 @@ export function ActiveUsersDisplay({
         <div className="flex items-start">
           <span className={cn(
             "text-xs font-medium",
-            APP_THEME.colors.text.tertiary
+            dynamicTheme.colors.text.tertiary
           )}>
             Active Stackers:
           </span>
@@ -173,7 +175,7 @@ export function ActiveUsersDisplay({
               "bg-gray-100 dark:bg-gray-700",
               "text-xs font-medium cursor-pointer",
               "transition-transform hover:scale-110 hover:z-10",
-              APP_THEME.colors.text.secondary
+              dynamicTheme.colors.text.secondary
             )}>
               +{overflowUsers.length}
             </div>

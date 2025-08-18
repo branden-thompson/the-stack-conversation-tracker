@@ -11,6 +11,7 @@ import { ProfilePicture } from '@/components/ui/profile-picture';
 import { cn } from '@/lib/utils';
 import { APP_THEME, TOOLTIP_POSITIONING } from '@/lib/utils/ui-constants';
 import { SESSION_EVENT_LABELS } from '@/lib/utils/session-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { MapPin, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function formatTimeAgo(timestamp) {
@@ -57,6 +58,7 @@ export function OverflowTooltip({
   pageSize = 8, // Show 8 users per page
 }) {
   const [currentPage, setCurrentPage] = useState(0);
+  const dynamicTheme = useDynamicAppTheme();
   
   if (!users || users.length === 0) return null;
   
@@ -119,7 +121,7 @@ export function OverflowTooltip({
       )}>
         <h3 className={cn(
           "font-semibold",
-          APP_THEME.colors.text.primary
+          dynamicTheme.colors.text.primary
         )}>
           Active Stackers ({users.length})
         </h3>
@@ -143,7 +145,7 @@ export function OverflowTooltip({
             
             <span className={cn(
               "text-xs px-2",
-              APP_THEME.colors.text.tertiary
+              dynamicTheme.colors.text.tertiary
             )}>
               {currentPage + 1} / {totalPages}
             </span>
@@ -188,7 +190,7 @@ export function OverflowTooltip({
               {/* Name */}
               <div className={cn(
                 "font-medium truncate",
-                APP_THEME.colors.text.primary
+                dynamicTheme.colors.text.primary
               )}>
                 {user.name}
               </div>
@@ -196,7 +198,7 @@ export function OverflowTooltip({
               {/* Route */}
               <div className={cn(
                 "flex items-center gap-1 text-xs truncate",
-                APP_THEME.colors.text.secondary
+                dynamicTheme.colors.text.secondary
               )}>
                 <MapPin className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate">
@@ -207,7 +209,7 @@ export function OverflowTooltip({
               {/* Action */}
               <div className={cn(
                 "flex items-center gap-1 text-xs truncate",
-                APP_THEME.colors.text.tertiary
+                dynamicTheme.colors.text.tertiary
               )}>
                 <Activity className="w-3 h-3 flex-shrink-0" />
                 <span className="truncate">
@@ -227,7 +229,7 @@ export function OverflowTooltip({
         )}>
           <span className={cn(
             "text-xs",
-            APP_THEME.colors.text.muted
+            dynamicTheme.colors.text.muted
           )}>
             Showing {startIndex + 1}-{endIndex} of {users.length} users
           </span>

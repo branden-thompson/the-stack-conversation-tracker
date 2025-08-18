@@ -35,6 +35,7 @@ import { ProfilePicture } from '@/components/ui/profile-picture';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PROFILE_PICTURE_SIZES, Z_INDEX_CLASSES, USER_SELECTOR } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export function CompactUserSelector({
   users = [],
@@ -55,6 +56,7 @@ export function CompactUserSelector({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
+  const dynamicTheme = useDynamicAppTheme();
   
   // Use provided currentUser if available, otherwise fallback to finding by ID
   const currentUser = currentUserProp || (
@@ -124,7 +126,7 @@ export function CompactUserSelector({
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
         className={cn(
-          `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px] rounded-full border-2 border-gray-400 dark:border-gray-600`,
+          `w-[${PROFILE_PICTURE_SIZES.compact}px] h-[${PROFILE_PICTURE_SIZES.compact}px] rounded-full border-2 ${dynamicTheme.colors.border.secondary}`,
           "hover:border-blue-400 dark:hover:border-blue-500 transition-colors",
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
           "flex items-center justify-center relative",
@@ -157,14 +159,14 @@ export function CompactUserSelector({
             )}
             {/* System user indicator */}
             {currentUser.isSystemUser && (
-              <div className="absolute top-0 right-0 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border border-white dark:border-gray-800">
+              <div className={`absolute top-0 right-0 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center border ${dynamicTheme.colors.background.secondary}`}>
                 <Crown className="w-2.5 h-2.5 text-white" />
               </div>
             )}
           </div>
         ) : (
-          <div className="w-[46px] h-[46px] rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-            <User className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+          <div className={`w-[46px] h-[46px] rounded-full ${dynamicTheme.colors.background.secondary} flex items-center justify-center`}>
+            <User className={`w-6 h-6 ${dynamicTheme.colors.text.muted}`} />
           </div>
         )}
       </button>
@@ -172,7 +174,7 @@ export function CompactUserSelector({
       {/* Dropdown Menu */}
       {isOpen && (
         <div 
-          className="absolute top-[60px] right-0 z-50 bg-gray-100 dark:bg-gray-950 border border-gray-400 dark:border-gray-600 rounded-md shadow-lg"
+          className={`absolute top-[60px] right-0 z-50 ${dynamicTheme.colors.background.dropdown} border ${dynamicTheme.colors.border.primary} rounded-md shadow-lg`}
           style={{ 
             minWidth: `${USER_SELECTOR.dropdownMinWidth}px`,
             maxWidth: `${USER_SELECTOR.dropdownMaxWidth}px`
@@ -181,7 +183,7 @@ export function CompactUserSelector({
             {/* Current user header */}
             {currentUser && (
               <>
-                <div className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-400 dark:border-gray-600">
+                <div className={`px-3 py-2 text-sm font-medium ${dynamicTheme.colors.text.primary} border-b ${dynamicTheme.colors.border.primary}`}>
                   Current: {currentUser.name}
                   {currentUser.isSystemUser && <span className="text-xs opacity-60 ml-1">(System)</span>}
                   {currentUser.isGuest && <span className="text-xs opacity-60 ml-1">(Guest)</span>}
@@ -191,11 +193,11 @@ export function CompactUserSelector({
 
             {/* User Preferences Section */}
             {currentUser && showUserPreferences && (themeControls || additionalPreferences.length > 0) && (
-              <div className="p-3 border-b border-gray-400 dark:border-gray-600">
+              <div className={`p-3 border-b ${dynamicTheme.colors.border.primary}`}>
                 {/* Theme Controls */}
                 {themeControls && (
                   <div className="space-y-2">
-                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                    <div className={`text-xs font-medium ${dynamicTheme.colors.text.tertiary} uppercase tracking-wide`}>
                       Theme
                     </div>
                     <div className="flex items-center gap-2" role="group" aria-label="Theme toggle">
@@ -255,7 +257,7 @@ export function CompactUserSelector({
               <button
                 key={user.id}
                 className={cn(
-                  "w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm",
+                  `w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm`,
                   "flex items-center gap-2",
                   user.id === currentUserId && "bg-blue-50 dark:bg-blue-900/20"
                 )}
@@ -283,16 +285,16 @@ export function CompactUserSelector({
             ))}
             
             {users.length === 0 && (
-              <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+              <div className={`px-3 py-2 text-sm ${dynamicTheme.colors.text.muted}`}>
                 No users available
               </div>
             )}
 
             {/* Guest Mode Option */}
-            <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
+            <div className={`border-t ${dynamicTheme.colors.border.primary} my-1`} />
             <button
               className={cn(
-                "w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm",
+                `w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm`,
                 "flex items-center gap-2",
                 currentUserId === 'guest' && "bg-orange-50 dark:bg-orange-900/20"
               )}
@@ -323,7 +325,7 @@ export function CompactUserSelector({
             {showManagementActions && (
               <>
                 {/* Separator */}
-                <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
+                <div className={`border-t ${dynamicTheme.colors.border.primary} my-1`} />
 
                 {onCreateUser && (
                   <button
@@ -358,7 +360,7 @@ export function CompactUserSelector({
                 {/* Logout Button */}
                 {onLogout && (
                   <>
-                    <div className="border-t border-gray-400 dark:border-gray-600 my-1" />
+                    <div className={`border-t ${dynamicTheme.colors.border.primary} my-1`} />
                     <button
                       className="w-full text-left px-3 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-900 rounded-sm text-red-600 dark:text-red-400 flex items-center gap-2"
                       onClick={() => {

@@ -8,6 +8,7 @@
 import { cn } from '@/lib/utils';
 import { APP_THEME, TOOLTIP_POSITIONING } from '@/lib/utils/ui-constants';
 import { SESSION_EVENT_LABELS } from '@/lib/utils/session-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { MapPin, Clock, Activity } from 'lucide-react';
 
 function formatTimeAgo(timestamp) {
@@ -52,6 +53,8 @@ export function UserProfileTooltip({
   position = 'bottom',
   className 
 }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   if (!user) return null;
   
   const positionClasses = {
@@ -63,9 +66,9 @@ export function UserProfileTooltip({
   
   return (
     <div className={cn(
-      "bg-white dark:bg-gray-800",
-      "border border-gray-200 dark:border-gray-700",
-      "rounded-lg shadow-lg",
+      dynamicTheme.colors.background.dropdown,
+      dynamicTheme.colors.border.primary,
+      "border rounded-lg shadow-lg",
       "p-3 min-w-[200px] max-w-[280px]",
       "text-sm",
       "z-50",
@@ -75,8 +78,8 @@ export function UserProfileTooltip({
       {/* Arrow */}
       <div 
         className={cn(
-          "absolute w-2 h-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-          "rotate-45",
+          `absolute w-2 h-2 ${dynamicTheme.colors.background.dropdown} ${dynamicTheme.colors.border.primary}`,
+          "border rotate-45",
           position === 'bottom' && "top-0 transform -translate-y-1/2 border-t border-l",
           position === 'top' && "bottom-0 transform translate-y-1/2 border-b border-r",
           position === 'left' && "right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 border-t border-r",
@@ -92,7 +95,7 @@ export function UserProfileTooltip({
       {/* User Name */}
       <div className={cn(
         "font-semibold mb-2",
-        APP_THEME.colors.text.primary
+        dynamicTheme.colors.text.primary
       )}>
         {user.name}
       </div>
@@ -100,7 +103,7 @@ export function UserProfileTooltip({
       {/* Route Location */}
       <div className={cn(
         "flex items-center gap-2 mb-2",
-        APP_THEME.colors.text.secondary
+        dynamicTheme.colors.text.secondary
       )}>
         <MapPin className="w-3 h-3 flex-shrink-0" />
         <span className="truncate">
@@ -111,7 +114,7 @@ export function UserProfileTooltip({
       {/* Last Action */}
       <div className={cn(
         "flex items-center gap-2",
-        APP_THEME.colors.text.tertiary
+        dynamicTheme.colors.text.tertiary
       )}>
         <Activity className="w-3 h-3 flex-shrink-0" />
         <span className="truncate">
@@ -124,7 +127,7 @@ export function UserProfileTooltip({
         <div className={cn(
           "flex items-center gap-2 mt-2 pt-2 border-t",
           "border-gray-200 dark:border-gray-700",
-          APP_THEME.colors.text.muted
+          dynamicTheme.colors.text.muted
         )}>
           <Clock className="w-3 h-3 flex-shrink-0" />
           <span className="text-xs">

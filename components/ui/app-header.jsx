@@ -154,7 +154,7 @@ export function AppHeader({
           )}
           <div className="min-w-0 hidden sm:block">
             <div className="flex items-center gap-2">
-              <h1 className={`text-lg sm:text-xl lg:text-2xl font-bold ${APP_THEME.colors.text.primary} truncate`}>
+              <h1 className={`text-lg sm:text-xl lg:text-2xl font-bold ${dynamicTheme.colors.text.primary} truncate`}>
                 {title}
               </h1>
               {isGuestMode && (
@@ -169,7 +169,7 @@ export function AppHeader({
               )}
             </div>
             {subtitle && (
-              <p className={`text-xs ${APP_THEME.colors.text.tertiary} hidden sm:block truncate`}>
+              <p className={`text-xs ${dynamicTheme.colors.text.tertiary} hidden sm:block truncate`}>
                 {subtitle}
               </p>
             )}
@@ -183,7 +183,7 @@ export function AppHeader({
           {showAppActions && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
 
               {/* App controls */}
               <div className="flex items-center gap-2">
@@ -255,7 +255,7 @@ export function AppHeader({
                         <div className="p-1">
                           {onRefreshCards && (
                             <button
-                              className={`w-full text-left px-3 py-2 text-sm ${APP_THEME.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
+                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
                               onClick={() => {
                                 onRefreshCards();
                                 setIsAppOverflowOpen(false);
@@ -267,7 +267,7 @@ export function AppHeader({
                           )}
                           {onResetLayout && (
                             <button
-                              className={`w-full text-left px-3 py-2 text-sm ${APP_THEME.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
+                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
                               onClick={() => {
                                 onResetLayout();
                                 setIsAppOverflowOpen(false);
@@ -289,7 +289,7 @@ export function AppHeader({
           {showConversationControls && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
 
               {/* Mobile/Tablet: Compact Conversation Menu */}
               <div className="relative xl:hidden" ref={conversationOverflowRef}>
@@ -301,7 +301,7 @@ export function AppHeader({
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                       : activeConversation?.status === 'paused'
                       ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                      : 'border-gray-300'
+                      : dynamicTheme.colors.border.primary
                   }`}
                   onClick={() => setIsConversationOverflowOpen(!isConversationOverflowOpen)}
                 >
@@ -310,7 +310,7 @@ export function AppHeader({
                       ? 'text-green-600' 
                       : activeConversation?.status === 'paused'
                       ? 'text-yellow-600'
-                      : 'text-gray-500'
+                      : dynamicTheme.colors.text.muted
                   }`} />
                   <span className="hidden lg:inline lg:ml-1 xl:ml-2 text-xs xl:text-sm">
                     {activeConversation?.status === 'active' ? 'Active' : 
@@ -323,15 +323,15 @@ export function AppHeader({
                   <div className={`absolute top-[42px] right-0 z-50 ${dynamicTheme.colors.background.dropdown} rounded-md min-w-[200px]`}>
                     <div className="p-2">
                       {/* Status Display */}
-                      <div className={`px-2 py-1 text-sm border-b ${APP_THEME.colors.border.primary} mb-2`}>
+                      <div className={`px-2 py-1 text-sm border-b ${dynamicTheme.colors.border.primary} mb-2`}>
                         <div className="font-medium">
                           {activeConversation ? activeConversation.name : 'No active conversation'}
                         </div>
-                        <div className={`text-xs ${APP_THEME.colors.text.muted} font-mono`}>
+                        <div className={`text-xs ${dynamicTheme.colors.text.muted} font-mono`}>
                           {runtime}
                         </div>
                         {activeConversation && (
-                          <div className={`text-xs ${APP_THEME.colors.status.success.text} mt-1`}>
+                          <div className={`text-xs ${dynamicTheme.colors.status.success.text} mt-1`}>
                             ✓ Events tracking to /dev/convos
                           </div>
                         )}
@@ -341,7 +341,7 @@ export function AppHeader({
                       <div className="space-y-1">
                         {onConversationResumeOrStart && (
                           <button
-                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2 ${
+                            className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
                               activeConversation?.status === 'active' ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                             onClick={() => {
@@ -359,7 +359,7 @@ export function AppHeader({
 
                         {onConversationPause && (
                           <button
-                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2 ${
+                            className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
                               activeConversation?.status !== 'active' ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                             onClick={() => {
@@ -377,7 +377,7 @@ export function AppHeader({
 
                         {onConversationStop && (
                           <button
-                            className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-sm flex items-center gap-2 ${
+                            className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
                               (!activeConversation || activeConversation.status === 'stopped') ? 'opacity-50 cursor-not-allowed' : ''
                             }`}
                             onClick={() => {
@@ -415,7 +415,7 @@ export function AppHeader({
           {showConversationControls && (
             <>
               {/* Divider before active users */}
-              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
               
               {/* Active Users with responsive min-width */}
               <div className="hidden lg:flex min-w-[120px] xl:min-w-[160px] 2xl:min-w-[200px]">
@@ -433,7 +433,7 @@ export function AppHeader({
           {showUserContext && users.length > 0 && (
             <>
               {/* Divider */}
-              <span className={`h-6 w-px bg-gray-300 dark:bg-gray-600 ${DIVIDER_MX}`} />
+              <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
 
               {/* Compact User Selector - Fixed width, never shrinks */}
               <div className="flex-shrink-0 w-[50px]">
@@ -459,7 +459,7 @@ export function AppHeader({
                     </div>,
                     // Animations toggle
                     <div key="animations" className="space-y-2">
-                      <div className={`text-xs font-medium ${APP_THEME.colors.text.tertiary} uppercase tracking-wide`}>
+                      <div className={`text-xs font-medium ${dynamicTheme.colors.text.tertiary} uppercase tracking-wide`}>
                         Animations
                       </div>
                       <div className="flex items-center gap-2">
@@ -484,7 +484,7 @@ export function AppHeader({
                         </Button>
                       </div>
                       {!animationsEnabled && (
-                        <p className={`text-[10px] ${APP_THEME.colors.text.muted}`}>
+                        <p className={`text-[10px] ${dynamicTheme.colors.text.muted}`}>
                           Cards always show face up
                         </p>
                       )}

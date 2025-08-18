@@ -19,6 +19,7 @@ import {
   Clock3
 } from 'lucide-react';
 import { UI_HEIGHTS } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export function ConversationControls({
   activeConversation = null,
@@ -27,6 +28,8 @@ export function ConversationControls({
   onConversationPause,
   onConversationStop,
 }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
     <div className="flex items-center gap-4">
       {/* Timer Icon & Status - Fixed width container */}
@@ -36,14 +39,14 @@ export function ConversationControls({
             ? 'text-green-600' 
             : activeConversation?.status === 'paused'
             ? 'text-yellow-600'
-            : 'text-gray-500'
+            : dynamicTheme.colors.text.muted
         }`} />
         <div className="text-sm">
-          <div className="font-medium text-gray-900 dark:text-gray-100">
+          <div className={`font-medium ${dynamicTheme.colors.text.primary}`}>
             {activeConversation ? activeConversation.name : 'No active conversation'}
           </div>
           <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+            <div className={`text-xs ${dynamicTheme.colors.text.muted} font-mono`}>
               {runtime}
             </div>
             {activeConversation && (
