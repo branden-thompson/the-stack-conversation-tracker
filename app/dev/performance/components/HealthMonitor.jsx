@@ -73,16 +73,8 @@ export default function HealthMonitor({ healthStatus, realtimeData }) {
       });
     }
     
-    if (realtimeData?.navigation) {
-      metrics.push({
-        category: 'Navigation',
-        icon: <Clock className="h-4 w-4" />,
-        value: `${realtimeData.navigation.averageNavigationTime.toFixed(0)}ms`,
-        status: realtimeData.navigation.averageNavigationTime > 2000 ? 'poor' : 
-                realtimeData.navigation.averageNavigationTime > 1000 ? 'degraded' : 'optimal',
-        details: `${realtimeData.navigation.totalNavigations} navigations tracked`
-      });
-    }
+    // Navigation metrics intentionally disabled due to previous system interference
+    // Previous navigation tracking caused core application functionality to break
     
     if (realtimeData?.memory) {
       const memoryMB = realtimeData.memory.currentUsage / 1048576;
@@ -194,12 +186,7 @@ export default function HealthMonitor({ healthStatus, realtimeData }) {
                 </div>
               )}
               
-              {healthStatus.issues?.includes('Slow page navigation detected') && (
-                <div className={`p-3 ${THEME.colors.status.error.bg} border ${THEME.colors.status.error.border} rounded-md`}>
-                  <p className={`text-sm font-medium ${THEME.colors.status.error.text}`}>Navigation Performance Issue</p>
-                  <p className={`text-sm ${THEME.colors.status.error.text}`}>Check for heavy components, large bundle sizes, or slow network conditions.</p>
-                </div>
-              )}
+              {/* Navigation performance issue alerts removed - tracking disabled for safety */}
               
               {healthStatus.issues?.includes('High memory usage detected') && (
                 <div className={`p-3 ${THEME.colors.status.error.bg} border ${THEME.colors.status.error.border} rounded-md`}>
@@ -215,12 +202,7 @@ export default function HealthMonitor({ healthStatus, realtimeData }) {
                 </div>
               )}
               
-              {healthStatus.warnings?.includes('Navigation could be faster') && (
-                <div className={`p-3 ${THEME.colors.status.warning.bg} border ${THEME.colors.status.warning.border} rounded-md`}>
-                  <p className={`text-sm font-medium ${THEME.colors.status.warning.text}`}>Navigation Performance Warning</p>
-                  <p className={`text-sm ${THEME.colors.status.warning.text}`}>Navigation is functional but could be optimized for better user experience.</p>
-                </div>
-              )}
+              {/* Navigation performance warning alerts removed - tracking disabled for safety */}
             </div>
           </CardContent>
         </Card>

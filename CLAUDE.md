@@ -40,6 +40,8 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 6. Fixed build errors in /dev/tests page
 7. Enhanced SessionCard styling with proper visual hierarchy (2025-08-18)
 8. Added card background colors to UI theme constants (2025-08-18)
+9. **React Query Migration** - Successfully migrated all hooks to React Query with safety switches (2025-08-18)
+10. **Bag n Tag Cleanup** - Deprecated legacy hooks after successful React Query migration (2025-08-18)
 
 ### Development Notes
 - NEVER NEVER NEVER add unprompted features unless you specifically ask to create them
@@ -63,6 +65,29 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 - Include before/after metrics when doing cleanup work
 - Document all linting, build fixes, and optimization work in this folder
 - This keeps cleanup work organized and trackable over time
+
+### "Bag n Tag" Process
+**🏷️ Post-Success Legacy Code Cleanup**
+When a major migration or refactor is successfully completed, use the "Bag n Tag" process:
+
+1. **Determine** if legacy code is still needed after the successful implementation
+2. **Create** `/deprecated` folders in appropriate directories (e.g., `hooks/deprecated`)
+3. **Move** legacy code to deprecated folders with proper headers:
+   ```javascript
+   /**
+    * DEPRECATED: Legacy [ComponentName]
+    * 
+    * MOVED: [Date]
+    * REASON: [Migration completed successfully]
+    * RESTORE: Move back to parent directory if [condition] needs rollback
+    */
+   ```
+4. **Clean up** main files to only contain migration wrappers
+5. **Add** `**/deprecated/` to `.gitignore` once successfully deprecated
+6. **Document** the process in project hygiene docs
+7. **Remember**: Files can be restored by moving them out of `/deprecated` folders if needed
+
+**Terminology**: "Bag n Tag", "Bag and Tag", or "Bag-n-Tag" all refer to this deprecation process.
 
 ## Commands to Remember
 ```bash

@@ -2,7 +2,6 @@
  * Performance Chart Component
  * 
  * Visualizes performance metrics over time using charts and graphs
- * Navigation tracking has been intentionally disabled due to previous system interference
  */
 
 'use client';
@@ -37,7 +36,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
   const [selectedMetricType, setSelectedMetricType] = useState('api_performance');
   const [chartType, setChartType] = useState('line');
 
-  // Process metrics for charting - navigation metrics excluded for safety
+  // Process metrics for charting
   const chartData = useMemo(() => {
     if (!metrics || metrics.length === 0) return [];
 
@@ -55,10 +54,10 @@ export default function PerformanceChart({ metrics, timeWindow }) {
           timestamp: bucket,
           time: new Date(bucket).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           api_performance: [],
+          navigation_timing: [],
           memory_usage: [],
+          performance_navigation: [],
           performance_resource: []
-          // navigation_timing: [], // Intentionally disabled due to previous system interference
-          // performance_navigation: [], // Caused core application functionality to break
         };
       }
 
@@ -85,8 +84,12 @@ export default function PerformanceChart({ metrics, timeWindow }) {
           result.apiErrorRate = (result.apiErrors / result.apiRequests) * 100;
         }
 
-        // Navigation metrics intentionally disabled due to previous system interference
-        // Previous navigation tracking caused core application functionality to break
+        // Navigation metrics
+        if (bucket.navigation_timing.length > 0) {
+          const navMetrics = bucket.navigation_timing;
+          result.avgNavTime = navMetrics.reduce((sum, m) => sum + m.data.navigationTime, 0) / navMetrics.length;
+          result.navigations = navMetrics.length;
+        }
 
         // Memory metrics
         if (bucket.memory_usage.length > 0) {
@@ -96,10 +99,10 @@ export default function PerformanceChart({ metrics, timeWindow }) {
           result.totalMemory = latestMem.data.totalJSHeapSize / 1048576;
         }
 
-        // Performance Observer metrics (excluding navigation)
+        // Performance Observer metrics
         const perfMetrics = [
+          ...bucket.performance_navigation,
           ...bucket.performance_resource
-          // ...bucket.performance_navigation, // Disabled for safety
         ];
 
         if (perfMetrics.length > 0) {
@@ -113,7 +116,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
       });
   }, [metrics, timeWindow]);
 
-  // Chart configurations for different metric types (navigation removed)
+  // Chart configurations for different metric types
   const getChartConfig = (type) => {
     switch (type) {
       case 'api_performance':
@@ -126,6 +129,15 @@ export default function PerformanceChart({ metrics, timeWindow }) {
           ],
           yAxisLabel: 'Time (ms) / Error Rate (%)'
         };
+      case 'navigation_timing':
+        return {
+          title: 'Navigation Performance',
+          icon: <Clock className="h-4 w-4" />,
+          dataKeys: [
+            { key: 'avgNavTime', name: 'Avg Navigation Time (ms)', color: '#82ca9d' }
+          ],
+          yAxisLabel: 'Time (ms)'
+        };
       case 'memory_usage':
         return {
           title: 'Memory Usage',
@@ -136,16 +148,16 @@ export default function PerformanceChart({ metrics, timeWindow }) {
           ],
           yAxisLabel: 'Memory (MB)'
         };
-      case 'system_overview':
+      case 'performance_overview':
         return {
-          title: 'System Overview',
+          title: 'Performance Overview',
           icon: <Activity className="h-4 w-4" />,
           dataKeys: [
             { key: 'avgApiResponse', name: 'API Response (ms)', color: '#8884d8' },
-            { key: 'memoryUsage', name: 'Memory Usage (MB)', color: '#ffc658' }
-            // { key: 'avgNavTime', name: 'Navigation (ms)', color: '#82ca9d' }, // Disabled
+            { key: 'avgNavTime', name: 'Navigation (ms)', color: '#82ca9d' },
+            { key: 'pageLoadTime', name: 'Page Load (ms)', color: '#ffc658' }
           ],
-          yAxisLabel: 'Time (ms) / Memory (MB)'
+          yAxisLabel: 'Time (ms)'
         };
       default:
         return {
@@ -276,10 +288,10 @@ export default function PerformanceChart({ metrics, timeWindow }) {
               <span className="text-sm font-medium">Metric:</span>
               <div className="flex gap-1">
                 {[
-                  { key: 'api_performance', label: 'API Performance' },
-                  { key: 'memory_usage', label: 'Memory Usage' },
-                  { key: 'system_overview', label: 'System Overview' }
-                  // { key: 'navigation_timing', label: 'Navigation' }, // Disabled for safety
+                  { key: 'api_performance', label: 'API' },
+                  { key: 'navigation_timing', label: 'Navigation' },
+                  { key: 'memory_usage', label: 'Memory' },
+                  { key: 'performance_overview', label: 'Overview' }
                 ].map(option => (
                   <Button
                     key={option.key}
@@ -324,10 +336,6 @@ export default function PerformanceChart({ metrics, timeWindow }) {
 
           <div className={`text-sm ${THEME.colors.text.tertiary}`}>
             Showing data from the last {timeWindow / 60000} minutes ({chartData.length} data points)
-            <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded text-xs">
-              <strong>Note:</strong> Navigation tracking has been disabled for safety. Previous implementation 
-              caused system interference and core application functionality issues.
-            </div>
           </div>
         </CardContent>
       </Card>

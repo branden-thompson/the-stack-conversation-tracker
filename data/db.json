@@ -14,7 +14,7 @@
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:46.081Z",
-      "updatedAt": "2025-08-18T20:24:11.810Z"
+      "updatedAt": "2025-08-18T21:58:45.364Z"
     },
     {
       "id": "qWd3mQ7EzJCY5UOTl7cHh",
@@ -30,7 +30,7 @@
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
-      "updatedAt": "2025-08-18T20:24:14.857Z"
+      "updatedAt": "2025-08-18T21:58:44.186Z"
     },
     {
       "id": "c9xbohV-rs7BQqF1vSRKI",
@@ -38,15 +38,15 @@
       "content": "testy mc test time",
       "zone": "active",
       "position": {
-        "x": 10,
+        "x": 872.05859375,
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": false,
+      "faceUp": true,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:48.044Z",
-      "updatedAt": "2025-08-18T20:27:42.821Z"
+      "updatedAt": "2025-08-18T21:58:42.853Z"
     }
   ],
   "users": [

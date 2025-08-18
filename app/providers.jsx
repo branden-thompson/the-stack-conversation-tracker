@@ -3,6 +3,7 @@
 import { ThemeProvider } from 'next-themes';
 import { GlobalSessionProvider } from '@/lib/contexts/GlobalSessionProvider';
 import { DynamicThemeProvider } from '@/lib/contexts/ThemeProvider';
+import { QueryProvider } from '@/lib/providers/query-client';
 import { useUserManagement } from '@/lib/hooks/useUserManagement';
 
 function AppThemeWrapper({ children }) {
@@ -42,17 +43,19 @@ function AppThemeWrapper({ children }) {
 
 export default function Providers({ children }) {
   return (
-    <ThemeProvider
-      attribute="class"       // adds 'class="dark"' to <html> for dark mode
-      defaultTheme="dark"     // Default to dark mode as per requirements
-      enableSystem            // allow system auto
-      disableTransitionOnChange // avoids flashy transitions on toggle
-    >
-      <GlobalSessionProvider>
-        <AppThemeWrapper>
-          {children}
-        </AppThemeWrapper>
-      </GlobalSessionProvider>
-    </ThemeProvider>
+    <QueryProvider>
+      <ThemeProvider
+        attribute="class"       // adds 'class="dark"' to <html> for dark mode
+        defaultTheme="dark"     // Default to dark mode as per requirements
+        enableSystem            // allow system auto
+        disableTransitionOnChange // avoids flashy transitions on toggle
+      >
+        <GlobalSessionProvider>
+          <AppThemeWrapper>
+            {children}
+          </AppThemeWrapper>
+        </GlobalSessionProvider>
+      </ThemeProvider>
+    </QueryProvider>
   );
 }

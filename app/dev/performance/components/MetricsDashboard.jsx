@@ -125,62 +125,36 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
     </Card>
   );
 
-  // Navigation Performance Section
-  const NavigationPerformanceCard = () => (
-    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+  // Navigation Performance Section - DISABLED FOR SAFETY
+  // Navigation tracking has been intentionally disabled due to previous system interference issues
+  // that caused core application functionality to break. This was a root cause of API runaways
+  // and card flipping problems. Keeping this as an informational card.
+  const NavigationInfoCard = () => (
+    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary} opacity-75`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5" />
-          Navigation Performance
+          <MemoryStick className={`h-5 w-5 ${THEME.colors.text.tertiary}`} />
+          Navigation Tracking
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {realtimeData.navigation ? (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Average Navigation</p>
-                <p className="text-xl font-semibold">{realtimeData.navigation.averageNavigationTime.toFixed(0)}ms</p>
-              </div>
-              <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Total Navigations</p>
-                <p className="text-xl font-semibold">{realtimeData.navigation.totalNavigations}</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Fastest Navigation</p>
-                <p className={`text-lg font-medium ${THEME.colors.status.success.text}`}>{realtimeData.navigation.fastestNavigation.toFixed(0)}ms</p>
-              </div>
-              <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Slowest Navigation</p>
-                <p className={`text-lg font-medium ${THEME.colors.status.warning.text}`}>{realtimeData.navigation.slowestNavigation.toFixed(0)}ms</p>
-              </div>
-            </div>
-
-            {realtimeData.navigation.routeBreakdown && (
-              <div>
-                <p className="text-sm font-medium mb-2">Route Performance</p>
-                <div className="space-y-2">
-                  {Object.entries(realtimeData.navigation.routeBreakdown).map(([route, stats]) => (
-                    <div key={route} className="flex justify-between items-center text-sm">
-                      <span className="font-mono">{route}</span>
-                      <div className="flex items-center gap-2">
-                        <span>{stats.count} navigations</span>
-                        <span className={`${THEME.colors.text.tertiary}`}>
-                          {(stats.totalTime / stats.count).toFixed(0)}ms avg
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+        <div className="space-y-3">
+          <Badge variant="outline" className="bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800">
+            Safety Disabled
+          </Badge>
+          <p className={`text-sm ${THEME.colors.text.tertiary}`}>
+            Navigation performance tracking has been disabled to prevent system interference.
+            Previous implementation caused core application features to malfunction.
+          </p>
+          <div className={`text-xs ${THEME.colors.text.muted} bg-gray-50 dark:bg-gray-800 p-3 rounded`}>
+            <strong>Focus Areas:</strong>
+            <ul className="mt-1 space-y-1">
+              <li>• API Performance (working reliably)</li>
+              <li>• Memory Usage (safe monitoring)</li>
+              <li>• System Health (no interference)</li>
+            </ul>
           </div>
-        ) : (
-          <p className={`${THEME.colors.text.tertiary}`}>No navigation metrics available</p>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -302,7 +276,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <ApiPerformanceCard />
-      <NavigationPerformanceCard />
+      <NavigationInfoCard />
       <MemoryUsageCard />
       <SystemOverviewCard />
     </div>

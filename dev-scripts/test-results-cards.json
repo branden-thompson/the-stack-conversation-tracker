@@ -1,0 +1,15 @@
+{
+  "api": {},
+  "performance": {
+    "rapidCreation": {
+      "totalCards": 5,
+      "successCount": 5,
+      "duration": 171,
+      "averagePerCard": 34.2
+    }
+  },
+  "optimisticUpdates": {},
+  "errors": [],
+  "totalDuration": 4221,
+  "criticalFunctionsWorking": true
+}

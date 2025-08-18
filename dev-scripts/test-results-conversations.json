@@ -1,0 +1,11 @@
+{
+  "legacy": {},
+  "reactQuery": {},
+  "performance": {
+    "average": 41.8,
+    "min": 31,
+    "max": 68,
+    "samples": 5
+  },
+  "errors": []
+}
