@@ -7,12 +7,12 @@
 
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie, shouldRefreshSession, createSessionToken, setSessionCookie } from '@/lib/auth/session';
-import { getUserById } from '@/lib/db/database';
+import { getUserById, readData } from '@/lib/db/database';
 
 export async function GET(request) {
   try {
     // Get current session from cookie
-    const session = getSessionFromCookie();
+    const session = await getSessionFromCookie();
     
     if (!session.valid) {
       return NextResponse.json(

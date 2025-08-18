@@ -11,7 +11,7 @@ import { clearSessionCookie, getSessionFromCookie } from '@/lib/auth/session';
 export async function POST(request) {
   try {
     // Get current session to log the logout
-    const session = getSessionFromCookie();
+    const session = await getSessionFromCookie();
     
     // Clear the session cookie
     clearSessionCookie();
