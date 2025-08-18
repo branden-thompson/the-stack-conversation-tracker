@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { X, MessageSquare, TestTube, Layers, BarChart3, History, Users } from 'lucide-react';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export function LeftTray({
   isOpen,
@@ -23,6 +24,19 @@ export function LeftTray({
   const router = useRouter();
   const pathname = usePathname();
   const isDevPage = pathname?.startsWith('/dev');
+  const dynamicTheme = useDynamicAppTheme();
+  
+  // Theme-aware button classes that override ShadCN defaults
+  const buttonClasses = {
+    // Default/primary buttons for active states
+    default: `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.background.hover}`,
+    // Ghost buttons for inactive navigation
+    ghost: `bg-transparent ${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.hover} border-transparent`,
+    // Outline buttons for actions
+    outline: `bg-transparent ${dynamicTheme.colors.text.secondary} border ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`,
+    // Icon button for close
+    icon: `${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.text.primary} border ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+  };
 
   // ESC key handler to close tray
   useEffect(() => {
@@ -33,9 +47,9 @@ export function LeftTray({
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
-  // Dynamic color schemes based on page type
+  // Dynamic color scheme using theme-aware colors
   const colorScheme = isDevPage ? {
-    // App pages: Blue/cyan theme for technical feel
+    // Dev pages: Use static dev theme (keep original behavior for dev pages)
     bg: THEME.colors.background.primary,
     border: THEME.colors.border.primary,
     headerBg: THEME.colors.background.tertiary,
@@ -45,15 +59,15 @@ export function LeftTray({
     divider: THEME.colors.border.primary,
     footerBorder: THEME.colors.border.primary
   } : {
-    // Dev pages:  Warm stone theme for conversation focus
-    bg: 'bg-slate-50 dark:bg-slate-900',
-    border: 'border-slate-200 dark:border-slate-700',
-    headerBg: 'bg-slate-100 dark:bg-slate-800',
-    headerBorder: 'border-slate-200 dark:border-slate-700',
-    headerText: 'text-slate-900 dark:text-slate-100',
-    sectionText: 'text-slate-600 dark:text-slate-300',
-    divider: 'border-slate-200 dark:border-slate-700',
-    footerBorder: 'border-slate-200 dark:border-slate-700'
+    // App pages: Use dynamic theme for consistent theming
+    bg: dynamicTheme.colors.background.secondary,
+    border: dynamicTheme.colors.border.primary,
+    headerBg: dynamicTheme.colors.background.tertiary,
+    headerBorder: dynamicTheme.colors.border.primary,
+    headerText: dynamicTheme.colors.text.primary,
+    sectionText: dynamicTheme.colors.text.secondary,
+    divider: dynamicTheme.colors.border.secondary,
+    footerBorder: dynamicTheme.colors.border.primary
   };
 
   return (
@@ -85,7 +99,12 @@ export function LeftTray({
             <div className={`text-xl font-semibold ${colorScheme.headerText}`}>
               {title}
             </div>
-            <Button variant="outline" size="icon" onClick={onClose}>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={onClose}
+              className={buttonClasses.icon}
+            >
               <X className="w-4 h-4" />
             </Button>
           </div>
@@ -98,7 +117,7 @@ export function LeftTray({
               <div className="mt-2 space-y-1">
                 <Button 
                   variant={pathname === '/' ? 'default' : 'ghost'}
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${pathname === '/' ? buttonClasses.default : buttonClasses.ghost}`}
                   onClick={() => { router.push('/'); onClose(); }}
                 >
                   <Layers className="w-4 h-4 mr-2" />
@@ -106,7 +125,7 @@ export function LeftTray({
                 </Button>
                 <Button 
                   variant={pathname?.startsWith('/timeline') ? 'default' : 'ghost'}
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${pathname?.startsWith('/timeline') ? buttonClasses.default : buttonClasses.ghost}`}
                   onClick={() => { router.push('/timeline/none'); onClose(); }}
                 >
                   <History className="w-4 h-4 mr-2" />
@@ -124,7 +143,7 @@ export function LeftTray({
               <div className="mt-2 space-y-2">
                 <Button 
                   variant={pathname === '/dev/tests' ? 'default' : 'outline'}
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${pathname === '/dev/tests' ? buttonClasses.default : buttonClasses.outline}`}
                   onClick={() => { router.push('/dev/tests'); onClose(); }}
                 >
                   <TestTube className="w-4 h-4 mr-2" />
@@ -132,7 +151,7 @@ export function LeftTray({
                 </Button>
                 <Button 
                   variant={pathname === '/dev/convos' ? 'default' : 'outline'}
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${pathname === '/dev/convos' ? buttonClasses.default : buttonClasses.outline}`}
                   onClick={() => { router.push('/dev/convos'); onClose(); }}
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
@@ -140,7 +159,7 @@ export function LeftTray({
                 </Button>
                 <Button 
                   variant={pathname === '/dev/user-tracking' ? 'default' : 'outline'}
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${pathname === '/dev/user-tracking' ? buttonClasses.default : buttonClasses.outline}`}
                   onClick={() => { router.push('/dev/user-tracking'); onClose(); }}
                 >
                   <Users className="w-4 h-4 mr-2" />
@@ -157,21 +176,21 @@ export function LeftTray({
               <div className="mt-2 space-y-2">
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${buttonClasses.outline}`}
                   onClick={onNewCard}
                 >
                   + New Card
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${buttonClasses.outline}`}
                   onClick={onResetLayout}
                 >
                   Reset Layout
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="w-full justify-start" 
+                  className={`w-full justify-start ${buttonClasses.outline}`}
                   onClick={onRefreshCards}
                 >
                   Refresh Cards

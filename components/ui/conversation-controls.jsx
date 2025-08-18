@@ -30,6 +30,11 @@ export function ConversationControls({
 }) {
   const dynamicTheme = useDynamicAppTheme();
   
+  // Theme-aware button classes that override ShadCN defaults
+  const buttonClasses = {
+    outline: `bg-transparent ${dynamicTheme.colors.text.secondary} border ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+  };
+  
   return (
     <div className="flex items-center gap-4">
       {/* Timer Icon & Status - Fixed width container */}
@@ -67,7 +72,7 @@ export function ConversationControls({
             disabled={activeConversation?.status === 'active'}
             size="sm"
             variant="outline"
-            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
+            className={`h-[${UI_HEIGHTS.button}px] leading-none ${buttonClasses.outline}`}
           >
             <Play className="w-3 h-3 mr-1" />
             {activeConversation?.status === 'paused' ? 'Resume' : 'Start'}
@@ -81,7 +86,7 @@ export function ConversationControls({
             disabled={activeConversation?.status !== 'active'}
             size="sm"
             variant="outline"
-            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
+            className={`h-[${UI_HEIGHTS.button}px] leading-none ${buttonClasses.outline}`}
           >
             <PauseIcon className="w-3 h-3 mr-1" />
             Pause
@@ -95,7 +100,7 @@ export function ConversationControls({
             disabled={!activeConversation || activeConversation.status === 'stopped'}
             size="sm"
             variant="outline"
-            className={`h-[${UI_HEIGHTS.button}px] leading-none`}
+            className={`h-[${UI_HEIGHTS.button}px] leading-none ${buttonClasses.outline}`}
           >
             <Square className="w-3 h-3 mr-1" />
             Stop

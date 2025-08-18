@@ -114,6 +114,14 @@ export function AppHeader({
   const { colorTheme, setColorTheme } = useAppTheme();
   const dynamicTheme = useDynamicAppTheme();
   
+  // Theme-aware button classes that override ShadCN defaults
+  const buttonClasses = {
+    // Primary button for main actions
+    default: `${dynamicTheme.colors.background.accent} ${dynamicTheme.colors.text.primary} border ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.background.hover}`,
+    // Outline buttons for secondary actions
+    outline: `bg-transparent ${dynamicTheme.colors.text.secondary} border ${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.background.hover}`
+  };
+  
   // Enhanced theme controls that handle both regular users and guests
   const handleThemeChange = useCallback((newTheme) => {
     if (isGuestMode && updateGuestPreferences) {
@@ -145,7 +153,7 @@ export function AppHeader({
             <Button
               variant="outline"
               size="icon"
-              className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px]`}
+              className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px] ${buttonClasses.outline}`}
               title="Open menu"
               onClick={onOpenTray}
             >
@@ -191,7 +199,7 @@ export function AppHeader({
                 {onOpenNewCard && (
                   <Button
                     onClick={onOpenNewCard}
-                    className={actionBtnClass}
+                    className={`${actionBtnClass} ${buttonClasses.default}`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">New Card</span>
@@ -205,7 +213,7 @@ export function AppHeader({
                     onClick={onOpenHelp}
                     variant="outline"
                     title="Help and keyboard shortcuts"
-                    className={`${iconBtnClass} xl:w-auto xl:px-4`}
+                    className={`${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
                   >
                     <HelpCircle className="w-4 h-4" />
                     <span className="hidden xl:inline xl:ml-2">Help</span>
@@ -218,7 +226,7 @@ export function AppHeader({
                     onClick={onRefreshCards}
                     variant="outline"
                     title="Refresh cards"
-                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4`}
+                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
                   >
                     <RefreshCw className="w-4 h-4" />
                     <span className="hidden xl:inline xl:ml-2">Refresh</span>
@@ -231,7 +239,7 @@ export function AppHeader({
                     onClick={onResetLayout}
                     variant="outline"
                     title="Reset layout to start sizes"
-                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4`}
+                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
                   >
                     <Maximize2 className="w-4 h-4" />
                     <span className="hidden xl:inline xl:ml-2">Reset</span>
@@ -244,7 +252,7 @@ export function AppHeader({
                     <Button
                       variant="outline"
                       title="More actions"
-                      className={iconBtnClass}
+                      className={`${iconBtnClass} ${buttonClasses.outline}`}
                       onClick={() => setIsAppOverflowOpen(!isAppOverflowOpen)}
                     >
                       <MoreHorizontal className="w-4 h-4" />
@@ -301,7 +309,7 @@ export function AppHeader({
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
                       : activeConversation?.status === 'paused'
                       ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                      : dynamicTheme.colors.border.primary
+                      : buttonClasses.outline
                   }`}
                   onClick={() => setIsConversationOverflowOpen(!isConversationOverflowOpen)}
                 >
