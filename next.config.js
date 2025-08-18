@@ -4,7 +4,20 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    output: 'standalone'
-  };
+  output: 'standalone',
+  
+  // Performance and optimization settings
+  compiler: {
+    // Remove console statements in production builds
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error'] // Keep console.error statements
+    } : false,
+  },
+  
+  // Additional production optimizations
+  ...(process.env.NODE_ENV === 'production' && {
+    // Additional production-only optimizations can go here
+  }),
+};
 
 module.exports = withBundleAnalyzer(nextConfig);

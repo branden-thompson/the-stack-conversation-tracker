@@ -16,8 +16,9 @@ import { LeftTray } from '@/components/ui/left-tray';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import SectionCard from '@/components/ui/section-card';
-import { TestHistoryChart } from '@/components/ui/charts/TestHistoryChart';
-import { GroupedCoverageTable } from '@/components/ui/grouped-coverage-table';
+// Lazy-loaded heavy components for better performance
+import { LazyTestHistoryChart } from '@/components/ui/charts/LazyTestHistoryChart';
+import { LazyCoverageData } from '@/components/ui/LazyCoverageData';
 import { MetricCard } from '@/components/ui/metric-card';
 import { StatusBadge, TestStatusBadge } from '@/components/ui/status-badge';
 import { CoverageBar } from '@/components/ui/coverage-bar';
@@ -34,10 +35,7 @@ import {
   Eye
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { COVERAGE_DATA, FILE_GROUPS } from '@/data/coverage-data';
-
-// Import coverage data from external file
-const DETAILED_COVERAGE = COVERAGE_DATA;
+// Coverage data now loaded lazily via LazyCoverageData component
 
 // Extract test state from coverage data
 const INITIAL_TEST_STATE = {
@@ -216,7 +214,7 @@ export default function TestsDashboardPage() {
         variant="outline"
         onClick={() => {
           const blob = new Blob(
-            [JSON.stringify(DETAILED_COVERAGE, null, 2)],
+            [JSON.stringify(testState.results, null, 2)],
             { type: 'application/json' }
           );
           const url = URL.createObjectURL(blob);
@@ -302,7 +300,7 @@ export default function TestsDashboardPage() {
             <MetricCard
               label="Statements"
               value={testState.coverage.statements}
-              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.statements || 0).reverse()}
+              sparkline={[]}
               description="Code execution coverage"
               actionable={{
                 text: "View uncovered statements",
@@ -313,7 +311,7 @@ export default function TestsDashboardPage() {
             <MetricCard
               label="Branches"
               value={testState.coverage.branches}
-              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.branches || 0).reverse()}
+              sparkline={[]}
               description="Conditional paths tested"
               actionable={{
                 text: "Improve branch coverage",
@@ -324,7 +322,7 @@ export default function TestsDashboardPage() {
             <MetricCard
               label="Functions"
               value={testState.coverage.functions}
-              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.functions || 0).reverse()}
+              sparkline={[]}
               description="Functions executed"
               actionable={{
                 text: "Find untested functions",
@@ -335,7 +333,7 @@ export default function TestsDashboardPage() {
             <MetricCard
               label="Lines"
               value={testState.coverage.lines}
-              sparkline={DETAILED_COVERAGE.testHistory.slice(0, 10).map(h => h.coverage?.lines || 0).reverse()}
+              sparkline={[]}
               description="Line-by-line coverage"
               actionable={{
                 text: "Show uncovered lines",
@@ -351,9 +349,7 @@ export default function TestsDashboardPage() {
             headerControls={coverageTableControl}
             footerControls={coverageTableControl}
           >
-            <GroupedCoverageTable 
-              files={DETAILED_COVERAGE.files} 
-              fileGroups={FILE_GROUPS}
+            <LazyCoverageData 
               onControlsReady={setCoverageTableControl}
             />
           </SectionCard>
@@ -364,8 +360,7 @@ export default function TestsDashboardPage() {
             headerControls={testHistoryControl}
             footerControls={testHistoryControl}
           >
-            <TestHistoryChart 
-              testHistory={DETAILED_COVERAGE.testHistory}
+            <LazyTestHistoryChart 
               maxItems={20}
               showFullHistory={false}
               onControlsReady={setTestHistoryControl}

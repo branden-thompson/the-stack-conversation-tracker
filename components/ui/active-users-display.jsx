@@ -6,16 +6,14 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { UserProfileTooltip } from '@/components/ui/user-profile-tooltip';
 import { OverflowTooltip } from '@/components/ui/overflow-tooltip';
-import { useUserTracking } from '@/lib/hooks/useUserTracking';
-import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
+import { useStableActiveUsers } from '@/lib/hooks/useStableActiveUsers';
 import { cn } from '@/lib/utils';
-import { APP_THEME } from '@/lib/utils/ui-constants';
+import { APP_THEME, ANIMATION } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
-import { SESSION_STATUS } from '@/lib/utils/session-constants';
 
 // Responsive limits for profile display
 const DISPLAY_LIMITS = {
@@ -36,77 +34,29 @@ export function ActiveUsersDisplay({
   const [showOverflow, setShowOverflow] = useState(false);
   const dynamicTheme = useDynamicAppTheme();
   
-  // Get user tracking data
-  const { sessions, loading, error } = useUserTracking({
-    mode: 'polling',
-    pollInterval: 5000, // Update every 5 seconds
+  // Use optimized stable active users hook
+  const {
+    activeUsers,
+    loading,
+    error,
+    visibleUsers,
+    overflowUsers,
+    hasOverflow,
+    getPerformanceStats
+  } = useStableActiveUsers({
+    maxVisible,
+    pollInterval: 5000
   });
   
-  // Get user info
-  const { allUsers } = useGuestUsers();
+  // Performance monitoring - disabled by default
+  const logPerformanceStats = useCallback(() => {
+    // Performance stats can be accessed via getPerformanceStats() if needed
+  }, [getPerformanceStats]);
   
-  // Determine responsive limit
-  const getResponsiveLimit = () => {
-    if (maxVisible) return maxVisible;
-    
-    // Default responsive behavior for header display
-    if (typeof window !== 'undefined') {
-      const width = window.innerWidth;
-      if (width < 640) return DISPLAY_LIMITS.sm;
-      if (width < 768) return DISPLAY_LIMITS.md;
-      if (width < 1024) return DISPLAY_LIMITS.lg;
-      if (width < 1280) return DISPLAY_LIMITS.xl;
-      if (width < 1536) return DISPLAY_LIMITS.xl;
-      return DISPLAY_LIMITS['2xl'];
-    }
-    
-    return DISPLAY_LIMITS.lg; // SSR fallback for header
-  };
-  
-  // Filter for active users on app-level pages (not dev pages)
-  const activeUsers = useMemo(() => {
-    if (!sessions || loading || error) return [];
-    
-    const allSessions = [
-      ...Object.values(sessions.grouped || {}).flat(),
-      ...(sessions.guests || [])
-    ];
-    
-    // Filter for active sessions on app-level routes
-    const activeAppSessions = allSessions.filter(session => {
-      const isActive = session.status === SESSION_STATUS.ACTIVE;
-      const isAppRoute = session.currentRoute && !session.currentRoute.startsWith('/dev');
-      return isActive && isAppRoute;
-    });
-    
-    // Create user objects with session data
-    return activeAppSessions.map(session => {
-      const user = allUsers.find(u => u.id === session.userId) || {
-        id: session.userId,
-        name: session.userName || 'Unknown User',
-        profilePicture: session.metadata?.avatar
-      };
-      
-      return {
-        ...user,
-        session,
-        route: session.currentRoute || '/',
-        lastAction: session.recentActions?.[0] || null,
-        lastActivity: session.lastActivityAt
-      };
-    })
-    // Sort by most recent activity
-    .sort((a, b) => (b.lastActivity || 0) - (a.lastActivity || 0))
-    // Remove duplicates (same user, multiple sessions)
-    .filter((user, index, arr) => 
-      arr.findIndex(u => u.id === user.id) === index
-    );
-  }, [sessions, allUsers, loading, error]);
-  
-  const displayLimit = getResponsiveLimit();
-  const visibleUsers = activeUsers.slice(0, displayLimit);
-  const overflowUsers = activeUsers.slice(displayLimit);
-  const hasOverflow = overflowUsers.length > 0;
+  // Optional: Log performance stats periodically (can be removed)
+  useMemo(() => {
+    logPerformanceStats();
+  }, [activeUsers.length, logPerformanceStats]);
   
   // Don't render if no active users or in error state
   if (loading || error || activeUsers.length === 0) {
@@ -132,9 +82,9 @@ export function ActiveUsersDisplay({
       
       {/* User Profiles */}
       <div className="flex items-center justify-start -space-x-2 min-w-0">
-        {visibleUsers.map((user, index) => (
+        {visibleUsers.map((user) => (
           <div
-            key={user.id}
+            key={user._stableKey || user.id}
             className="relative"
             onMouseEnter={() => setHoveredUser(user)}
             onMouseLeave={() => setHoveredUser(null)}
@@ -146,7 +96,9 @@ export function ActiveUsersDisplay({
               className={cn(
                 "border-2 border-white dark:border-gray-800",
                 "cursor-pointer transition-transform hover:scale-110 hover:z-10",
-                "ring-2 ring-green-500 ring-opacity-50" // Active indicator
+                "ring-2 ring-green-500 ring-opacity-50", // Active indicator
+                // GPU acceleration classes
+                "will-change-transform backface-visibility-hidden transform-gpu"
               )}
             />
             

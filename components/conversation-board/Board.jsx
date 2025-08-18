@@ -123,7 +123,6 @@ function BoardInner({
   // This ensures all pages get sessions, not just the Board
   useEffect(() => {
     if (currentUser && currentUser.id) {
-      console.log('[Board] Current user:', currentUser.name, currentUser.id, 'isGuest:', currentUser.isGuest);
       // If user switches, update the session
       if (!currentUser.isGuest && !currentUser.isSystemUser) {
         // For registered users, update the session

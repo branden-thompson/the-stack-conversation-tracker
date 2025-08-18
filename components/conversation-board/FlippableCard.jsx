@@ -33,6 +33,8 @@ export function FlippableCard({
   handleAssignUser,
   moveToZone,
   dragHandleProps,
+  showAssignMenu,
+  setShowAssignMenu,
   users,
   controlRailWidth,
   contentMinHeight,
@@ -44,27 +46,33 @@ export function FlippableCard({
   style,
   className,
 }) {
-  const [isFlipped, setIsFlipped] = useState(!card.faceUp);
+  
+  // Use showingFace to track what we're currently showing (true = face, false = back)
+  const [showingFace, setShowingFace] = useState(card.faceUp);
   const [isAnimating, setIsAnimating] = useState(false);
   const { activeId: conversationId } = useConversations();
   const { emitCardEvent } = useGlobalSession();
   
   // Sync with card's faceUp state
   useEffect(() => {
-    setIsFlipped(!card.faceUp);
+    setShowingFace(card.faceUp);
   }, [card.faceUp]);
   
   const handleFlip = async (source = 'user') => {
-    // If animations are disabled, don't flip
-    if (!animationsEnabled) return;
-    
     // Prevent flipping while already animating
-    if (isAnimating) return;
+    if (isAnimating) {
+      return;
+    }
     
     setIsAnimating(true);
     
-    // Start the visual flip
-    setIsFlipped(!isFlipped);
+    // Determine flip target
+    const currentlyShowingFace = showingFace;
+    const targetState = !currentlyShowingFace;
+    const targetFlipTo = targetState ? 'faceUp' : 'faceDown';
+    
+    // Start the visual flip immediately
+    setShowingFace(targetState);
     
     // Call the API to update the database
     try {
@@ -73,36 +81,37 @@ export function FlippableCard({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: card.id,
-          flipTo: isFlipped ? 'faceUp' : 'faceDown',
+          flipTo: targetFlipTo,
           flippedBy: source,
           conversationId: conversationId || undefined,
         }),
       });
       
       if (!response.ok) {
-        console.error('Failed to flip card:', await response.text());
+        const errorText = await response.text();
+        console.error('Failed to flip card:', errorText);
         // Revert the flip on error
-        setIsFlipped(isFlipped);
+        setShowingFace(currentlyShowingFace);
       } else {
+        const result = await response.json();
         // Emit session tracking event
         emitCardEvent('flipped', {
           cardId: card.id,
           flippedBy: source,
           zone: card.zone,
-          from: isFlipped ? 'faceDown' : 'faceUp',
-          flippedTo: isFlipped ? 'faceUp' : 'faceDown',
+          from: currentlyShowingFace ? 'faceUp' : 'faceDown',
+          to: targetState ? 'faceUp' : 'faceDown',
         });
         
         // Call the callback if provided
         if (onFlipCallback) {
-          const result = await response.json();
           onFlipCallback(result);
         }
       }
     } catch (error) {
       console.error('Error flipping card:', error);
       // Revert the flip on error
-      setIsFlipped(isFlipped);
+      setShowingFace(currentlyShowingFace);
     }
     
     // Animation complete
@@ -111,8 +120,8 @@ export function FlippableCard({
     }, ANIMATION.card.flip.duration);
   };
   
-  // If animations are disabled, always show face up
-  const shouldShowFace = !animationsEnabled || !isFlipped;
+  // Use direct state - much clearer logic
+  const shouldShowFace = !animationsEnabled || showingFace;
   
   // When animations are disabled, just render CardFace directly with the container styling
   if (!animationsEnabled) {
@@ -156,101 +165,157 @@ export function FlippableCard({
     );
   }
   
-  // With animations enabled, use the flip container
+  // With animations enabled, use proper 3D flip animation
+  // First ensure we can see the cards, then optimize animation
+  if (!animationsEnabled) {
+    // Non-animated version - just show the appropriate side
+    return (
+      <div 
+        className={cn(
+          'relative rounded-xl border-2 shadow-sm overflow-hidden',
+          typeColors?.container,
+          className
+        )}
+        style={style}
+      >
+        {/* Stack index badge */}
+        {isStacked && stackPosition > 0 && (
+          <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm font-medium pointer-events-none z-10">
+            {stackPosition + 1}
+          </div>
+        )}
+        
+        {showingFace ? (
+          <CardFace
+            card={card}
+            isEditing={isEditing}
+            content={content}
+            setContent={setContent}
+            handleEdit={handleEdit}
+            handleSave={handleSave}
+            handleKeyDown={handleKeyDown}
+            handleDelete={handleDelete}
+            handleAssignUser={handleAssignUser}
+            moveToZone={moveToZone}
+            onFlip={() => handleFlip('user')}
+            dragHandleProps={dragHandleProps}
+            showAssignMenu={showAssignMenu}
+            setShowAssignMenu={setShowAssignMenu}
+            users={users}
+            screenWidth={screenWidth}
+            controlRailWidth={controlRailWidth}
+            contentMinHeight={contentMinHeight}
+            dateText={dateText}
+            createdByUser={createdByUser}
+            assignedToUser={assignedToUser}
+            inputRef={inputRef}
+            typeColors={typeColors}
+          />
+        ) : (
+          <CardBack
+            card={card}
+            onFlip={() => handleFlip('user')}
+            screenWidth={screenWidth}
+            minWidth={style?.minWidth}
+            maxWidth={style?.maxWidth}
+            minHeight={style?.minHeight}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Animated version with proper 3D flip
   return (
     <div 
-      className={`flip-card relative ${className || ''}`}
+      className={cn(
+        'relative',
+        className
+      )}
       style={{
         ...style,
-        width: style?.width || 'auto',
-        height: style?.height || 'auto',
-        perspective: ANIMATION.card.flip.perspective,
+        perspective: '1000px',
       }}
     >
-      {/* Stack index badge - positioned relative to the flip container */}
+      {/* Stack index badge */}
       {isStacked && stackPosition > 0 && (
-        <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm font-medium pointer-events-none z-10">
+        <div className="absolute top-1 right-1 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm font-medium pointer-events-none z-30">
           {stackPosition + 1}
         </div>
       )}
       
+      {/* 3D Flip Container - this entire container rotates with border */}
       <div 
-        className="flip-card-inner"
+        className={cn(
+          'relative rounded-xl border-2 shadow-sm',
+          typeColors?.container
+        )}
         style={{
-          position: 'relative',
-          width: '100%',
-          height: 'auto',
           transformStyle: 'preserve-3d',
-          transition: `transform ${ANIMATION.card.flip.duration}ms ${ANIMATION.card.flip.easing}`,
-          transform: shouldShowFace ? 'rotateY(0deg)' : 'rotateY(180deg)',
+          transform: showingFace ? 'rotateY(0deg)' : 'rotateY(180deg)',
+          transition: isAnimating ? `transform ${ANIMATION.card.flip.duration}ms ${ANIMATION.card.flip.easing}` : 'none',
+          width: style?.width || style?.minWidth || 'auto',
+          minWidth: style?.minWidth,
+          maxWidth: style?.maxWidth,
+          height: style?.height || style?.minHeight || 'auto',
+          minHeight: style?.minHeight,
         }}
       >
-        {/* Face (front) - with card container styling */}
-        <div
-          className="flip-card-face"
+        {/* Card Face - Front Side */}
+        <div 
+          className={cn(
+            'absolute inset-0 w-full h-full overflow-hidden backface-visibility-hidden',
+            showingFace ? 'block' : 'hidden'
+          )}
           style={{
-            position: shouldShowFace ? 'relative' : 'absolute',
-            width: '100%',
-            minHeight: style?.minHeight || 'auto',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(0deg)',
           }}
         >
-          <div className={cn(
-            'rounded-xl border-2 shadow-sm overflow-hidden w-full h-full',
-            typeColors?.container // per-type colors (light + dark)
-          )}>
-            <CardFace
-              card={card}
-              isEditing={isEditing}
-              content={content}
-              setContent={setContent}
-              handleEdit={handleEdit}
-              handleSave={handleSave}
-              handleKeyDown={handleKeyDown}
-              handleDelete={handleDelete}
-              handleAssignUser={handleAssignUser}
-              moveToZone={moveToZone}
-              onFlip={() => handleFlip('user')}
-              dragHandleProps={dragHandleProps}
-              users={users}
-              screenWidth={screenWidth}
-              controlRailWidth={controlRailWidth}
-              contentMinHeight={contentMinHeight}
-              dateText={dateText}
-              createdByUser={createdByUser}
-              assignedToUser={assignedToUser}
-              inputRef={inputRef}
-            />
-          </div>
+          <CardFace
+            card={card}
+            isEditing={isEditing}
+            content={content}
+            setContent={setContent}
+            handleEdit={handleEdit}
+            handleSave={handleSave}
+            handleKeyDown={handleKeyDown}
+            handleDelete={handleDelete}
+            handleAssignUser={handleAssignUser}
+            moveToZone={moveToZone}
+            onFlip={() => handleFlip('user')}
+            dragHandleProps={dragHandleProps}
+            showAssignMenu={showAssignMenu}
+            setShowAssignMenu={setShowAssignMenu}
+            users={users}
+            screenWidth={screenWidth}
+            controlRailWidth={controlRailWidth}
+            contentMinHeight={contentMinHeight}
+            dateText={dateText}
+            createdByUser={createdByUser}
+            assignedToUser={assignedToUser}
+            inputRef={inputRef}
+            typeColors={typeColors}
+          />
         </div>
-        
-        {/* Back - with its own container styling */}
-        <div
-          className="flip-card-back"
+
+        {/* Card Back - Back Side */}
+        <div 
+          className={cn(
+            'absolute inset-0 w-full h-full overflow-hidden backface-visibility-hidden',
+            !showingFace ? 'block' : 'hidden'
+          )}
           style={{
-            position: shouldShowFace ? 'absolute' : 'relative',
-            width: '100%',
-            minHeight: style?.minHeight || 'auto',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
           }}
         >
-          <div className={cn(
-            'rounded-xl border-2 shadow-sm overflow-hidden w-full h-full',
-            typeColors?.container // Apply same border colors as face
-          )}>
-            <CardBack
-              card={card}
-              onFlip={() => handleFlip('user')}
-              screenWidth={screenWidth}
-              minWidth={style?.minWidth}
-              maxWidth={style?.maxWidth}
-              minHeight={style?.minHeight}
-            />
-          </div>
+          <CardBack
+            card={card}
+            onFlip={() => handleFlip('user')}
+            screenWidth={screenWidth}
+            minWidth={style?.minWidth}
+            maxWidth={style?.maxWidth}
+            minHeight={style?.minHeight}
+          />
         </div>
       </div>
     </div>

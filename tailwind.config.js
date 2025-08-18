@@ -93,7 +93,50 @@ module.exports = {
             },
           },
         },
+        
+        // GPU acceleration utilities
+        transitionProperty: {
+          'transform-gpu': 'transform',
+          'opacity-gpu': 'opacity', 
+          'transform-opacity-gpu': 'transform, opacity',
+        },
+        
+        willChange: {
+          'transform': 'transform',
+          'opacity': 'opacity',
+          'transform-opacity': 'transform, opacity',
+          'contents': 'contents',
+        },
       } 
     },
-    plugins: [],
+    plugins: [
+      // Plugin to add GPU acceleration utilities
+      function({ addUtilities }) {
+        const newUtilities = {
+          '.will-change-transform': {
+            'will-change': 'transform',
+          },
+          '.will-change-opacity': {
+            'will-change': 'opacity',
+          },
+          '.will-change-transform-opacity': {
+            'will-change': 'transform, opacity',
+          },
+          '.backface-visibility-hidden': {
+            'backface-visibility': 'hidden',
+            '-webkit-backface-visibility': 'hidden',
+          },
+          '.transform-gpu': {
+            'transform': 'translate3d(0, 0, 0)',
+          },
+          '.perspective-1000': {
+            'perspective': '1000px',
+          },
+          '.preserve-3d': {
+            'transform-style': 'preserve-3d',
+          },
+        }
+        addUtilities(newUtilities)
+      }
+    ],
   };
