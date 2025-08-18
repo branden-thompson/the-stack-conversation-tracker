@@ -26,11 +26,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": true,
+      "faceUp": false,
       "createdByUserId": "guest_aH_Upd6N",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T07:15:56.590Z",
-      "updatedAt": "2025-08-18T09:38:55.405Z"
+      "updatedAt": "2025-08-18T15:23:48.229Z"
     },
     {
       "id": "OvTAF1lDh3RTSCCrU2tAB",
@@ -62,7 +62,7 @@
       "createdByUserId": "guest_aH_Upd6N",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T07:16:07.765Z",
-      "updatedAt": "2025-08-18T09:38:50.478Z"
+      "updatedAt": "2025-08-18T10:09:27.477Z"
     },
     {
       "id": "HalFDmE1V9qd78IVlg5Dg",
@@ -74,11 +74,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": true,
+      "faceUp": false,
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T09:33:42.821Z",
-      "updatedAt": "2025-08-18T09:39:02.271Z"
+      "updatedAt": "2025-08-18T10:09:30.638Z"
     },
     {
       "id": "j9bD2Hw4OLAJoI1iTlqXn",
@@ -94,7 +94,7 @@
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T09:33:44.816Z",
-      "updatedAt": "2025-08-18T09:38:51.550Z"
+      "updatedAt": "2025-08-18T10:09:51.751Z"
     },
     {
       "id": "l_A0x3rE3kbKKzVbJG7Ko",
@@ -106,11 +106,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": true,
+      "faceUp": false,
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T09:33:47.613Z",
-      "updatedAt": "2025-08-18T09:47:30.678Z"
+      "updatedAt": "2025-08-18T15:24:06.146Z"
     },
     {
       "id": "SSHdrBz4_z-b8A76jekZg",
@@ -122,11 +122,11 @@
         "y": 60
       },
       "stackOrder": 0,
-      "faceUp": true,
+      "faceUp": false,
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T09:33:56.250Z",
-      "updatedAt": "2025-08-18T09:34:04.326Z"
+      "updatedAt": "2025-08-18T10:09:25.055Z"
     }
   ],
   "users": [
