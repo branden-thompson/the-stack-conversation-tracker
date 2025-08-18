@@ -247,7 +247,7 @@ export function FlippableCard({
       {/* 3D Flip Container - this entire container rotates with border */}
       <div 
         className={cn(
-          'relative rounded-xl border-2 shadow-sm',
+          'relative rounded-xl border-2 shadow-sm overflow-hidden',
           typeColors?.container
         )}
         style={{
