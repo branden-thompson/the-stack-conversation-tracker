@@ -19,8 +19,11 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { UserSelector } from '@/components/ui/user-selector';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { User, Crown } from 'lucide-react';
+import { useAppTheme } from '@/lib/contexts/ThemeProvider';
+import { cn } from '@/lib/utils';
 
 export function CardDialog({ open, onOpenChange, onCreateCard, users = [], currentUser = null }) {
+  const { appTheme } = useAppTheme();
   const [type, setType] = useState('topic');
   const [content, setContent] = useState('');
   const [assignedUserId, setAssignedUserId] = useState(''); // User ID for assignment
@@ -93,8 +96,14 @@ export function CardDialog({ open, onOpenChange, onCreateCard, users = [], curre
           <div className="space-y-2">
             <Label>Content</Label>
             <textarea
-              className="w-full border rounded-md p-2 text-sm min-h-[90px]"
-              placeholder="What’s the topic/question/fact/accusation?"
+              className={cn(
+                "w-full border rounded-md p-2 text-sm min-h-[90px] transition-colors outline-none focus:ring-2 focus:ring-blue-500/50",
+                appTheme.colors.background.secondary,
+                appTheme.colors.border.primary,
+                appTheme.colors.text.primary,
+                "placeholder:" + appTheme.colors.text.tertiary
+              )}
+              placeholder="What's the topic/question/fact/accusation?"
               value={content}
               onChange={e => setContent(e.target.value)}
             />
@@ -102,18 +111,24 @@ export function CardDialog({ open, onOpenChange, onCreateCard, users = [], curre
 
           {/* Current User Info */}
           {currentUser && (
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Creating as:</Label>
+            <div className={cn(
+              "rounded-md p-3",
+              appTheme.colors.background.tertiary
+            )}>
+              <Label className={cn(
+                "text-sm font-medium",
+                appTheme.colors.text.secondary
+              )}>Creating as:</Label>
               <div className="flex items-center gap-2 mt-1">
-                <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium">
+                <User className={cn("w-4 h-4", appTheme.colors.text.tertiary)} />
+                <span className={cn("text-sm font-medium", appTheme.colors.text.primary)}>
                   {currentUser.name}
                   {currentUser.isSystemUser && (
                     <Crown className="w-3 h-3 ml-1 inline opacity-60" />
                   )}
                 </span>
                 {currentUser.preferences?.theme && (
-                  <span className="text-xs text-gray-500 capitalize">
+                  <span className={cn("text-xs capitalize", appTheme.colors.text.tertiary)}>
                     ({currentUser.preferences.theme})
                   </span>
                 )}

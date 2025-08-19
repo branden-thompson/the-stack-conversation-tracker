@@ -43,6 +43,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ProfilePictureUpload } from '@/components/ui/profile-picture-upload';
 import { ProfilePicture } from '@/components/ui/profile-picture';
+import { useAppTheme } from '@/lib/contexts/ThemeProvider';
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'System Default' },
@@ -61,6 +62,7 @@ export function UserProfileDialog({
   cards = [], // for statistics
   mode = 'edit' // 'create', 'edit', 'view'
 }) {
+  const { appTheme } = useAppTheme();
   const [formData, setFormData] = useState({
     name: '',
     preferences: {
@@ -321,15 +323,24 @@ export function UserProfileDialog({
                 )}
 
                 {!isCreateMode && user && (
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className={cn(
+                    "grid grid-cols-2 gap-4 p-4 rounded-lg",
+                    appTheme.colors.background.tertiary
+                  )}>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <Label className={cn(
+                        "text-sm font-medium",
+                        appTheme.colors.text.tertiary
+                      )}>
                         User ID
                       </Label>
                       <p className="text-sm font-mono">{user.id}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <Label className={cn(
+                        "text-sm font-medium",
+                        appTheme.colors.text.tertiary
+                      )}>
                         Type
                       </Label>
                       <p className="text-sm flex items-center gap-1">
@@ -347,13 +358,19 @@ export function UserProfileDialog({
                       </p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <Label className={cn(
+                        "text-sm font-medium",
+                        appTheme.colors.text.tertiary
+                      )}>
                         Created
                       </Label>
                       <p className="text-sm">{userStats?.joinedDate}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      <Label className={cn(
+                        "text-sm font-medium",
+                        appTheme.colors.text.tertiary
+                      )}>
                         Last Updated
                       </Label>
                       <p className="text-sm">
@@ -415,7 +432,10 @@ export function UserProfileDialog({
                     checked={formData.preferences.notifications}
                     onChange={(e) => updateFormData('preferences.notifications', e.target.checked)}
                     disabled={isViewMode}
-                    className="rounded border-gray-300"
+                    className={cn(
+                      "rounded transition-colors",
+                      appTheme.colors.border.primary
+                    )}
                   />
                   <Label htmlFor="notifications">Enable notifications</Label>
                 </div>
@@ -479,8 +499,12 @@ export function UserProfileDialog({
 
         {/* Error Message */}
         {errors.submit && (
-          <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-sm text-red-700 dark:text-red-300">{errors.submit}</p>
+          <div className={cn(
+            "p-3 border rounded-md",
+            appTheme.colors.status.error.bg,
+            appTheme.colors.status.error.border
+          )}>
+            <p className={cn("text-sm", appTheme.colors.status.error.text)}>{errors.submit}</p>
           </div>
         )}
 
@@ -524,12 +548,16 @@ export function UserProfileDialog({
         {/* Delete Confirmation Dialog */}
         {showDeleteConfirm && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg max-w-md">
+            <div className={cn(
+              "p-6 rounded-lg max-w-md",
+              appTheme.colors.background.secondary,
+              appTheme.shadows.lg
+            )}>
               <div className="flex items-center gap-3 mb-4">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
-                <h3 className="text-lg font-semibold">Delete User</h3>
+                <h3 className={cn("text-lg font-semibold", appTheme.colors.text.primary)}>Delete User</h3>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+              <p className={cn("text-sm mb-6", appTheme.colors.text.secondary)}>
                 Are you sure you want to delete <strong>{user?.name}</strong>? 
                 This action cannot be undone. The user's created cards will remain 
                 but show as "Unknown" creator.
