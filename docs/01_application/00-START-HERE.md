@@ -22,9 +22,9 @@
 - `cross-tab-sync-issues.md` - Real-time cross-tab synchronization troubleshooting
 
 ### 🚨 Emergency Procedures
-- `emergency-rollback.md` - Emergency rollback procedures and protocols
-- `sev-classification.md` - Severity classification system for issues
-- `circuit-breaker-protocols.md` - Development circuit breaker and safety procedures
+- `emergency-procedures.md` - Emergency response protocols and circuit breaker procedures
+- `sev-classification.md` - Severity classification system for issues and projects
+- `development-standards.md` - Development standards and architectural guidelines
 
 ### 📊 Project Health
 - `health-monitoring.md` - Application health monitoring and alerting

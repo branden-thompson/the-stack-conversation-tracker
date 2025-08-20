@@ -1,10 +1,13 @@
-# Major System Cleanup - Project Overview
+# Major System Cleanup - ARCHIVED PROJECT
 
-**Status**: FAILED / ROLLED BACK  
-**Classification**: MAJOR Feature  
+**Status**: ARCHIVED - Project Failed and Rolled Back  
+**Location**: Moved from `/docs/02_features/` to `/docs/06_archive/`  
+**Classification**: MAJOR Feature (Failed)  
 **SEV Level**: SEV-0 (System stability threats)  
 **Date**: 2025-08-20  
 **Final Outcome**: Complete baseline restoration to commit d8e2889
+
+⚠️ **ARCHIVE NOTICE**: This project documentation is preserved for learning purposes but does not represent current application functionality. The major system cleanup was rolled back completely.
 
 ## TL;DR - Project Failure
 
@@ -42,7 +45,7 @@ The major system cleanup project attempted to consolidate Server-Sent Events (SS
 1. **`6-key_learnings/2025-08-20-project-failure-post-mortem.md`** - Comprehensive failure analysis
 2. **`5-debugging/2025-08-20-sse-emergency-fix-technical-analysis.md`** - Technical root cause
 3. **`2-analysis/project-failure-analysis.md`** - SEV-0 debrief across 9 areas
-4. **After Action Report**: `/docs/04_after-action-reports/sse-emergency-fix-fail-state_2025-08-20.md`
+4. **After Action Report**: `/docs/04_after-action-reports/major-system-cleanup-failure_2025-08-20.md`
 
 ## Emergency Response Summary
 
