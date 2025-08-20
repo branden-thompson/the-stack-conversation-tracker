@@ -5,31 +5,45 @@
 
 ## Navigation
 
-### 📋 Application Standards
-- `development-standards.md` - Coding standards, patterns, and best practices
-- `architecture-overview.md` - High-level system architecture and design principles
-- `performance-standards.md` - Performance monitoring and optimization guidelines
+### 📊 1. Architecture 
+`/1-Architecture/` - System architecture, data flows, and technical references
+- `data-event-flow-human-readable.md` - Human-readable data flow diagrams
+- `data-event-flow-technical.md` - Technical reference for AI agents
+- `Real-Time-Collaboration-Options.md` - SSE implementation planning
+- `repeated-constants-analysis.md` - Constants consolidation analysis
 
-### 🔧 Development Environment
-- `local-development-setup.md` - Complete local development environment setup
-- `docker-deployment.md` - Docker configuration and deployment procedures
-- `testing-standards.md` - Testing approaches, frameworks, and coverage requirements
+### ⚡ 2. Performance Monitoring
+`/2-Performance-Monitoring/` - Performance tracking and safety controls
+- `performance-monitoring-safety-controls.md` - Emergency controls and circuit breakers
+- `realtime-runtime-perf-monitoring.md` - Real-time performance tracking
 
-### 🛠️ Troubleshooting
-- `common-issues.md` - Frequently encountered issues and their solutions
-- `sse-troubleshooting.md` - Server-Sent Events specific troubleshooting
-- `port-management.md` - Development server port conflicts and management
-- `cross-tab-sync-issues.md` - Real-time cross-tab synchronization troubleshooting
+### 🛠️ 3. Development Infrastructure 
+`/3-Development-Infrastructure/` - Development tools and automation
+- `DEBUG_LOGGING.md` - Debug logging system
+- `dev-pages-automation.md` - Automated development pages
+- `git-hooks-safeguards.md` - Git hooks and safety checks
+- `user-tracking.md` - User analytics and session tracking
 
-### 🚨 Emergency Procedures
-- `emergency-procedures.md` - Emergency response protocols and circuit breaker procedures
-- `sev-classification.md` - Severity classification system for issues and projects
-- `development-standards.md` - Development standards and architectural guidelines
+### 🔧 4. Troubleshooting
+`/4-Troubleshooting/` - Issue resolution and debugging guides
+- `docker-build-issues.md` - Docker build troubleshooting
+- `sse-troubleshooting.md` - Server-Sent Events issues
+- `3d-card-flip-animation-restoration.md` - Animation debugging
+- `user-dynamic-color-theme-issues.md` - Theme system issues
 
-### 📊 Project Health
-- `health-monitoring.md` - Application health monitoring and alerting
-- `performance-baselines.md` - Performance baselines and regression detection
-- `dependency-management.md` - Package management and security practices
+### 🧩 5. Component Systems
+`/5-Component-Systems/` - Reusable component documentation
+- `card-type-constants.md` - Card type system and constants
+- `ui-constants.md` - Application-wide UI constants
+- `compact-user-selector.md` - User selection components
+
+### 📋 Application-Level Files
+- `architecture-overview.md` - High-level application architecture
+- `port-management.md` - Port configuration and conflict management  
+- `project-organization-summary.md` - Project structure overview
+
+### 🏗️ Major System Projects
+- `system-analysis-and-cleanup/` - Major system cleanup project (6-folder structure)
 
 ## Key Application Concepts
 
