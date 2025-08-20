@@ -6,11 +6,13 @@ import { Clock } from 'lucide-react';
 import { getEventConfig } from '@/lib/utils/timelineConstants';
 import { formatTime } from '@/lib/utils/timelineFormatters';
 import { getEventSummary, getPayloadDetails } from '@/lib/utils/timelineEvents';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 
 
 export function TimelineNode({ event, isLeft = false, showTime = true }) {
   const [isHovered, setIsHovered] = useState(false);
+  const dynamicTheme = useDynamicAppTheme();
   
   const eventConfig = getEventConfig(event.type);
   
@@ -67,30 +69,30 @@ export function TimelineNode({ event, isLeft = false, showTime = true }) {
       {isHovered && payloadDetails.length > 0 && (
         <div className={`absolute z-20 ${
           isLeft ? 'right-full mr-4' : 'left-full ml-4'
-        } top-0 w-72 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-xl p-4 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95 animate-fade-in-scale`}>
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+        } top-0 w-72 ${dynamicTheme.colors.background.card} border ${dynamicTheme.colors.border.primary} rounded-xl ${dynamicTheme.shadows.xl} p-4 backdrop-blur-sm animate-fade-in-scale`}>
+          <div className={`text-sm font-medium ${dynamicTheme.colors.text.primary} mb-2`}>
             Event Details
           </div>
           
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-gray-400">Type:</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">{event.type}</span>
+              <span className={dynamicTheme.colors.text.tertiary}>Type:</span>
+              <span className={`font-medium ${dynamicTheme.colors.text.primary}`}>{event.type}</span>
             </div>
             
             <div className="flex justify-between text-xs">
-              <span className="text-gray-500 dark:text-gray-400">Time:</span>
-              <span className="font-medium text-gray-900 dark:text-gray-100">
+              <span className={dynamicTheme.colors.text.tertiary}>Time:</span>
+              <span className={`font-medium ${dynamicTheme.colors.text.primary}`}>
                 {new Date(event.at).toLocaleString()}
               </span>
             </div>
             
             {payloadDetails.map(({ key, value }) => (
               <div key={key} className="flex justify-between text-xs">
-                <span className="text-gray-500 dark:text-gray-400 capitalize">
+                <span className={`${dynamicTheme.colors.text.tertiary} capitalize`}>
                   {key.replace(/([A-Z])/g, ' $1').toLowerCase()}:
                 </span>
-                <span className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-32" title={value}>
+                <span className={`font-medium ${dynamicTheme.colors.text.primary} truncate max-w-32`} title={value}>
                   {value}
                 </span>
               </div>
