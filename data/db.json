@@ -4,17 +4,17 @@
       "id": "qWd3mQ7EzJCY5UOTl7cHh",
       "type": "opinion",
       "content": "super test",
-      "zone": "active",
+      "zone": "parking",
       "position": {
-        "x": 10,
-        "y": 89.8046875
+        "x": 20,
+        "y": 20
       },
       "stackOrder": 0,
       "faceUp": true,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
-      "updatedAt": "2025-08-20T22:42:16.352Z"
+      "updatedAt": "2025-08-20T22:48:56.118Z"
     }
   ],
   "users": [
