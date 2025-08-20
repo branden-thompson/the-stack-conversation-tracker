@@ -14,7 +14,7 @@
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:46.081Z",
-      "updatedAt": "2025-08-20T17:32:53.367Z"
+      "updatedAt": "2025-08-20T20:59:50.647Z"
     },
     {
       "id": "qWd3mQ7EzJCY5UOTl7cHh",
@@ -22,15 +22,15 @@
       "content": "super test",
       "zone": "active",
       "position": {
-        "x": 608.18359375,
-        "y": 60
+        "x": 10,
+        "y": 89.8046875
       },
       "stackOrder": 0,
       "faceUp": true,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
-      "updatedAt": "2025-08-20T17:32:52.290Z"
+      "updatedAt": "2025-08-20T21:00:20.216Z"
     }
   ],
   "users": [
