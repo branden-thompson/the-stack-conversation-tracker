@@ -3,7 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import { DndContext } from '@dnd-kit/core';
 import { ConversationCard } from '@/components/conversation-board/ConversationCard';
 import { FlippableCard } from '@/components/conversation-board/FlippableCard';
-import { CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_TYPES } from '@/lib/utils/card-type-constants';
 
 // Mock fetch for API calls
 global.fetch = vi.fn(() =>

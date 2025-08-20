@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { UserSelector } from '@/components/ui/user-selector';
-import { CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_TYPES } from '@/lib/utils/card-type-constants';
 import { User, Crown } from 'lucide-react';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { cn } from '@/lib/utils';

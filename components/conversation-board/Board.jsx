@@ -17,7 +17,7 @@ import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
 import { useGlobalSession } from '@/lib/contexts/GlobalSessionProvider';
 import { useButtonTracking } from '@/lib/hooks/useButtonTracking';
-import { CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_TYPES } from '@/lib/utils/card-type-constants';
 import { LeftTray } from '@/components/ui/left-tray';
 import { AppHeader } from '@/components/ui/app-header';
 import { APP_THEME } from '@/lib/utils/ui-constants';

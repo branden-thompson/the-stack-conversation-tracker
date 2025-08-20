@@ -16,8 +16,7 @@ import { Button } from '@/components/ui/button';
 import {
   MoreVertical,
 } from 'lucide-react';
-import { CARD_TYPES, CARD_DIMENSIONS } from '@/lib/utils/constants';
-import { getTypeColors } from '@/lib/utils/card-type-constants';
+import { CARD_TYPES, CARD_DIMENSIONS, getTypeColors } from '@/lib/utils/card-type-constants';
 import { 
   CARD_RESPONSIVE_WIDTHS,
   CARD_LAYOUT,

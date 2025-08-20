@@ -12,7 +12,7 @@ import { useDroppable } from '@dnd-kit/core';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/constants';
+import { CARD_ZONES as ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/card-type-constants';
 import { CARD_LAYOUT, APP_THEME } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
