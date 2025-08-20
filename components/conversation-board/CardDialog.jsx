@@ -19,11 +19,11 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@
 import { UserSelector } from '@/components/ui/user-selector';
 import { CARD_TYPES } from '@/lib/utils/constants';
 import { User, Crown } from 'lucide-react';
-import { useAppTheme } from '@/lib/contexts/ThemeProvider';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { cn } from '@/lib/utils';
 
 export function CardDialog({ open, onOpenChange, onCreateCard, users = [], currentUser = null }) {
-  const { appTheme } = useAppTheme();
+  const dynamicTheme = useDynamicAppTheme();
   const [type, setType] = useState('topic');
   const [content, setContent] = useState('');
   const [assignedUserId, setAssignedUserId] = useState(''); // User ID for assignment
@@ -98,10 +98,10 @@ export function CardDialog({ open, onOpenChange, onCreateCard, users = [], curre
             <textarea
               className={cn(
                 "w-full border rounded-md p-2 text-sm min-h-[90px] transition-colors outline-none focus:ring-2 focus:ring-blue-500/50",
-                appTheme.colors.background.secondary,
-                appTheme.colors.border.primary,
-                appTheme.colors.text.primary,
-                "placeholder:" + appTheme.colors.text.tertiary
+                dynamicTheme.colors.background.secondary,
+                dynamicTheme.colors.border.primary,
+                dynamicTheme.colors.text.primary,
+                "placeholder:" + dynamicTheme.colors.text.tertiary
               )}
               placeholder="What's the topic/question/fact/accusation?"
               value={content}
@@ -113,22 +113,22 @@ export function CardDialog({ open, onOpenChange, onCreateCard, users = [], curre
           {currentUser && (
             <div className={cn(
               "rounded-md p-3",
-              appTheme.colors.background.tertiary
+              dynamicTheme.colors.background.tertiary
             )}>
               <Label className={cn(
                 "text-sm font-medium",
-                appTheme.colors.text.secondary
+                dynamicTheme.colors.text.secondary
               )}>Creating as:</Label>
               <div className="flex items-center gap-2 mt-1">
-                <User className={cn("w-4 h-4", appTheme.colors.text.tertiary)} />
-                <span className={cn("text-sm font-medium", appTheme.colors.text.primary)}>
+                <User className={cn("w-4 h-4", dynamicTheme.colors.text.tertiary)} />
+                <span className={cn("text-sm font-medium", dynamicTheme.colors.text.primary)}>
                   {currentUser.name}
                   {currentUser.isSystemUser && (
                     <Crown className="w-3 h-3 ml-1 inline opacity-60" />
                   )}
                 </span>
                 {currentUser.preferences?.theme && (
-                  <span className={cn("text-xs capitalize", appTheme.colors.text.tertiary)}>
+                  <span className={cn("text-xs capitalize", dynamicTheme.colors.text.tertiary)}>
                     ({currentUser.preferences.theme})
                   </span>
                 )}

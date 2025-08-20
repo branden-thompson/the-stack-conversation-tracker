@@ -41,9 +41,9 @@ export function ConversationControls({
       <div className="flex items-center gap-3 min-w-[240px]">
         <Clock3 className={`w-8 h-8 ${
           activeConversation?.status === 'active' 
-            ? 'text-green-600' 
+            ? dynamicTheme.colors.status.success.text
             : activeConversation?.status === 'paused'
-            ? 'text-yellow-600'
+            ? dynamicTheme.colors.status.warning.text
             : dynamicTheme.colors.text.muted
         }`} />
         <div className="text-sm">
