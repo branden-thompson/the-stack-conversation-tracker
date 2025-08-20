@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-08-20T06:24:17.324Z",
+  "defaultSwitches": {
+    "reactQuery": true,
+    "cardEvents": true,
+    "userTracking": true,
+    "sessionEvents": true,
+    "conversationPolling": true,
+    "sseEnabled": true,
+    "sseResourceMonitoring": true,
+    "sseAutoRecovery": true,
+    "sseBroadcasting": true,
+    "ssePresence": true,
+    "sseConversationEvents": true,
+    "sseConversationPollingFallback": false,
+    "ssePerformanceMonitoring": true,
+    "ssePerformancePollingFallback": false,
+    "performanceMonitoring": false,
+    "optimizedMutations": false,
+    "unifiedThemeSystem": false,
+    "featureModules": false,
+    "sseUnifiedMigration": false,
+    "emergencyDisable": false
+  },
+  "totalSwitches": 20,
+  "criticalSwitches": [
+    "sseEnabled",
+    "emergencyDisable",
+    "reactQuery",
+    "userTracking",
+    "sessionEvents"
+  ],
+  "optimizationSwitches": [
+    "optimizedMutations",
+    "unifiedThemeSystem",
+    "featureModules",
+    "sseUnifiedMigration"
+  ]
+}
