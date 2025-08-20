@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, waitFor, act } from '../../utils/test-utils';
 import { useUsers } from '@/lib/hooks/useUsers.js';
 
 // Mock fetch globally

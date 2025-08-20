@@ -34,6 +34,14 @@ vi.mock('next/image', () => ({
 // Mock environment variables
 process.env.NODE_ENV = 'test'
 
+// Enable all safety switches for tests
+process.env.NEXT_PUBLIC_USE_REACT_QUERY = 'true'
+process.env.NEXT_PUBLIC_CARD_EVENTS_ENABLED = 'true'
+process.env.NEXT_PUBLIC_USER_TRACKING_ENABLED = 'true'
+process.env.NEXT_PUBLIC_SESSION_EVENTS_ENABLED = 'true'
+process.env.NEXT_PUBLIC_CONVERSATION_POLLING_ENABLED = 'true'
+process.env.NEXT_PUBLIC_PERFORMANCE_MONITORING_ENABLED = 'true'
+
 // Ensure test database directory exists and is writable
 beforeAll(async () => {
   // Mock fetch for tests that don't mock it explicitly
@@ -48,6 +56,30 @@ global.ResizeObserver = class ResizeObserver {
   unobserve = vi.fn()
   disconnect = vi.fn()
 }
+
+// Mock localStorage and sessionStorage with default safety switch values
+const createStorageMock = () => ({
+  getItem: vi.fn((key) => {
+    // Enable safety switches by default in tests
+    if (key === 'emergency-disable') return 'false';
+    return null;
+  }),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(),
+})
+
+Object.defineProperty(window, 'localStorage', {
+  writable: true,
+  value: createStorageMock(),
+})
+
+Object.defineProperty(window, 'sessionStorage', {
+  writable: true,
+  value: createStorageMock(),
+})
 
 // Mock window.matchMedia for responsive tests
 Object.defineProperty(window, 'matchMedia', {
