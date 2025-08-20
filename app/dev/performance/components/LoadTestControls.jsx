@@ -23,7 +23,7 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
-import { THEME } from '@/lib/utils/ui-constants';
+
 
 const LOAD_TEST_SCENARIOS = {
   'light-load': {
@@ -72,7 +72,7 @@ const LOAD_TEST_SCENARIOS = {
   }
 };
 
-export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRunning }) {
+export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRunning, theme }) {
   const [selectedScenario, setSelectedScenario] = useState('light-load');
   const [customConfig, setCustomConfig] = useState(null);
   const [testResults, setTestResults] = useState(null);
@@ -152,10 +152,10 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
 
   const ScenarioCard = ({ scenarioKey, scenario }) => (
     <Card 
-      className={`cursor-pointer transition-colors ${THEME.colors.background.card} ${
+      className={`cursor-pointer transition-colors ${theme.colors.background.card} ${
         selectedScenario === scenarioKey 
-          ? `${THEME.colors.border.secondary} ${THEME.colors.background.accent}` 
-          : `${THEME.colors.border.primary} ${THEME.colors.background.hover}`
+          ? `${theme.colors.border.secondary} ${theme.colors.background.accent}` 
+          : `${theme.colors.border.primary} ${theme.colors.background.hover}`
       }`}
       onClick={() => setSelectedScenario(scenarioKey)}
     >
@@ -164,7 +164,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
           <div className="mt-1">{scenario.icon}</div>
           <div className="flex-1">
             <h3 className="font-medium">{scenario.name}</h3>
-            <p className="text-sm ${THEME.colors.text.tertiary} mb-2">{scenario.description}</p>
+            <p className="text-sm ${theme.colors.text.tertiary} mb-2">{scenario.description}</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>Users: {scenario.config.concurrentUsers}</div>
               <div>Duration: {scenario.config.duration / 1000}s</div>
@@ -184,37 +184,37 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
     const isSuccessful = successRate >= 95;
     
     return (
-      <Card className={`mt-6 border-2 ${isSuccessful ? THEME.colors.status.success.border + ' ' + THEME.colors.status.success.bg : THEME.colors.status.warning.border + ' ' + THEME.colors.status.warning.bg}`}>
+      <Card className={`mt-6 border-2 ${isSuccessful ? theme.colors.status.success.border + ' ' + theme.colors.status.success.bg : theme.colors.status.warning.border + ' ' + theme.colors.status.warning.bg}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {isSuccessful ? <CheckCircle className={`h-5 w-5 ${THEME.colors.status.success.icon}`} /> : <AlertTriangle className={`h-5 w-5 ${THEME.colors.status.warning.icon}`} />}
+            {isSuccessful ? <CheckCircle className={`h-5 w-5 ${theme.colors.status.success.icon}`} /> : <AlertTriangle className={`h-5 w-5 ${theme.colors.status.warning.icon}`} />}
             Load Test Results
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Success Rate</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Success Rate</p>
               <div className="flex items-center gap-2">
                 <p className="text-xl font-bold">{successRate.toFixed(1)}%</p>
                 <Badge className={isSuccessful 
-                  ? `${THEME.colors.status.success.bg} ${THEME.colors.status.success.border} ${THEME.colors.status.success.text}` 
-                  : `${THEME.colors.status.warning.bg} ${THEME.colors.status.warning.border} ${THEME.colors.status.warning.text}`
+                  ? `${theme.colors.status.success.bg} ${theme.colors.status.success.border} ${theme.colors.status.success.text}` 
+                  : `${theme.colors.status.warning.bg} ${theme.colors.status.warning.border} ${theme.colors.status.warning.text}`
                 }>
                   {testResults.successfulRequests}/{testResults.totalRequests}
                 </Badge>
               </div>
             </div>
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Avg Response</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Avg Response</p>
               <p className="text-xl font-bold">{testResults.averageResponseTime}ms</p>
             </div>
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Peak Response</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Peak Response</p>
               <p className="text-xl font-bold">{testResults.peakResponseTime}ms</p>
             </div>
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Requests/sec</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Requests/sec</p>
               <p className="text-xl font-bold">{testResults.requestsPerSecond}</p>
             </div>
           </div>
@@ -262,7 +262,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
   return (
     <div className="space-y-6">
       {/* Load Test Scenarios */}
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -279,7 +279,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
       </Card>
 
       {/* Test Controls */}
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
         <CardHeader>
           <CardTitle>Test Execution</CardTitle>
         </CardHeader>
@@ -305,7 +305,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
             )}
             
             <div className="flex items-center gap-2">
-              <span className={`text-sm ${THEME.colors.text.secondary}`}>Selected:</span>
+              <span className={`text-sm ${theme.colors.text.secondary}`}>Selected:</span>
               <Badge variant="outline" className="border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300">
                 {LOAD_TEST_SCENARIOS[selectedScenario].name}
               </Badge>
@@ -315,7 +315,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
           {isRunning && (
             <div className="space-y-3">
               <div>
-                <div className={`flex justify-between text-sm mb-2 ${THEME.colors.text.secondary}`}>
+                <div className={`flex justify-between text-sm mb-2 ${theme.colors.text.secondary}`}>
                   <span>Progress</span>
                   <span>{testProgress.toFixed(0)}%</span>
                 </div>
@@ -323,7 +323,7 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
               </div>
               
               {currentPhase && (
-                <div className={`text-sm ${THEME.colors.text.tertiary}`}>
+                <div className={`text-sm ${theme.colors.text.tertiary}`}>
                   {currentPhase}
                 </div>
               )}
@@ -331,9 +331,9 @@ export default function LoadTestControls({ onLoadTestStart, onLoadTestStop, isRu
           )}
 
           {!isRunning && (
-            <Alert className={`${THEME.colors.status.warning.bg} ${THEME.colors.status.warning.border}`}>
-              <AlertTriangle className={`h-4 w-4 ${THEME.colors.status.warning.icon}`} />
-              <AlertDescription className={THEME.colors.status.warning.text}>
+            <Alert className={`${theme.colors.status.warning.bg} ${theme.colors.status.warning.border}`}>
+              <AlertTriangle className={`h-4 w-4 ${theme.colors.status.warning.icon}`} />
+              <AlertDescription className={theme.colors.status.warning.text}>
                 <strong>Safety Notice:</strong> Load tests will create significant system load. 
                 Monitor your application's performance metrics during testing and be prepared to stop 
                 if issues arise.

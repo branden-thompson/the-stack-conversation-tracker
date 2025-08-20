@@ -31,9 +31,9 @@ import {
   MemoryStick,
   Activity
 } from 'lucide-react';
-import { THEME } from '@/lib/utils/ui-constants';
 
-export default function PerformanceChart({ metrics, timeWindow }) {
+
+export default function PerformanceChart({ metrics, timeWindow, theme }) {
   const [selectedMetricType, setSelectedMetricType] = useState('api_performance');
   const [chartType, setChartType] = useState('line');
 
@@ -163,7 +163,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className={`${THEME.colors.background.secondary} p-3 border rounded shadow-lg`}>
+        <div className={`${theme.colors.background.secondary} p-3 border rounded shadow-lg`}>
           <p className="font-medium">{`Time: ${label}`}</p>
           {payload.map((entry, index) => (
             <p key={index} style={{ color: entry.color }}>
@@ -180,7 +180,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
   const renderChart = () => {
     if (chartData.length === 0) {
       return (
-        <div className={`flex items-center justify-center h-64 ${THEME.colors.text.tertiary}`}>
+        <div className={`flex items-center justify-center h-64 ${theme.colors.text.tertiary}`}>
           No data available for the selected time window
         </div>
       );
@@ -263,7 +263,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
   return (
     <div className="space-y-6">
       {/* Chart Controls */}
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
@@ -322,7 +322,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
             </div>
           </div>
 
-          <div className={`text-sm ${THEME.colors.text.tertiary}`}>
+          <div className={`text-sm ${theme.colors.text.tertiary}`}>
             Showing data from the last {timeWindow / 60000} minutes ({chartData.length} data points)
             <div className="mt-2 p-2 bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded text-xs">
               <strong>Note:</strong> Navigation tracking has been disabled for safety. Previous implementation 
@@ -333,7 +333,7 @@ export default function PerformanceChart({ metrics, timeWindow }) {
       </Card>
 
       {/* Chart Display */}
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {config.icon}
@@ -360,28 +360,28 @@ export default function PerformanceChart({ metrics, timeWindow }) {
 
       {/* Chart Statistics */}
       {chartData.length > 0 && (
-        <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+        <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
           <CardHeader>
             <CardTitle>Chart Statistics</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Data Points</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Data Points</p>
                 <p className="text-xl font-bold">{chartData.length}</p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Time Range</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Time Range</p>
                 <p className="text-xl font-bold">{timeWindow / 60000}min</p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Latest Update</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Latest Update</p>
                 <p className="text-xl font-bold">
                   {chartData.length > 0 ? chartData[chartData.length - 1].time : 'N/A'}
                 </p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Chart Type</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Chart Type</p>
                 <Badge variant="outline" className="text-xl border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300">
                   {chartType.charAt(0).toUpperCase() + chartType.slice(1)}
                 </Badge>

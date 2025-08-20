@@ -148,8 +148,8 @@ export default function UserTrackingPage() {
       {/* User Tracking Stats Group */}
       <div className={cn(
         "flex items-center gap-2 px-3 rounded-md text-sm",
-        THEME.colors.background.tertiary,
-        THEME.colors.border.primary,
+        dynamicTheme.colors.background.tertiary,
+        dynamicTheme.colors.border.primary,
         "border",
         `h-[${UI_HEIGHTS.toolbar}px]`
       )}>
@@ -157,12 +157,12 @@ export default function UserTrackingPage() {
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span>{stats.active} active</span>
         </div>
-        <span className={THEME.colors.text.tertiary}>|</span>
+        <span className={dynamicTheme.colors.text.tertiary}>|</span>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-yellow-500" />
           <span>{stats.inactive} inactive</span>
         </div>
-        <span className={THEME.colors.text.tertiary}>|</span>
+        <span className={dynamicTheme.colors.text.tertiary}>|</span>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-full bg-gray-500" />
           <span>{stats.idle} idle</span>
@@ -173,17 +173,17 @@ export default function UserTrackingPage() {
 
   if (loading && !sessions.total) {
     return (
-      <div className={`flex items-center justify-center h-screen ${THEME.colors.background.primary}`}>
+      <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
         <div className="text-center">
-          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${THEME.colors.text.tertiary}`} />
-          <p className={THEME.colors.text.tertiary}>Loading user tracking data...</p>
+          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${dynamicTheme.colors.text.tertiary}`} />
+          <p className={dynamicTheme.colors.text.tertiary}>Loading user tracking data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`h-screen flex flex-col ${THEME.colors.background.primary}`}>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -191,15 +191,15 @@ export default function UserTrackingPage() {
       />
 
       {/* Main Content */}
-      <div className={`flex-1 ${DEV_LAYOUT.sectionPadding} ${THEME.colors.text.primary}`}>
+      <div className={`flex-1 ${DEV_LAYOUT.sectionPadding} ${dynamicTheme.colors.text.primary}`}>
         <div className="h-full grid grid-cols-12 gap-4">
           {/* Left Column: Sessions (8 cols) */}
           <div className="col-span-8 flex flex-col h-full">
             {/* View Mode Tabs */}
             <div className={cn(
               "flex items-center gap-2 p-2 rounded-t-lg border-b",
-              THEME.colors.background.secondary,
-              THEME.colors.border.primary
+              dynamicTheme.colors.background.secondary,
+              dynamicTheme.colors.border.primary
             )}>
               <Button
                 variant={viewMode === 'grouped' ? 'default' : 'outline'}
@@ -230,13 +230,13 @@ export default function UserTrackingPage() {
               </Button>
               
               <div className="ml-auto flex items-center gap-2">
-                <span className={cn("text-xs", THEME.colors.text.tertiary)}>
+                <span className={cn("text-xs", dynamicTheme.colors.text.tertiary)}>
                   Connection: {connectionMode}
                 </span>
                 <span className={cn(
                   "text-xs px-2 py-0.5 rounded-full",
-                  THEME.colors.background.tertiary,
-                  THEME.colors.text.secondary
+                  dynamicTheme.colors.background.tertiary,
+                  dynamicTheme.colors.text.secondary
                 )}>
                   {stats.total} total sessions
                 </span>
@@ -246,8 +246,8 @@ export default function UserTrackingPage() {
             {/* Sessions Content */}
             <div className={cn(
               "flex-1 overflow-y-auto rounded-b-lg border-x border-b p-4",
-              THEME.colors.background.secondary,
-              THEME.colors.border.primary
+              dynamicTheme.colors.background.secondary,
+              dynamicTheme.colors.border.primary
             )}>
               {error && (
                 <div className={cn(
@@ -504,7 +504,7 @@ export default function UserTrackingPage() {
                     {Object.keys(sessions.grouped).length === 0 && sessions.guests.length === 0 && (
                       <div className={cn(
                         "text-center py-12",
-                        THEME.colors.text.tertiary
+                        dynamicTheme.colors.text.tertiary
                       )}>
                         <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
                         <p className="text-lg mb-1">No Active Sessions</p>
@@ -566,8 +566,8 @@ export default function UserTrackingPage() {
             {viewMode !== 'timeline' && (
               <div className={cn(
                 "flex-1 rounded-lg border",
-                THEME.colors.background.secondary,
-                THEME.colors.border.primary
+                dynamicTheme.colors.background.secondary,
+                dynamicTheme.colors.border.primary
               )}>
                 <ActivityTimeline
                   events={events}

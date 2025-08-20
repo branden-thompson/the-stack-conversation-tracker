@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { DevHeader } from '@/components/ui/dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { RefreshCw, Download } from 'lucide-react';
-import { THEME, EVENT_TYPES, EVENT_COLORS, EVENT_LABELS, DEV_LAYOUT } from '@/lib/utils/ui-constants';
+import { EVENT_TYPES, EVENT_COLORS, EVENT_LABELS, DEV_LAYOUT } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { ConversationStatusBadge, ConversationStatusIndicator } from '@/components/ui/status-badge';
 import { SelectionEmptyState, NoDataEmptyState } from '@/components/ui/empty-state';
 import { EventTypeBadge } from '@/components/ui/event-type-badge';
@@ -54,6 +55,8 @@ const summarizePayload = (type, payload = {}) => {
 };
 
 export default function DevConvos() {
+  const dynamicTheme = useDynamicAppTheme();
+  
   const {
     loading, error, items, activeId,
     refresh, create, patch, logEvent, setActiveId,
@@ -237,7 +240,7 @@ export default function DevConvos() {
   );
 
   return (
-    <div className={`h-screen flex flex-col ${THEME.colors.background.primary}`}>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -246,17 +249,17 @@ export default function DevConvos() {
 
       {/* Main Content */}
       <div 
-        className={`flex-1 grid gap-${DEV_LAYOUT.gridGap} ${DEV_LAYOUT.sectionPadding} ${THEME.colors.text.primary} min-h-0`}
+        className={`flex-1 grid gap-${DEV_LAYOUT.gridGap} ${DEV_LAYOUT.sectionPadding} ${dynamicTheme.colors.text.primary} min-h-0`}
         style={{
           gridTemplateColumns: `${DEV_LAYOUT.leftPanelWidth} 1fr`
         }}
       >
       {/* LEFT: conversations list */}
-      <div className={`flex flex-col rounded-lg border ${THEME.colors.border.primary} overflow-hidden`}>
-        <div className={`p-3 border-b ${THEME.colors.border.primary}`}>
+      <div className={`flex flex-col rounded-lg border ${dynamicTheme.colors.border.primary} overflow-hidden`}>
+        <div className={`p-3 border-b ${dynamicTheme.colors.border.primary}`}>
           <div className="flex gap-2">
             <input
-              className={`flex-1 border rounded px-2 py-1 ${THEME.colors.background.secondary} ${THEME.colors.border.secondary}`}
+              className={`flex-1 border rounded px-2 py-1 ${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.border.secondary}`}
               placeholder="New conversation name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -274,20 +277,20 @@ export default function DevConvos() {
           </div>
         </div>
 
-        <div className={`flex-1 overflow-auto divide-y ${THEME.colors.border.primary}`}>
+        <div className={`flex-1 overflow-auto divide-y ${dynamicTheme.colors.border.primary}`}>
           {loading && <div className="p-3 text-sm">Loading…</div>}
           {error && <div className="p-3 text-sm text-red-500">{error}</div>}
           {safeItems.map((c) => (
             <div
               key={c.id}
-              className={`p-3 cursor-pointer ${selected?.id === c.id ? THEME.colors.background.tertiary : ''}`}
+              className={`p-3 cursor-pointer ${selected?.id === c.id ? dynamicTheme.colors.background.tertiary : ''}`}
               onClick={() => setSelectedId(c.id)}
             >
               <div className="flex items-center justify-between">
                 <div className="font-semibold truncate">{c.name}</div>
                 <ConversationStatusBadge status={c.status} size="s" />
               </div>
-              <div className={`text-xs ${THEME.colors.text.light} mt-1`}>
+              <div className={`text-xs ${dynamicTheme.colors.text.light} mt-1`}>
                 {new Date(c.createdAt).toLocaleString()}
               </div>
               <div className="mt-2">
@@ -331,14 +334,14 @@ export default function DevConvos() {
       </div>
 
       {/* RIGHT: details + filters up top, middle split (timeline/events), emit bar fixed at bottom */}
-      <div className={`flex flex-col rounded-lg border ${THEME.colors.border.primary} overflow-hidden min-h-0`}>
+      <div className={`flex flex-col rounded-lg border ${dynamicTheme.colors.border.primary} overflow-hidden min-h-0`}>
         {/* Details */}
-        <div className={`p-4 border-b ${THEME.colors.border.primary}`}>
+        <div className={`p-4 border-b ${dynamicTheme.colors.border.primary}`}>
           {selected ? (
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-lg font-bold">{selected.name}</div>
-                <div className={`text-xs ${THEME.colors.text.light}`}>
+                <div className={`text-xs ${dynamicTheme.colors.text.light}`}>
                   id: {selected.id}
                 </div>
               </div>
@@ -406,8 +409,8 @@ export default function DevConvos() {
         <div className="flex-1 overflow-hidden min-h-0">
           <div className={`grid ${DEV_LAYOUT.timelineEventsGrid} h-full min-h-0`}>
             {/* Timeline (left column) */}
-            <section className={`h-full flex flex-col border-r ${THEME.colors.border.primary} min-h-0`}>
-              <div className={`px-4 py-2 text-sm font-semibold border-b ${THEME.colors.border.primary} ${THEME.colors.background.tertiary} flex-shrink-0`}>Timeline</div>
+            <section className={`h-full flex flex-col border-r ${dynamicTheme.colors.border.primary} min-h-0`}>
+              <div className={`px-4 py-2 text-sm font-semibold border-b ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.background.tertiary} flex-shrink-0`}>Timeline</div>
               <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
                 {selected ? (
                   timeline.length ? (
@@ -429,11 +432,11 @@ export default function DevConvos() {
                             <div className="text-sm font-medium">
                               {typeLabel(e.type)}
                             </div>
-                            <div className={`text-xs font-mono ${THEME.colors.text.light}`}>
+                            <div className={`text-xs font-mono ${dynamicTheme.colors.text.light}`}>
                               {new Date(e.at).toLocaleString()}
                             </div>
                           </div>
-                          <div className={`text-xs ${THEME.colors.text.tertiary} mt-1`}>
+                          <div className={`text-xs ${dynamicTheme.colors.text.tertiary} mt-1`}>
                             {summarizePayload(e.type, e.payload)}
                           </div>
                         </li>
@@ -458,11 +461,11 @@ export default function DevConvos() {
 
             {/* Events (right column) */}
             <section className="h-full flex flex-col min-h-0">
-              <div className={`px-4 py-2 text-sm font-semibold border-b ${THEME.colors.border.primary} ${THEME.colors.background.tertiary} flex-shrink-0`}>Events</div>
+              <div className={`px-4 py-2 text-sm font-semibold border-b ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.background.tertiary} flex-shrink-0`}>Events</div>
               <div className="flex-1 overflow-y-auto min-h-0">
                 {selected ? (
                   filtered.length ? (
-                    <ul className={`divide-y ${THEME.colors.border.primary}`}>
+                    <ul className={`divide-y ${dynamicTheme.colors.border.primary}`}>
                       {filtered.map((e) => (
                         <li key={e.id} className="p-3">
                           <div className="flex items-center justify-between">
@@ -506,7 +509,7 @@ export default function DevConvos() {
 
         {/* EMIT BAR: fixed at bottom of right column */}
         {selected && (
-          <div className={`p-3 border-t ${THEME.colors.border.primary}`}>
+          <div className={`p-3 border-t ${dynamicTheme.colors.border.primary}`}>
             <EventActions
               eventTypes={eventTypesToEmit}
               onEmitEvent={(eventType, payload) => logEvent(selected.id, eventType, payload)}

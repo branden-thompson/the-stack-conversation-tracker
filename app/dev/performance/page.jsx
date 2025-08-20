@@ -29,7 +29,7 @@ import {
   Square,
   TrendingUp
 } from 'lucide-react';
-import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import usePerformanceMonitor from '@/lib/hooks/usePerformanceMonitor';
 
 // Performance metrics dashboard components
@@ -39,6 +39,8 @@ import HealthMonitor from './components/HealthMonitor';
 import PerformanceChart from './components/PerformanceChart';
 
 export default function PerformancePage() {
+  const dynamicTheme = useDynamicAppTheme();
+  
   const {
     isEnabled,
     summary,
@@ -84,67 +86,67 @@ export default function PerformancePage() {
   const getHealthIndicator = (status) => {
     switch (status) {
       case 'optimal':
-        return <Badge className={`${THEME.colors.status.success.bg} ${THEME.colors.status.success.border} ${THEME.colors.status.success.text}`}><CheckCircle className={`w-3 h-3 mr-1 ${THEME.colors.status.success.icon}`} />Optimal</Badge>;
+        return <Badge className={`${dynamicTheme.colors.status.success.bg} ${dynamicTheme.colors.status.success.border} ${dynamicTheme.colors.status.success.text}`}><CheckCircle className={`w-3 h-3 mr-1 ${dynamicTheme.colors.status.success.icon}`} />Optimal</Badge>;
       case 'degraded':
-        return <Badge className={`${THEME.colors.status.warning.bg} ${THEME.colors.status.warning.border} ${THEME.colors.status.warning.text}`}><AlertTriangle className={`w-3 h-3 mr-1 ${THEME.colors.status.warning.icon}`} />Degraded</Badge>;
+        return <Badge className={`${dynamicTheme.colors.status.warning.bg} ${dynamicTheme.colors.status.warning.border} ${dynamicTheme.colors.status.warning.text}`}><AlertTriangle className={`w-3 h-3 mr-1 ${dynamicTheme.colors.status.warning.icon}`} />Degraded</Badge>;
       case 'poor':
-        return <Badge className={`${THEME.colors.status.error.bg} ${THEME.colors.status.error.border} ${THEME.colors.status.error.text}`}><XCircle className={`w-3 h-3 mr-1 ${THEME.colors.status.error.icon}`} />Poor</Badge>;
+        return <Badge className={`${dynamicTheme.colors.status.error.bg} ${dynamicTheme.colors.status.error.border} ${dynamicTheme.colors.status.error.text}`}><XCircle className={`w-3 h-3 mr-1 ${dynamicTheme.colors.status.error.icon}`} />Poor</Badge>;
       default:
-        return <Badge className={`${THEME.colors.background.secondary} ${THEME.colors.border.primary} ${THEME.colors.text.tertiary}`}>Unknown</Badge>;
+        return <Badge className={`${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.text.tertiary}`}>Unknown</Badge>;
     }
   };
 
   // Quick stats component - focusing on working metrics only
   const QuickStats = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>API Response</p>
-              <p className={`text-2xl font-bold ${THEME.colors.text.primary}`}>
+              <p className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>API Response</p>
+              <p className={`text-2xl font-bold ${dynamicTheme.colors.text.primary}`}>
                 {realtimeData?.api ? `${realtimeData.api.averageResponseTime.toFixed(0)}ms` : '-'}
               </p>
-              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+              <p className={`text-xs ${dynamicTheme.colors.text.muted} mt-1`}>
                 {realtimeData?.api ? `${realtimeData.api.totalRequests} requests` : 'No data'}
               </p>
             </div>
-            <Clock className={`h-8 w-8 ${THEME.colors.status.info.icon}`} />
+            <Clock className={`h-8 w-8 ${dynamicTheme.colors.status.info.icon}`} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Memory Usage</p>
-              <p className={`text-2xl font-bold ${THEME.colors.text.primary}`}>
+              <p className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>Memory Usage</p>
+              <p className={`text-2xl font-bold ${dynamicTheme.colors.text.primary}`}>
                 {realtimeData?.memory ? `${(realtimeData.memory.currentUsage / 1048576).toFixed(1)}MB` : '-'}
               </p>
-              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+              <p className={`text-xs ${dynamicTheme.colors.text.muted} mt-1`}>
                 {realtimeData?.memory ? `Peak: ${(realtimeData.memory.peakUsage / 1048576).toFixed(1)}MB` : 'No data'}
               </p>
             </div>
-            <MemoryStick className={`h-8 w-8 ${THEME.colors.text.secondary}`} />
+            <MemoryStick className={`h-8 w-8 ${dynamicTheme.colors.text.secondary}`} />
           </div>
         </CardContent>
       </Card>
 
-      <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+      <Card className={`${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary}`}>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>System Health</p>
+              <p className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>System Health</p>
               <div className="mt-1">
                 {healthStatus ? getHealthIndicator(healthStatus.status) : <Badge variant="outline">Loading</Badge>}
               </div>
-              <p className={`text-xs ${THEME.colors.text.muted} mt-1`}>
+              <p className={`text-xs ${dynamicTheme.colors.text.muted} mt-1`}>
                 {healthStatus?.issues?.length > 0 ? `${healthStatus.issues.length} issues` : 
                  healthStatus?.warnings?.length > 0 ? `${healthStatus.warnings.length} warnings` : 'All systems normal'}
               </p>
             </div>
-            <Activity className={`h-8 w-8 ${THEME.colors.status.success.icon}`} />
+            <Activity className={`h-8 w-8 ${dynamicTheme.colors.status.success.icon}`} />
           </div>
         </CardContent>
       </Card>
@@ -153,7 +155,7 @@ export default function PerformancePage() {
 
   // Control panel component
   const ControlPanel = () => (
-    <Card className={`mb-6 ${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+    <Card className={`mb-6 ${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
@@ -220,7 +222,7 @@ export default function PerformancePage() {
             </Button>
           )}
 
-          <div className={`text-sm ${THEME.colors.text.tertiary}`}>
+          <div className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>
             Session: {summary?.sessionId?.slice(-8) || 'N/A'} | 
             Uptime: {summary?.uptime ? `${Math.round(summary.uptime / 1000)}s` : 'N/A'} |
             Metrics: {metrics?.length || 0}
@@ -233,8 +235,8 @@ export default function PerformancePage() {
           </div>
           
           {isEnabled && (!realtimeData || !realtimeData.api) && (
-            <div className={`mt-3 p-3 ${THEME.colors.status.info.bg} border ${THEME.colors.status.info.border} rounded-lg`}>
-              <p className={`text-sm ${THEME.colors.status.info.text}`}>
+            <div className={`mt-3 p-3 ${dynamicTheme.colors.status.info.bg} border ${dynamicTheme.colors.status.info.border} rounded-lg`}>
+              <p className={`text-sm ${dynamicTheme.colors.status.info.text}`}>
                 <strong>Getting Started:</strong> Performance monitoring is active and collecting data. 
                 Navigate between pages, make API calls, or use the load testing features to generate metrics. 
                 Data will appear within a few seconds of activity.
@@ -250,12 +252,12 @@ export default function PerformancePage() {
     if (!isEnabled) {
       return (
         <div className="max-w-2xl">
-          <Card className={THEME.colors.background.card + ' ' + THEME.colors.border.primary}>
+          <Card className={dynamicTheme.colors.background.card + ' ' + dynamicTheme.colors.border.primary}>
             <CardHeader>
               <CardTitle>Performance Monitoring Disabled</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm ${THEME.colors.text.tertiary} mb-4">
+              <p className={`text-sm ${dynamicTheme.colors.text.tertiary} mb-4`}>
                 Enable performance monitoring to track real-time metrics, API performance, 
                 navigation timing, and system health.
               </p>
@@ -278,11 +280,11 @@ export default function PerformancePage() {
         <QuickStats />
 
         <Tabs defaultValue="dashboard" className="space-y-4">
-          <TabsList className={`${THEME.colors.background.secondary} ${THEME.colors.border.primary} gap-3`}>
-            <TabsTrigger value="dashboard" className={`data-[state=active]:${THEME.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${THEME.colors.text.secondary} ${THEME.colors.background.hover}`}>Dashboard</TabsTrigger>
-            <TabsTrigger value="health" className={`data-[state=active]:${THEME.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${THEME.colors.text.secondary} ${THEME.colors.background.hover}`}>Health Monitor</TabsTrigger>
-            <TabsTrigger value="load-testing" className={`data-[state=active]:${THEME.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${THEME.colors.text.secondary} ${THEME.colors.background.hover}`}>Load Testing</TabsTrigger>
-            <TabsTrigger value="charts" className={`data-[state=active]:${THEME.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${THEME.colors.text.secondary} ${THEME.colors.background.hover}`}>Performance Charts</TabsTrigger>
+          <TabsList className={`${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.border.primary} gap-3`}>
+            <TabsTrigger value="dashboard" className={`data-[state=active]:${dynamicTheme.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.hover}`}>Dashboard</TabsTrigger>
+            <TabsTrigger value="health" className={`data-[state=active]:${dynamicTheme.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.hover}`}>Health Monitor</TabsTrigger>
+            <TabsTrigger value="load-testing" className={`data-[state=active]:${dynamicTheme.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.hover}`}>Load Testing</TabsTrigger>
+            <TabsTrigger value="charts" className={`data-[state=active]:${dynamicTheme.colors.background.active} data-[state=active]:text-white data-[state=inactive]:${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.hover}`}>Performance Charts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard">
@@ -290,6 +292,7 @@ export default function PerformancePage() {
               realtimeData={realtimeData}
               metrics={metrics}
               summary={summary}
+              theme={dynamicTheme}
             />
           </TabsContent>
 
@@ -357,13 +360,13 @@ export default function PerformancePage() {
             
             {/* Performance Impact Warning */}
             {overheadImpact && overheadImpact.averageCollectionTime > 5 && (
-              <Card className={`${THEME.colors.status.warning.border} ${THEME.colors.status.warning.bg}`}>
+              <Card className={`${dynamicTheme.colors.status.warning.border} ${dynamicTheme.colors.status.warning.bg}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className={`h-5 w-5 ${THEME.colors.status.warning.icon} mt-0.5`} />
+                    <AlertTriangle className={`h-5 w-5 ${dynamicTheme.colors.status.warning.icon} mt-0.5`} />
                     <div>
-                      <p className={`text-sm font-medium ${THEME.colors.status.warning.text}`}>Performance Impact Detected</p>
-                      <p className={`text-sm ${THEME.colors.status.warning.text}`}>
+                      <p className={`text-sm font-medium ${dynamicTheme.colors.status.warning.text}`}>Performance Impact Detected</p>
+                      <p className={`text-sm ${dynamicTheme.colors.status.warning.text}`}>
                         Monitoring overhead is {overheadImpact.averageCollectionTime.toFixed(2)}ms on average. 
                         {overheadImpact.averageCollectionTime > 10 ? 'Monitoring will be automatically disabled at 15ms average.' :
                          'Consider reducing metrics collection frequency or disabling detailed tracking.'}
@@ -397,7 +400,7 @@ export default function PerformancePage() {
   );
 
   return (
-    <div className={`h-screen flex flex-col ${THEME.colors.background.primary}`}>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
       <DevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -408,8 +411,8 @@ export default function PerformancePage() {
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="mb-6">
-            <h1 className={`text-3xl font-bold mb-2 ${THEME.colors.text.primary}`}>Performance Monitoring</h1>
-            <p className={`${THEME.colors.text.secondary}`}>Real-time application performance monitoring and load testing</p>
+            <h1 className={`text-3xl font-bold mb-2 ${dynamicTheme.colors.text.primary}`}>Performance Monitoring</h1>
+            <p className={`${dynamicTheme.colors.text.secondary}`}>Real-time application performance monitoring and load testing</p>
           </div>
 
           {renderContent()}
