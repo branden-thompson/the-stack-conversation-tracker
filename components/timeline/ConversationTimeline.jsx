@@ -7,7 +7,8 @@ import { Clock, Calendar, MessageCircle, List, TreePine, ChevronDown, ChevronRig
 import { transformEventsToTree } from '@/lib/utils/timelineTree';
 import { formatTime, formatDate, getTimeBetweenEvents } from '@/lib/utils/timelineFormatters';
 import { useExpansionState } from '@/lib/hooks/useExpansionState';
-import { getStatusBadgeStyles, accordionStyles, expansionButtonStyles, getEmptyStateStyles, timelineTextColors } from '@/lib/utils/timelineStyles';
+import { getStatusBadgeStyles, getAccordionStyles, getExpansionButtonStyles, getEmptyStateStyles, getTimelineTextColors } from '@/lib/utils/timelineStyles';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 
 // Accordion List View Component
@@ -20,7 +21,13 @@ function AccordionListView({ conversation, events }) {
   const { cardBranches } = treeData;
   const { isExpanded, toggleItem, expandAll, collapseAll } = useExpansionState();
   
-  const emptyStyles = getEmptyStateStyles('w-16');
+  // Get dynamic theme
+  const dynamicTheme = useDynamicAppTheme();
+  
+  // Get theme-aware styles
+  const emptyStyles = getEmptyStateStyles('w-16', dynamicTheme);
+  const accordionStyles = getAccordionStyles(dynamicTheme);
+  const expansionButtonStyles = getExpansionButtonStyles(dynamicTheme);
 
   if (cardBranches.length === 0) {
     return (

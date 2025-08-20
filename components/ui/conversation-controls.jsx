@@ -57,10 +57,10 @@ export function ConversationControls({
             {activeConversation && (
               <div className={`text-xs ${
                 activeConversation.status === 'active' 
-                  ? 'text-green-600 dark:text-green-400'
+                  ? dynamicTheme.colors.status.success.text
                   : activeConversation.status === 'paused'
-                  ? 'text-yellow-600 dark:text-yellow-400'
-                  : 'text-gray-500 dark:text-gray-400'
+                  ? dynamicTheme.colors.status.warning.text
+                  : dynamicTheme.colors.text.muted
               }`}>
                 • {activeConversation.status === 'active' 
                     ? 'Tracking' 

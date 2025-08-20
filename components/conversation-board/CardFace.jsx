@@ -27,6 +27,7 @@ import {
 import { getTypeLabel, getCardTextStyle, CARD_TEXT_STYLES } from '@/lib/utils/card-type-constants';
 import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
  * Helper function to get the next user in the assignment cycle
@@ -82,6 +83,9 @@ export function CardFace({
   const headerMinHeight = getResponsiveCardHeights(screenWidth).header;
   const footerMinHeight = getResponsiveCardHeights(screenWidth).footer;
   const railBtnSize = getControlRailDimensions(screenWidth).buttonSize;
+  
+  // Get dynamic theme
+  const dynamicTheme = useDynamicAppTheme();
   
   return (
     <div className="relative w-full h-full flex flex-col overflow-visible">
@@ -153,7 +157,7 @@ export function CardFace({
           <Button
             variant="ghost"
             size="icon"
-            className="hover:bg-blue-500/10 dark:hover:bg-blue-500/20"
+            className={dynamicTheme.colors.background.hover}
             onClick={() => {
               const nextUserId = getNextAssignedUser(assignedToUser, users);
               if (nextUserId !== null) {
@@ -173,7 +177,7 @@ export function CardFace({
           {/* Tooltip showing current assignment - positioned to the left to avoid clipping */}
           {assignedToUser && (
             <div className="absolute bottom-full right-full mr-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <div className="bg-gray-900 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+              <div className={`${dynamicTheme.colors.background.tertiary} ${dynamicTheme.colors.text.primary} ${dynamicTheme.colors.border.primary} text-xs rounded px-2 py-1 whitespace-nowrap border`}>
                 {assignedToUser.name}
               </div>
             </div>
@@ -188,8 +192,8 @@ export function CardFace({
         {...dragHandleProps}
       >
         <div className="flex items-center gap-2">
-          <GripVertical className={`${screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} text-gray-500 dark:text-gray-400`} />
-          <span className="font-extrabold tracking-wide text-gray-900 dark:text-gray-100 text-sm sm:text-base lg:text-lg">
+          <GripVertical className={`${screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} ${dynamicTheme.colors.text.muted}`} />
+          <span className={`font-extrabold tracking-wide ${dynamicTheme.colors.text.primary} text-sm sm:text-base lg:text-lg`}>
             {getTypeLabel(card?.type)}
           </span>
         </div>
@@ -217,8 +221,9 @@ export function CardFace({
               className={cn(
                 'w-full max-w-[46ch] p-1 sm:p-2 text-sm sm:text-base rounded-md border resize-none',
                 'focus:outline-none focus:ring-1',
-                'bg-white/90 border-gray-300 text-gray-800',
-                'dark:bg-gray-900/90 dark:border-gray-700 dark:text-gray-100',
+                dynamicTheme.colors.background.secondary,
+                dynamicTheme.colors.border.primary,
+                dynamicTheme.colors.text.primary,
                 'whitespace-pre-wrap break-words'
               )}
               rows={4}
