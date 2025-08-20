@@ -135,11 +135,10 @@ export class MockEventSource {
    */
   _sendMessage(data, eventType = 'message', id = null) {
     if (this.readyState === READY_STATES.OPEN) {
-      const event = new MessageEvent('message', {
+      const event = new MessageEvent(eventType, {
         data: typeof data === 'string' ? data : JSON.stringify(data),
-        type: eventType,
         lastEventId: id || '',
-        origin: new URL(this.url).origin,
+        origin: this.url.startsWith('http') ? new URL(this.url).origin : 'http://localhost:3000',
       });
       
       this.dispatchEvent(event);

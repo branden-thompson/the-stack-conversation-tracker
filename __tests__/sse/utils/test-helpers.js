@@ -422,7 +422,18 @@ export const TestSuiteHelpers = {
         }
       });
       
-      testFn(environment);
+      // Create a proxy object that provides environment access
+      const environmentProxy = {
+        get createConnection() { return (...args) => environment.createConnection(...args); },
+        get sendMessage() { return (...args) => environment.sendMessage(...args); },
+        get simulateError() { return (...args) => environment.simulateError(...args); },
+        get teardown() { return (...args) => environment.teardown(...args); },
+        get setup() { return (...args) => environment.setup(...args); },
+        get getMessageHistory() { return (...args) => environment.getMessageHistory(...args); },
+        get clearMessageHistory() { return (...args) => environment.clearMessageHistory(...args); },
+      };
+      
+      testFn(environmentProxy);
     });
   },
   
