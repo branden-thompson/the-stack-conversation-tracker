@@ -31,22 +31,6 @@
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
       "updatedAt": "2025-08-20T17:32:52.290Z"
-    },
-    {
-      "id": "c9xbohV-rs7BQqF1vSRKI",
-      "type": "question",
-      "content": "testy mc test time",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "faceUp": true,
-      "createdByUserId": "guest_7TYZhvyJ",
-      "assignedToUserId": null,
-      "createdAt": "2025-08-18T17:08:48.044Z",
-      "updatedAt": "2025-08-20T19:56:10.804Z"
     }
   ],
   "users": [
