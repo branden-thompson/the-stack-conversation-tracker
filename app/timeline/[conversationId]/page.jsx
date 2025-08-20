@@ -7,7 +7,7 @@ import { ConversationSelector } from '@/components/timeline/ConversationSelector
 import { AppHeader } from '@/components/ui/app-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { useConversations } from '@/lib/hooks/useConversations';
-import { APP_THEME, getAppThemeClasses } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { RefreshCw, Calendar, MessageCircle, List, TreePine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -21,6 +21,7 @@ function formatDate(timestamp) {
 }
 
 export default function TimelinePage() {
+  const dynamicTheme = useDynamicAppTheme();
   const params = useParams();
   const conversationId = params?.conversationId;
   
@@ -93,10 +94,10 @@ export default function TimelinePage() {
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
+      <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
         <div className="text-center">
-          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
-          <p className={APP_THEME.colors.text.tertiary}>Loading conversations...</p>
+          <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${dynamicTheme.colors.text.tertiary}`} />
+          <p className={dynamicTheme.colors.text.tertiary}>Loading conversations...</p>
         </div>
       </div>
     );
@@ -104,8 +105,8 @@ export default function TimelinePage() {
 
   if (error) {
     return (
-      <div className={`flex items-center justify-center h-screen ${APP_THEME.colors.background.primary}`}>
-        <div className="text-center text-red-600">
+      <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
+        <div className={`text-center ${dynamicTheme.colors.status.error.text}`}>
           <p className="mb-4">Error loading conversations: {error}</p>
           <Button onClick={refresh} variant="outline" className="h-10 leading-none">
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -148,35 +149,35 @@ export default function TimelinePage() {
               {/* Left: Conversation Title and Details */}
               <div className="flex items-center gap-6">
                 <div>
-                  <h1 className={`text-xl font-bold ${APP_THEME.colors.text.primary}`}>
+                  <h1 className={`text-xl font-bold ${dynamicTheme.colors.text.primary}`}>
                     {selectedConversation.name}
                   </h1>
                 </div>
                 
                 <div className="flex items-center gap-4 text-sm">
-                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
-                    <Calendar className="w-3.5 h-3.5 text-blue-500" />
-                    <span className={APP_THEME.colors.text.tertiary}>
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${dynamicTheme.colors.background.accent} rounded`}>
+                    <Calendar className={`w-3.5 h-3.5 ${dynamicTheme.colors.status.info.text}`} />
+                    <span className={dynamicTheme.colors.text.tertiary}>
                       {formatDate(selectedConversation.createdAt)}
                     </span>
                   </div>
                   
-                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
-                    <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
-                    <span className={APP_THEME.colors.text.tertiary}>
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${dynamicTheme.colors.background.accent} rounded`}>
+                    <MessageCircle className={`w-3.5 h-3.5 ${dynamicTheme.colors.status.success.text}`} />
+                    <span className={dynamicTheme.colors.text.tertiary}>
                       {events.length} events
                     </span>
                   </div>
                   
-                  <div className={`flex items-center gap-1.5 px-2 py-1 ${APP_THEME.colors.background.accent} rounded`}>
+                  <div className={`flex items-center gap-1.5 px-2 py-1 ${dynamicTheme.colors.background.accent} rounded`}>
                     <div className="relative">
                       <span className={`w-2.5 h-2.5 rounded-full flex ${
-                        selectedConversation.status === 'active' ? 'bg-green-500' :
-                        selectedConversation.status === 'paused' ? 'bg-yellow-500' :
-                        'bg-gray-500'
+                        selectedConversation.status === 'active' ? dynamicTheme.colors.status.success.bg :
+                        selectedConversation.status === 'paused' ? dynamicTheme.colors.status.warning.bg :
+                        dynamicTheme.colors.status.inactive.bg
                       }`} />
                       {selectedConversation.status === 'active' && (
-                        <span className="absolute inset-0 w-2.5 h-2.5 bg-green-400 rounded-full animate-ping opacity-40" />
+                        <span className={`absolute inset-0 w-2.5 h-2.5 ${dynamicTheme.colors.status.success.bg} rounded-full animate-ping opacity-40`} />
                       )}
                     </div>
                     <span className="text-gray-600 dark:text-gray-300 capitalize font-medium">
@@ -187,13 +188,13 @@ export default function TimelinePage() {
               </div>
 
               {/* Right: View Mode Toggle */}
-              <div className={`${APP_THEME.colors.background.tertiary} rounded-lg p-1 flex gap-1`}>
+              <div className={`${dynamicTheme.colors.background.tertiary} rounded-lg p-1 flex gap-1`}>
                 <button
                   onClick={() => setViewMode('tree')}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm ${
                     viewMode === 'tree'
-                      ? `${APP_THEME.colors.background.secondary} shadow-sm text-emerald-600 dark:text-emerald-400`
-                      : `${APP_THEME.colors.text.tertiary} hover:${APP_THEME.colors.text.secondary}`
+                      ? `${dynamicTheme.colors.background.secondary} shadow-sm text-emerald-600 dark:text-emerald-400`
+                      : `${dynamicTheme.colors.text.tertiary} hover:${dynamicTheme.colors.text.secondary}`
                   }`}
                 >
                   <TreePine className="w-4 h-4" />
@@ -203,8 +204,8 @@ export default function TimelinePage() {
                   onClick={() => setViewMode('list')}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm ${
                     viewMode === 'list'
-                      ? `${APP_THEME.colors.background.secondary} shadow-sm text-blue-600 dark:text-blue-400`
-                      : `${APP_THEME.colors.text.tertiary} hover:${APP_THEME.colors.text.secondary}`
+                      ? `${dynamicTheme.colors.background.secondary} shadow-sm text-blue-600 dark:text-blue-400`
+                      : `${dynamicTheme.colors.text.tertiary} hover:${dynamicTheme.colors.text.secondary}`
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -227,13 +228,13 @@ export default function TimelinePage() {
           ) : eventsLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${APP_THEME.colors.text.tertiary}`} />
+                <RefreshCw className={`w-8 h-8 animate-spin mx-auto mb-2 ${dynamicTheme.colors.text.tertiary}`} />
                 <p className="text-gray-600 dark:text-gray-300">Loading timeline...</p>
               </div>
             </div>
           ) : eventsError ? (
             <div className="flex items-center justify-center h-full">
-              <div className="text-center text-red-600">
+              <div className={`text-center ${dynamicTheme.colors.status.error.text}`}>
                 <p className="mb-4">{eventsError}</p>
                 <Button onClick={handleRefresh} variant="outline" className="h-10 leading-none">
                   <RefreshCw className="w-4 h-4 mr-2" />

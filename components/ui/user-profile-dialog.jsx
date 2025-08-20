@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ProfilePictureUpload } from '@/components/ui/profile-picture-upload';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { useAppTheme } from '@/lib/contexts/ThemeProvider';
 
@@ -63,6 +64,7 @@ export function UserProfileDialog({
   mode = 'edit' // 'create', 'edit', 'view'
 }) {
   const { appTheme } = useAppTheme();
+  const dynamicTheme = useDynamicAppTheme();
   const [formData, setFormData] = useState({
     name: '',
     preferences: {
@@ -484,9 +486,9 @@ export function UserProfileDialog({
                 </div>
 
                 {userStats.cardsCreated > 0 && (
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className={`p-4 ${dynamicTheme.colors.background.card} rounded-lg`}>
                     <h4 className="font-medium mb-2">Activity Summary</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className={`text-sm ${dynamicTheme.colors.text.muted}`}>
                       This user has been active in creating content and collaborating 
                       with {userStats.cardsCreated} cards created and {userStats.cardsAssigned} assignments.
                     </p>

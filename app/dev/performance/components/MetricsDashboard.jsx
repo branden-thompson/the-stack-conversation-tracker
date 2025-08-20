@@ -19,18 +19,16 @@ import {
   TrendingDown,
   Minus
 } from 'lucide-react';
-import { THEME } from '@/lib/utils/ui-constants';
-
-export default function MetricsDashboard({ realtimeData, metrics, summary }) {
+export default function MetricsDashboard({ realtimeData, metrics, summary, theme }) {
   if (!realtimeData) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+        <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
           <CardHeader>
             <CardTitle>Loading Performance Data...</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`${THEME.colors.text.tertiary}`}>Collecting metrics...</p>
+            <p className={`${theme.colors.text.tertiary}`}>Collecting metrics...</p>
           </CardContent>
         </Card>
       </div>
@@ -38,10 +36,10 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
   }
 
   const getTrendIcon = (current, previous) => {
-    if (!previous) return <Minus className={`h-4 w-4 ${THEME.colors.text.tertiary}`} />;
-    if (current > previous) return <TrendingUp className={`h-4 w-4 ${THEME.colors.status.error.icon}`} />;
-    if (current < previous) return <TrendingDown className={`h-4 w-4 ${THEME.colors.status.success.icon}`} />;
-    return <Minus className={`h-4 w-4 ${THEME.colors.text.tertiary}`} />;
+    if (!previous) return <Minus className={`h-4 w-4 ${theme.colors.text.tertiary}`} />;
+    if (current > previous) return <TrendingUp className={`h-4 w-4 ${theme.colors.status.error.icon}`} />;
+    if (current < previous) return <TrendingDown className={`h-4 w-4 ${theme.colors.status.success.icon}`} />;
+    return <Minus className={`h-4 w-4 ${theme.colors.text.tertiary}`} />;
   };
 
   const formatBytes = (bytes) => {
@@ -54,7 +52,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
 
   // API Performance Section
   const ApiPerformanceCard = () => (
-    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+    <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Network className="h-5 w-5" />
@@ -66,32 +64,32 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Average Response Time</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Average Response Time</p>
                 <p className="text-xl font-semibold">{realtimeData.api.averageResponseTime.toFixed(0)}ms</p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Total Requests</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Total Requests</p>
                 <p className="text-xl font-semibold">{realtimeData.api.totalRequests}</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Fastest Request</p>
-                <p className={`text-lg font-medium ${THEME.colors.status.success.text}`}>{realtimeData.api.fastestRequest.toFixed(0)}ms</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Fastest Request</p>
+                <p className={`text-lg font-medium ${theme.colors.status.success.text}`}>{realtimeData.api.fastestRequest.toFixed(0)}ms</p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Slowest Request</p>
-                <p className={`text-lg font-medium ${THEME.colors.status.warning.text}`}>{realtimeData.api.slowestRequest.toFixed(0)}ms</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Slowest Request</p>
+                <p className={`text-lg font-medium ${theme.colors.status.warning.text}`}>{realtimeData.api.slowestRequest.toFixed(0)}ms</p>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Error Rate</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Error Rate</p>
                 <Badge className={realtimeData.api.errorRate > 0.05 
-                  ? `${THEME.colors.status.error.bg} ${THEME.colors.status.error.border} ${THEME.colors.status.error.text}` 
-                  : `${THEME.colors.status.success.bg} ${THEME.colors.status.success.border} ${THEME.colors.status.success.text}`
+                  ? `${theme.colors.status.error.bg} ${theme.colors.status.error.border} ${theme.colors.status.error.text}` 
+                  : `${theme.colors.status.success.bg} ${theme.colors.status.success.border} ${theme.colors.status.success.text}`
                 }>
                   {(realtimeData.api.errorRate * 100).toFixed(1)}%
                 </Badge>
@@ -108,7 +106,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
                       <span className="font-mono">{endpoint}</span>
                       <div className="flex items-center gap-2">
                         <span>{stats.count} calls</span>
-                        <span className={`${THEME.colors.text.tertiary}`}>
+                        <span className={`${theme.colors.text.tertiary}`}>
                           {(stats.totalTime / stats.count).toFixed(0)}ms avg
                         </span>
                       </div>
@@ -119,7 +117,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
             )}
           </div>
         ) : (
-          <p className={`${THEME.colors.text.tertiary}`}>No API metrics available</p>
+          <p className={`${theme.colors.text.tertiary}`}>No API metrics available</p>
         )}
       </CardContent>
     </Card>
@@ -130,10 +128,10 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
   // that caused core application functionality to break. This was a root cause of API runaways
   // and card flipping problems. Keeping this as an informational card.
   const NavigationInfoCard = () => (
-    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary} opacity-75`}>
+    <Card className={`${theme.colors.background.card} ${theme.colors.border.primary} opacity-75`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MemoryStick className={`h-5 w-5 ${THEME.colors.text.tertiary}`} />
+          <MemoryStick className={`h-5 w-5 ${theme.colors.text.tertiary}`} />
           Navigation Tracking
         </CardTitle>
       </CardHeader>
@@ -142,11 +140,11 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
           <Badge variant="outline" className="bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border-orange-200 dark:border-orange-800">
             Safety Disabled
           </Badge>
-          <p className={`text-sm ${THEME.colors.text.tertiary}`}>
+          <p className={`text-sm ${theme.colors.text.tertiary}`}>
             Navigation performance tracking has been disabled to prevent system interference.
             Previous implementation caused core application features to malfunction.
           </p>
-          <div className={`text-xs ${THEME.colors.text.muted} bg-gray-50 dark:bg-gray-800 p-3 rounded`}>
+          <div className={`text-xs ${theme.colors.text.muted} bg-gray-50 dark:bg-gray-800 p-3 rounded`}>
             <strong>Focus Areas:</strong>
             <ul className="mt-1 space-y-1">
               <li>• API Performance (working reliably)</li>
@@ -161,7 +159,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
 
   // Memory Usage Section
   const MemoryUsageCard = () => (
-    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+    <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MemoryStick className="h-5 w-5" />
@@ -173,18 +171,18 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Current Usage</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Current Usage</p>
                 <p className="text-xl font-semibold">{formatBytes(realtimeData.memory.currentUsage)}</p>
               </div>
               <div>
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Peak Usage</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Peak Usage</p>
                 <p className="text-xl font-semibold">{formatBytes(realtimeData.memory.peakUsage)}</p>
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <p className={`text-sm ${THEME.colors.text.tertiary}`}>Memory Trend</p>
+                <p className={`text-sm ${theme.colors.text.tertiary}`}>Memory Trend</p>
                 <div className="flex items-center gap-1">
                   {getTrendIcon(realtimeData.memory.currentUsage, realtimeData.memory.averageUsage)}
                   <span className="text-sm">
@@ -192,7 +190,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
                   </span>
                 </div>
               </div>
-              <div className={`text-sm ${THEME.colors.text.tertiary}`}>
+              <div className={`text-sm ${theme.colors.text.tertiary}`}>
                 Average: {formatBytes(realtimeData.memory.averageUsage)} | 
                 Measurements: {realtimeData.memory.measurements}
               </div>
@@ -211,7 +209,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
             </div>
           </div>
         ) : (
-          <p className={`${THEME.colors.text.tertiary}`}>No memory metrics available</p>
+          <p className={`${theme.colors.text.tertiary}`}>No memory metrics available</p>
         )}
       </CardContent>
     </Card>
@@ -219,7 +217,7 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
 
   // System Overview Section
   const SystemOverviewCard = () => (
-    <Card className={`${THEME.colors.background.card} ${THEME.colors.border.primary}`}>
+    <Card className={`${theme.colors.background.card} ${theme.colors.border.primary}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
@@ -230,11 +228,11 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Total Metrics</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Total Metrics</p>
               <p className="text-xl font-semibold">{realtimeData.totalMetrics}</p>
             </div>
             <div>
-              <p className={`text-sm ${THEME.colors.text.tertiary}`}>Time Window</p>
+              <p className={`text-sm ${theme.colors.text.tertiary}`}>Time Window</p>
               <p className="text-xl font-semibold">{realtimeData.timeWindow / 60000}min</p>
             </div>
           </div>
@@ -255,14 +253,14 @@ export default function MetricsDashboard({ realtimeData, metrics, summary }) {
               </div>
               
               {realtimeData.monitoring.overhead && (
-                <div className={`text-xs ${THEME.colors.text.tertiary}`}>
+                <div className={`text-xs ${theme.colors.text.tertiary}`}>
                   Overhead: {realtimeData.monitoring.overhead.averageCollectionTime?.toFixed(2)}ms avg,
                   {' '}{realtimeData.monitoring.overhead.totalCollectionTime?.toFixed(0)}ms total
                 </div>
               )}
               
               {realtimeData.monitoring.sessionId && (
-                <div className={`text-xs ${THEME.colors.text.tertiary}`}>
+                <div className={`text-xs ${theme.colors.text.tertiary}`}>
                   Session: {realtimeData.monitoring.sessionId.slice(-12)}
                 </div>
               )}

@@ -289,7 +289,7 @@ function BoardInner({
   if (error) {
     return (
       <div className={`flex items-center justify-center h-screen ${dynamicTheme.colors.background.primary}`}>
-        <div className="text-center text-red-600">
+        <div className={`text-center ${dynamicTheme.colors.status.error.text}`}>
           <p className="mb-4">Error loading board: {error}</p>
           <Button onClick={refreshCards} variant="outline" className="h-10 leading-none">
             <RefreshCw className="w-4 h-4 mr-2" />
