@@ -150,18 +150,21 @@
 
 ### Level-1 Validation (SEV-0, SEV-1)
 **Requirements**: Full phase safety checks and approval gates  
+**Git Strategy**: **MANDATORY** - Work must occur in dedicated git branch  
 **Process**: AN-SOP → PLAN-SOP → DEV-SOP → PDSOP with approvals  
 **Documentation**: Complete 6-folder structure required  
 **Testing**: Comprehensive testing including cross-tab synchronization
 
 ### Level-2 Validation (SEV-2, some SEV-1)
 **Requirements**: Analysis and planning validation only  
+**Git Strategy**: Branch recommended for complex SEV-2, optional for simple SEV-2  
 **Process**: AN-SOP validation + PLAN-SOP recommendation only  
 **Documentation**: Analysis and architecture docs required  
 **Testing**: Feature-specific testing with integration verification
 
 ### Level-3 Validation (SEV-3, SEV-4, SEV-5)
 **Requirements**: No approval gates required  
+**Git Strategy**: Direct commits to main allowed for simple changes  
 **Process**: Auto-proceed with standard development workflow  
 **Documentation**: Implementation notes and hygiene tracking  
 **Testing**: Standard unit/integration testing

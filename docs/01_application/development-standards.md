@@ -36,10 +36,12 @@
 
 **Development Requirements**:
 - SEV-1 classification minimum
+- **MANDATORY**: Work must occur in dedicated git branch
 - Complete documentation structure (6-folder system)
 - Comprehensive testing including cross-tab synchronization
 - Rollback plan documented before implementation
 - Post-implementation validation across all affected features
+- Merge to main only after full verification
 
 ### Feature-Level Changes
 **Recognition Criteria**:
@@ -125,6 +127,104 @@
 - **State Management** - Clear patterns for local vs server state
 - **Data Validation** - Client and server-side validation
 - **Error Recovery** - Graceful handling of data loading failures
+
+## Git Branch Strategy
+
+### Mandatory Branch Usage
+
+#### MAJOR and APPLICATION-Level Projects
+**Requirement**: **MANDATORY** - All work must occur in dedicated git branch  
+**Rationale**: Protects main branch from experimental/high-risk changes  
+**Process**:
+1. Create descriptive branch before any implementation
+2. Complete all development work in branch
+3. Full verification and testing in branch
+4. Merge to main only after complete validation
+5. Delete branch after successful merge
+
+#### Branch Naming Conventions
+- **Feature Branches**: `feature/descriptive-name`
+- **Architecture Changes**: `arch/system-name-change`  
+- **Infrastructure Work**: `infra/infrastructure-component`
+- **Emergency Fixes**: `hotfix/issue-description`
+- **Experimental Work**: `experiment/exploration-name`
+
+**Examples**:
+- `feature/sse-real-time-collaboration`
+- `arch/theme-modularization`  
+- `infra/performance-monitoring-system`
+- `hotfix/cross-tab-sync-failure`
+- `experiment/sse-consolidation-approach`
+
+### Branch Protection Strategy
+
+#### Main Branch Protection
+- **Direct commits prohibited** for MAJOR/APPLICATION work
+- **Merge requirements**: Full verification completed in branch
+- **Testing requirements**: All tests passing in branch
+- **Documentation requirements**: Complete documentation in branch
+
+#### Branch Verification Requirements
+**Before Merge to Main**:
+1. **Functional Testing**: All features working as expected
+2. **Cross-Tab Testing**: Real-time features synchronized (if applicable)
+3. **Integration Testing**: No regression in existing functionality  
+4. **Performance Testing**: No significant performance degradation
+5. **Documentation Complete**: All required documentation updated
+6. **Rollback Plan Tested**: Verify rollback procedures work
+
+### Emergency Branch Procedures
+
+#### Crisis Situations
+- **Emergency branches allowed** for critical fixes
+- **Accelerated merge process** with immediate post-merge verification
+- **Documentation requirement**: Can be completed post-merge for true emergencies
+- **Post-crisis review**: Full analysis of emergency branch usage
+
+#### Failed Branch Handling
+- **Preserve failed work**: Keep branch for analysis
+- **Archive documentation**: Move analysis to `/docs/06_archive/`
+- **Learning extraction**: Incorporate insights into standards
+- **Clean slate**: Return to main branch for fresh approach
+
+### Branch Workflow Examples
+
+#### Successful MAJOR Project
+```bash
+# 1. Create branch
+git checkout -b feature/major-feature-name
+
+# 2. Development work (multiple commits)
+git add -A && git commit -m "Initial implementation"
+git add -A && git commit -m "Add safety controls"
+git add -A && git commit -m "Complete testing"
+
+# 3. Final verification
+# - Test all functionality
+# - Verify cross-tab sync (if applicable)
+# - Confirm no regressions
+# - Complete documentation
+
+# 4. Merge to main
+git checkout main
+git merge feature/major-feature-name
+git branch -d feature/major-feature-name
+```
+
+#### Failed Project Recovery
+```bash
+# 1. Preserve failed work
+git checkout -b archive/failed-project-name
+
+# 2. Return to main
+git checkout main
+
+# 3. Clean state verification
+# - Test all functionality works
+# - Verify no remnants of failed work
+
+# 4. Document failure (branch preserved for analysis)
+```
 
 ## Development Workflow Standards
 
