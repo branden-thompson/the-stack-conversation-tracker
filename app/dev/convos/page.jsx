@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTabVisibility } from '@/lib/hooks/useTabVisibility';
 import { useConversations } from '@/lib/hooks/useConversations';
+import { useSSECardEvents } from '@/lib/hooks/useSSECardEvents';
 import { Button } from '@/components/ui/button';
 import { DevHeader } from '@/components/ui/dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
@@ -62,6 +63,23 @@ export default function DevConvos() {
     refresh, create, patch, logEvent, setActiveId,
     listEvents, clearEvents,
   } = useConversations();
+  
+  // Real-time card events for dev/convos (enhanced intervals for development)
+  const cardEvents = useSSECardEvents({
+    enabled: true,
+    forDevPages: true, // Use 800ms intervals for faster dev feedback
+    backgroundOperation: true, // Critical: Continue in background tabs
+    onCardFlip: (flipEvent) => {
+      console.log('[DevConvos] Real-time card flip:', flipEvent);
+      // Could trigger event log entry or UI notification
+    },
+    onCardMove: (moveEvent) => {
+      console.log('[DevConvos] Real-time card move:', moveEvent);
+    },
+    onCardUpdate: (updateEvent) => {
+      console.log('[DevConvos] Real-time card update:', updateEvent);
+    }
+  });
 
   // MINIMAL HARDENING: always treat items as an array
   const safeItems = Array.isArray(items) ? items : [];

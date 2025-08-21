@@ -12,6 +12,7 @@ import { CardDialog } from './CardDialog';
 import { HelpDialog } from './HelpDialog';
 import { UserProfileDialog } from '@/components/ui/user-profile-dialog';
 import { useCards } from '@/lib/hooks/useCards';
+import { useSSECardEvents } from '@/lib/hooks/useSSECardEvents';
 import { useUserManagement } from '@/lib/hooks/useUserManagement';
 import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import { useConversationControls } from '@/lib/hooks/useConversationControls';
@@ -401,16 +402,43 @@ function BoardInner({
 }
 
 export default function Board() {
+  // Traditional card operations (create, update, delete)
   const {
-    cards,
-    loading,
-    error,
+    cards: fallbackCards,
+    loading: fallbackLoading,
+    error: fallbackError,
     createCard,
     updateCard,
     deleteCard,
     getCardsByZone,
     refreshCards,
   } = useCards();
+  
+  // Real-time card events SSE (for live collaboration)
+  const cardEvents = useSSECardEvents({
+    enabled: true,
+    forDevPages: false,
+    backgroundOperation: true,
+    onCardFlip: (flipEvent) => {
+      console.log('[Board] Card flip detected:', flipEvent);
+      // Future: Add real-time flip animations or notifications
+    },
+    onCardMove: (moveEvent) => {
+      console.log('[Board] Card move detected:', moveEvent);
+      // Future: Add real-time move animations or position updates
+    },
+    onCardUpdate: (updateEvent) => {
+      console.log('[Board] Card update detected:', updateEvent);
+      // Future: Add real-time content update animations
+    }
+  });
+  
+  // Use real-time cards if available, fallback to traditional cards
+  const cards = cardEvents.isRegistered && cardEvents.cards.length > 0 
+    ? cardEvents.cards 
+    : fallbackCards;
+  const loading = cardEvents.isRegistered ? cardEvents.loading : fallbackLoading;
+  const error = cardEvents.error || fallbackError;
 
   const {
     // User data
