@@ -79,7 +79,7 @@ export function BoardCanvas({
               <div className="flex-1 p-2 min-h-[200px]">
                 <Zone
                   zoneId="active"
-                  cards={getCardsByZone().active || []}
+                  cards={cards.filter(card => card.zone === 'active') || []}
                   onUpdateCard={onUpdateCard}
                   onDeleteCard={onDeleteCard}
                   isDraggingCard={!!activeCard}
@@ -95,7 +95,7 @@ export function BoardCanvas({
               <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="parking"
-                  cards={getCardsByZone().parking || []}
+                  cards={cards.filter(card => card.zone === 'parking') || []}
                   onUpdateCard={onUpdateCard}
                   onDeleteCard={onDeleteCard}
                   isDraggingCard={!!activeCard}
@@ -111,7 +111,7 @@ export function BoardCanvas({
               <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="resolved"
-                  cards={getCardsByZone().resolved || []}
+                  cards={cards.filter(card => card.zone === 'resolved') || []}
                   onUpdateCard={onUpdateCard}
                   onDeleteCard={onDeleteCard}
                   isDraggingCard={!!activeCard}
@@ -127,7 +127,7 @@ export function BoardCanvas({
               <div className="flex-1 p-2 min-h-[180px]">
                 <Zone
                   zoneId="unresolved"
-                  cards={getCardsByZone().unresolved || []}
+                  cards={cards.filter(card => card.zone === 'unresolved') || []}
                   onUpdateCard={onUpdateCard}
                   onDeleteCard={onDeleteCard}
                   isDraggingCard={!!activeCard}
@@ -150,7 +150,7 @@ export function BoardCanvas({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="active"
-                      cards={getCardsByZone().active || []}
+                      cards={cards.filter(card => card.zone === 'active') || []}
                       onUpdateCard={onUpdateCard}
                       onDeleteCard={onDeleteCard}
                       isDraggingCard={!!activeCard}
@@ -169,7 +169,7 @@ export function BoardCanvas({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="parking"
-                      cards={getCardsByZone().parking || []}
+                      cards={cards.filter(card => card.zone === 'parking') || []}
                       onUpdateCard={onUpdateCard}
                       onDeleteCard={onDeleteCard}
                       isDraggingCard={!!activeCard}
@@ -193,7 +193,7 @@ export function BoardCanvas({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="resolved"
-                      cards={getCardsByZone().resolved || []}
+                      cards={cards.filter(card => card.zone === 'resolved') || []}
                       onUpdateCard={onUpdateCard}
                       onDeleteCard={onDeleteCard}
                       isDraggingCard={!!activeCard}
@@ -212,7 +212,7 @@ export function BoardCanvas({
                   <div className="h-full p-2">
                     <Zone
                       zoneId="unresolved"
-                      cards={getCardsByZone().unresolved || []}
+                      cards={cards.filter(card => card.zone === 'unresolved') || []}
                       onUpdateCard={onUpdateCard}
                       onDeleteCard={onDeleteCard}
                       isDraggingCard={!!activeCard}

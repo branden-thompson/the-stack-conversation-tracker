@@ -79,6 +79,8 @@ function BoardInner({
   onCreateUser,
   onEditUser,
   onManageUsers,
+  // Render key for forcing re-renders
+  boardRenderKey,
   // Guest mode props
   isGuestMode,
   sessionTimeRemaining,
@@ -344,7 +346,8 @@ function BoardInner({
 
         {/* Board Canvas */}
         <BoardCanvas
-          layoutKey={layoutKey}
+          key={`board-${boardRenderKey}-${cards?.length || 0}-${JSON.stringify(cards?.map(c => c.id) || [])}`}
+          layoutKey={layoutKey + boardRenderKey} // Combine layout key with board render key
           cards={cards}
           getCardsByZone={getCardsByZone}
           onUpdateCard={wrappedUpdateCard}
@@ -417,7 +420,7 @@ export default function Board() {
   // Real-time card events SSE (for live collaboration)
   const cardEvents = useSSECardEvents({
     enabled: true,
-    forDevPages: false,
+    forDevPages: true, // Enable dev-page optimizations for testing
     backgroundOperation: true,
     onCardFlip: (flipEvent) => {
       console.log('[Board] Card flip detected:', flipEvent);
@@ -433,12 +436,42 @@ export default function Board() {
     }
   });
   
-  // Use real-time cards if available, fallback to traditional cards
-  const cards = cardEvents.isRegistered && cardEvents.cards.length > 0 
+  // Use real-time cards if SSE is properly registered, fallback to traditional cards
+  console.log(`[Board] 🔍 Card source decision: isRegistered=${cardEvents.isRegistered}, sseCards=${cardEvents.cards?.length || 0}, fallbackCards=${fallbackCards?.length || 0}`);
+  
+  const cards = cardEvents.isRegistered 
     ? cardEvents.cards 
     : fallbackCards;
   const loading = cardEvents.isRegistered ? cardEvents.loading : fallbackLoading;
   const error = cardEvents.error || fallbackError;
+  
+  // Debug current cards being used
+  console.log(`[Board] 💳 Final cards being rendered: count=${cards?.length || 0}, data=`, cards?.map(c => ({ id: c.id?.substring(0, 8), zone: c.zone })) || []);
+  
+  // CRITICAL: Add useEffect to track when cards prop actually changes
+  useEffect(() => {
+    console.log(`[Board] 🚨 CARDS PROP CHANGED! New count: ${cards?.length || 0}, Tab: ${document.hidden ? 'BACKGROUND' : 'FOREGROUND'}`);
+    console.log(`[Board] 🚨 Card details:`, cards?.map(c => ({ id: c.id?.substring(0, 8), zone: c.zone, type: c.type })) || []);
+  }, [cards]);
+  
+  // Force re-render when real-time updates occur (even in background tabs)
+  const [boardRenderKey, setBoardRenderKey] = useState(0);
+  
+  useEffect(() => {
+    if (cardEvents.forceRenderCount > 0) {
+      // Force a full component re-render by changing the key
+      setBoardRenderKey(prev => prev + 1);
+    }
+  }, [cardEvents.forceRenderCount]);
+  
+  // Debug logging for card data source (dev only)
+  if (process.env.NODE_ENV === 'development' && cardEvents.registrationStatus === 'rejected') {
+    console.log('[Board] SSE Registration Issue:', {
+      registrationStatus: cardEvents.registrationStatus,
+      hookId: cardEvents.hookId,
+      error: cardEvents.error
+    });
+  }
 
   const {
     // User data
@@ -484,6 +517,7 @@ export default function Board() {
         onCreateUser={handleCreateUser}
         onEditUser={handleEditUser}
         onManageUsers={handleManageUsers}
+        boardRenderKey={boardRenderKey}
         // Guest mode props
         isGuestMode={isGuestMode}
         sessionTimeRemaining={sessionTimeRemaining}

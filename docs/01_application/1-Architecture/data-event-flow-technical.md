@@ -258,31 +258,157 @@ class ErrorBoundary extends Component {
 }
 ```
 
-### SSE Integration Points (Future)
+### SSE Implementation ✅ ACTIVE
 ```javascript
-// Planned SSE event handlers
-const useSSEConnection = () => {
-  const [eventSource, setEventSource] = useState(null);
-  const queryClient = useQueryClient();
+// Active SSE implementation with multi-tab support
+const useSSECardEvents = ({
+  enabled = true,
+  forDevPages = false,
+  backgroundOperation = false,
+  onCardFlip,
+  onCardMove,
+  onCardCreate,
+  onCardUpdate,
+  onCardDelete
+}) => {
+  const [cards, setCards] = useState([]);
+  const [registrationStatus, setRegistrationStatus] = useState('idle');
+  const hookId = useRef(`sse-hook-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
   
   useEffect(() => {
-    const es = new EventSource('/api/sse/events');
+    if (!enabled) return;
     
-    es.addEventListener('card.created', (event) => {
-      const data = JSON.parse(event.data);
-      queryClient.invalidateQueries(['cards']);
-      queryClient.setQueryData(['card', data.id], data);
+    // Register with global hook registry for multi-tab coordination
+    const registry = getGlobalHookRegistry();
+    registry.register(hookId.current, {
+      endpoint: '/api/cards/events',
+      hook: 'useSSECardEvents',
+      forDevPages,
+      backgroundOperation
     });
     
-    es.addEventListener('card.updated', (event) => {
-      const data = JSON.parse(event.data);
-      queryClient.setQueryData(['card', data.id], data);
-      queryClient.invalidateQueries(['cards']);
-    });
+    const pollCards = async () => {
+      try {
+        const response = await fetch('/api/cards/events', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        const newCards = await response.json();
+        
+        // Hash-based change detection
+        const newHash = JSON.stringify(newCards.map(c => ({ id: c.id, updatedAt: c.updatedAt, zone: c.zone })));
+        if (previousHashRef.current !== newHash) {
+          setCards(newCards);
+          previousHashRef.current = newHash;
+          
+          // Emit card events to callbacks
+          const diff = calculateCardDifferences(cardsRef.current, newCards);
+          diff.forEach(change => {
+            switch(change.type) {
+              case 'created': onCardCreate?.(change); break;
+              case 'updated': onCardUpdate?.(change); break;
+              case 'moved': onCardMove?.(change); break;
+              case 'flipped': onCardFlip?.(change); break;
+              case 'deleted': onCardDelete?.(change); break;
+            }
+          });
+        }
+      } catch (error) {
+        console.error('[SSE] Polling failed:', error);
+      }
+    };
     
-    return () => es.close();
-  }, [queryClient]);
+    // Start polling at 800ms intervals for real-time feel
+    const interval = setInterval(pollCards, 800);
+    pollCards(); // Initial fetch
+    
+    return () => {
+      clearInterval(interval);
+      registry.unregister(hookId.current);
+    };
+  }, [enabled, forDevPages, backgroundOperation]);
+  
+  return {
+    cards,
+    registrationStatus,
+    isConnected: registrationStatus === 'registered'
+  };
 };
+
+// Multi-tab coordination registry
+class GlobalHookRegistry {
+  constructor() {
+    this.activeHooks = new Map(); // hookId -> registration
+  }
+  
+  register(hookId, registration) {
+    this.activeHooks.set(hookId, {
+      ...registration,
+      registeredAt: Date.now(),
+      lastActivity: Date.now()
+    });
+  }
+  
+  unregister(hookId) {
+    this.activeHooks.delete(hookId);
+  }
+  
+  getActiveHooks() {
+    return Array.from(this.activeHooks.values());
+  }
+}
+```
+
+### SSE Data Flow Architecture
+```javascript
+// Real-time data propagation pattern
+Component → useSSECardEvents → Fetch('/api/cards/events') → Hash Change Detection
+    ↓              ↓                       ↓                        ↓
+Hook Registry → 800ms Poll → JSON Response → setState(newCards) → UI Re-render
+    ↓              ↓                       ↓                        ↓
+Multi-tab → Background Tabs → Change Events → Card Callbacks → Event Emission
+```
+
+### BoardCanvas SSE Integration
+```javascript
+// Critical fix: Direct SSE data consumption
+export function BoardCanvas({ cards = [], /* other props */ }) {
+  return (
+    <div>
+      {/* FIXED: Use SSE cards directly, not getCardsByZone() */}
+      <Zone
+        zoneId="active"
+        cards={cards.filter(card => card.zone === 'active') || []}
+        /* other props */
+      />
+      <Zone
+        zoneId="parking"
+        cards={cards.filter(card => card.zone === 'parking') || []}
+        /* other props */
+      />
+      {/* Repeat for all zones */}
+    </div>
+  );
+}
+
+// Board component SSE consumption
+export function Board() {
+  const cardEvents = useSSECardEvents({
+    enabled: true,
+    forDevPages: true, // Enable background rendering
+    backgroundOperation: true,
+    onCardFlip: (event) => console.log('🔄 Card flipped:', event),
+    onCardMove: (event) => console.log('↔️ Card moved:', event),
+    // ... other callbacks
+  });
+  
+  return (
+    <BoardCanvas
+      cards={cardEvents.cards} // SSE cards, not REST cards
+      /* other props */
+    />
+  );
+}
 ```
 
 ### Memory Management Strategy
