@@ -59,6 +59,25 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
   - ✅ Good: `'0.75rem'` (direct value, since 1rem = 16px, 0.75rem = 12px)
   - Calculations are expensive and should only be used when absolutely necessary
 
+### Dev-Scripts Web Interface
+**🎨 Professional Development Tools Dashboard**
+- **Access URL**: `http://localhost:3000/dev-scripts/` (development only)
+- **Security**: Automatically blocked in production builds and Docker containers
+- **Features**: Interactive testing, visual results viewer, mobile responsive
+- **Framework**: Zero-dependency CSS with VS Code-inspired dark theme
+
+**📍 Quick Access:**
+- Master Dashboard: `/dev-scripts/`
+- Guest Avatar Testing: `/dev-scripts/test-pages/test-guest-avatar-live.html`
+- Results Viewer: `/dev-scripts/results/`
+- Generated Galleries: Run `node dev-scripts/tests/api/test-guest-avatars.js`
+
+**🔒 Security Configuration:**
+- Development: All dev-scripts accessible via Next.js API route
+- Production: Middleware and API route return 404 (tools completely hidden)
+- Docker: Automatically disabled in container environments
+- Test Access: `node dev-scripts/test-access.js`
+
 ### Documentation Guidelines
 **📁 Project Hygiene Documentation**
 - **ALWAYS** save cleanup summaries in `/docs/project-hygiene/`

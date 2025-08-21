@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visual Polish Test - Dev Scripts</title>
+  <link rel="stylesheet" href="/dev-scripts/shared/ui-framework.css">
+  <style>
+    .viewport-test {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: var(--bg-tertiary);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-accent);
+      z-index: 1000;
+    }
+    
+    .test-section {
+      margin-bottom: var(--space-2xl);
+    }
+    
+    .test-section:last-of-type {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-md);
+    }
+    
+    .test-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="dev-page">
+  <div class="viewport-test">
+    <div id="viewport-size">Loading...</div>
+  </div>
+  
+  <div class="dev-container">
+    <header class="dev-header">
+      <h1>🧪 Visual Polish Test</h1>
+      <p class="text-secondary">Testing responsive design and visual improvements</p>
+    </header>
+
+    <main class="dev-content">
+      <section class="test-section">
+        <h2>Container Structure Test</h2>
+        <div class="dev-card">
+          <h3 class="dev-card-title">✅ Proper Margins</h3>
+          <div class="dev-card-description">
+            Content should have proper spacing from browser edges and be contained within a max-width container.
+          </div>
+        </div>
+      </section>
+
+      <section class="test-section">
+        <h2>Responsive Grid Test</h2>
+        <div class="test-grid">
+          <div class="test-card">
+            <h4>Mobile</h4>
+            <p class="text-secondary">< 768px</p>
+            <div class="dev-status dev-status-info">
+              <span>📱</span>
+              Single Column
+            </div>
+          </div>
+          <div class="test-card">
+            <h4>Tablet</h4>
+            <p class="text-secondary">768px - 1280px</p>
+            <div class="dev-status dev-status-warning">
+              <span>📱</span>
+              2-3 Columns
+            </div>
+          </div>
+          <div class="test-card">
+            <h4>Desktop</h4>
+            <p class="text-secondary">> 1280px</p>
+            <div class="dev-status dev-status-success">
+              <span>🖥️</span>
+              Full Grid
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="test-section">
+        <h2>Visual Elements Test</h2>
+        <div class="dev-grid dev-grid-2">
+          <div class="dev-card">
+            <h3 class="dev-card-title">🎨 Gradient Background</h3>
+            <p>Body should have subtle gradient background that's attached to viewport.</p>
+          </div>
+          <div class="dev-card">
+            <h3 class="dev-card-title">🔲 Container Shadow</h3>
+            <p>Main container should have subtle shadow for visual distinction from background.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="test-section">
+        <h2>Spacing Verification</h2>
+        <div class="dev-card">
+          <div class="dev-status dev-status-success">
+            <span>✅</span>
+            Proper padding: 2rem desktop, 1.5rem tablet, 1rem mobile
+          </div>
+          <br>
+          <div class="dev-status dev-status-success">
+            <span>✅</span>
+            Proper margins: 1.5rem desktop, 1rem tablet, 0.75rem mobile  
+          </div>
+          <br>
+          <div class="dev-status dev-status-success">
+            <span>✅</span>
+            Max-width: 1200px with auto centering
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    function updateViewportSize() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const element = document.getElementById('viewport-size');
+      
+      let breakpoint = 'Unknown';
+      if (width >= 1280) breakpoint = 'Desktop';
+      else if (width >= 768) breakpoint = 'Tablet'; 
+      else if (width >= 480) breakpoint = 'Mobile';
+      else breakpoint = 'Small';
+      
+      element.textContent = `${width}×${height} (${breakpoint})`;
+    }
+    
+    updateViewportSize();
+    window.addEventListener('resize', updateViewportSize);
+    
+    // Add some interactive feedback
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🎨 Visual Polish Test Loaded');
+      console.log('📐 Current viewport:', window.innerWidth + '×' + window.innerHeight);
+      console.log('📱 Try resizing the window to test responsive behavior');
+    });
+  </script>
+</body>
+</html>
