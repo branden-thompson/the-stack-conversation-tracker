@@ -13,6 +13,7 @@ import { OverflowTooltip } from '@/components/ui/overflow-tooltip';
 import { useStableActiveUsers } from '@/lib/hooks/useStableActiveUsers';
 import { useSSEActiveUsers } from '@/lib/hooks/useSSEActiveUsers';
 import { useSSEActiveUsersOptimized } from '@/lib/hooks/useSSEActiveUsersOptimized';
+import { getEnvironmentConfig } from '@/lib/sse-infrastructure/config/environment-config';
 import { cn } from '@/lib/utils';
 import { APP_THEME, ANIMATION } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
@@ -54,6 +55,9 @@ const ActiveUsersDisplayComponent = ({
   const [showOverflow, setShowOverflow] = useState(false);
   const dynamicTheme = useDynamicAppTheme();
   
+  // Get environment configuration for production-safe operation
+  const envConfig = getEnvironmentConfig();
+  
   // Phase 4: Detect if we're in SSE mode by checking environment and Phase 4 status
   const isPhase4Enabled = process.env.NEXT_PUBLIC_PHASE4_SSE_ONLY === 'true' || 
                          process.env.NODE_ENV === 'development';
@@ -62,7 +66,7 @@ const ActiveUsersDisplayComponent = ({
   const useOptimizedSSE = process.env.NEXT_PUBLIC_SSE_OPTIMIZATION_TEST === 'true' || 
                          process.env.NODE_ENV === 'development';
   
-  // Phase 4: Use optimized SSE hook for testing, fallback to regular SSE, then polling
+  // CRITICAL FIX: Prevent API runaway by ensuring only one hook is active at a time
   const optimizedHookResult = useSSEActiveUsersOptimized({
     maxVisible,
     enabled: isPhase4Enabled && useOptimizedSSE
@@ -70,7 +74,7 @@ const ActiveUsersDisplayComponent = ({
   
   const sseHookResult = useSSEActiveUsers({
     maxVisible,
-    enabled: isPhase4Enabled && !useOptimizedSSE
+    enabled: isPhase4Enabled && !useOptimizedSSE // FIXED: Only enabled when optimization is OFF
   });
   
   const pollingHookResult = useStableActiveUsers({
@@ -138,7 +142,9 @@ const ActiveUsersDisplayComponent = ({
         hookUsed: isPhase4Enabled && useOptimizedSSE ? 'useSSEActiveUsersOptimized' :
                   isPhase4Enabled ? 'useSSEActiveUsers' : 'useStableActiveUsers',
         systemStatus: systemStatus || 'unknown',
-        optimization: _optimization || 'none'
+        optimization: _optimization || 'none',
+        environment: envConfig.environment.type,
+        pollingInterval: envConfig.polling.sessions
       });
     }
   }, [getPerformanceStats, connectionMode, isConnectedViaSSE, isPhase4Enabled]);
