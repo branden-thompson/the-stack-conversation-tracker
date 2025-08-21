@@ -37,6 +37,44 @@ export function UserThemeProvider({
   onThemeChange = null 
 }) {
   const { setTheme } = useTheme();
+  
+  // Disable next-themes localStorage to prevent global theme sync
+  useEffect(() => {
+    if (isUserThemeIsolationEnabled()) {
+      // Use a more targeted approach to prevent next-themes global storage
+      const themeStorageBlocker = {
+        originalSetItem: localStorage.setItem.bind(localStorage),
+        originalGetItem: localStorage.getItem.bind(localStorage)
+      };
+      
+      // Only override for the specific 'theme' key used by next-themes
+      const blockedSetItem = function(key, value) {
+        if (key === 'theme') {
+          console.log(`[UserTheme] 🚫 Blocked global theme storage: ${key} = ${value}`);
+          return; // Don't store globally
+        }
+        return themeStorageBlocker.originalSetItem(key, value);
+      };
+      
+      const blockedGetItem = function(key) {
+        if (key === 'theme') {
+          console.log(`[UserTheme] 🚫 Blocked global theme read: ${key}`);
+          return null; // Return null so next-themes doesn't use global theme
+        }
+        return themeStorageBlocker.originalGetItem(key);
+      };
+      
+      // Apply the overrides
+      localStorage.setItem = blockedSetItem;
+      localStorage.getItem = blockedGetItem;
+      
+      return () => {
+        // Restore original localStorage methods
+        localStorage.setItem = themeStorageBlocker.originalSetItem;
+        localStorage.getItem = themeStorageBlocker.originalGetItem;
+      };
+    }
+  }, []);
   const [userThemeMode, setUserThemeModeState] = useState('dark');
   const [isUserThemeLoaded, setIsUserThemeLoaded] = useState(false);
   const [lastUserId, setLastUserId] = useState(null);
@@ -114,7 +152,7 @@ export function UserThemeProvider({
         // Update next-themes
         setTheme(mode);
         
-        console.log(`[UserTheme] Set theme mode for user ${currentUser.id}: ${mode}`);
+        // console.log(`[UserTheme] ✅ SUCCESS: Set theme mode for user ${currentUser.id}: ${mode}`);
         
         // Optional callback
         if (onThemeChange) {
@@ -184,7 +222,7 @@ export function UserThemeProvider({
       
       // Only sync if this is for the current user and the change came from another tab
       if (userId === currentUser?.id && event.newValue && event.newValue !== userThemeMode) {
-        console.log(`[UserTheme] Cross-tab sync: ${userId} theme changed to ${event.newValue}`);
+        // console.log(`[UserTheme] Cross-tab sync: ${userId} theme changed to ${event.newValue}`);
         
         setUserThemeModeState(event.newValue);
         setTheme(event.newValue);

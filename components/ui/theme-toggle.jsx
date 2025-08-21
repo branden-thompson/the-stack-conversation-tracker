@@ -24,6 +24,8 @@ export function ThemeToggle() {
   // Use user-isolated theme if enabled, otherwise use next-themes
   const theme = isUserThemeIsolationEnabled() ? userTheme.theme : nextTheme;
   const setTheme = isUserThemeIsolationEnabled() ? userTheme.setTheme : setNextTheme;
+  
+  // console.log(`[ThemeToggle] 🎨 Render - Feature enabled: ${isUserThemeIsolationEnabled()}, currentUser: ${currentUser?.id}, theme: ${theme}`);
   const current = theme === 'system' ? systemTheme : theme;
 
   const iconBtnClass =
