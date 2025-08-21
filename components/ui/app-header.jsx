@@ -220,16 +220,16 @@ export function AppHeader({
                   </Button>
                 )}
 
-                {/* Help - Icon only until very wide screens */}
+                {/* Help - Icon only */}
                 {onOpenHelp && (
                   <Button
                     onClick={onOpenHelp}
                     variant="outline"
                     title="Help and keyboard shortcuts"
-                    className={`${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
+                    aria-label="Help and keyboard shortcuts"
+                    className={`${iconBtnClass} ${buttonClasses.outline}`}
                   >
                     <HelpCircle className="w-4 h-4" />
-                    <span className="hidden xl:inline xl:ml-2">Help</span>
                   </Button>
                 )}
 
@@ -239,10 +239,10 @@ export function AppHeader({
                     onClick={onRefreshCards}
                     variant="outline"
                     title="Refresh cards"
-                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
+                    aria-label="Refresh cards"
+                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline}`}
                   >
                     <RefreshCw className="w-4 h-4" />
-                    <span className="hidden xl:inline xl:ml-2">Refresh</span>
                   </Button>
                 )}
 
@@ -252,10 +252,10 @@ export function AppHeader({
                     onClick={onResetLayout}
                     variant="outline"
                     title="Reset layout to start sizes"
-                    className={`hidden lg:flex ${iconBtnClass} xl:w-auto xl:px-4 ${buttonClasses.outline}`}
+                    aria-label="Reset layout to start sizes"
+                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline}`}
                   >
                     <Maximize2 className="w-4 h-4" />
-                    <span className="hidden xl:inline xl:ml-2">Reset</span>
                   </Button>
                 )}
 
