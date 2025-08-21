@@ -65,22 +65,6 @@
       "updatedAt": "2025-08-21T01:37:45.675Z"
     },
     {
-      "id": "aiFGIFWp4l-WyloOfLt0k",
-      "type": "accusation",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "faceUp": true,
-      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
-      "assignedToUserId": null,
-      "createdAt": "2025-08-21T01:37:46.653Z",
-      "updatedAt": "2025-08-21T01:37:46.653Z"
-    },
-    {
       "id": "jfYo9UJR8yrIj5jMqisFV",
       "type": "fact",
       "content": "",
@@ -94,23 +78,7 @@
       "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
       "assignedToUserId": null,
       "createdAt": "2025-08-21T01:37:47.842Z",
-      "updatedAt": "2025-08-21T01:37:47.842Z"
-    },
-    {
-      "id": "zovwLYSZD6onwxFcqx9n8",
-      "type": "guess",
-      "content": "",
-      "zone": "active",
-      "position": {
-        "x": 10,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "faceUp": true,
-      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
-      "assignedToUserId": null,
-      "createdAt": "2025-08-21T01:37:50.681Z",
-      "updatedAt": "2025-08-21T01:37:50.681Z"
+      "updatedAt": "2025-08-21T03:21:46.902Z"
     }
   ],
   "users": [
