@@ -11,11 +11,25 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
 import { useSafetySwitch } from '@/lib/utils/safety-switches';
+import { createSSEOnlyQueryClient } from '@/lib/hooks/useSSEOnlyQueryClient';
 
 /**
  * Create Query Client with optimized settings
+ * 
+ * PHASE 4 UPDATE: Uses SSE-Only Query Client for selective polling elimination
  */
 function createQueryClient() {
+  // Check if Phase 4 SSE-Only mode is enabled
+  const phase4Enabled = process.env.NEXT_PUBLIC_PHASE4_SSE_ONLY === 'true' || 
+                       process.env.NODE_ENV === 'development';
+  
+  if (phase4Enabled) {
+    console.log('[QueryClient] Phase 4: Using SSE-Only Query Client with selective polling elimination');
+    return createSSEOnlyQueryClient();
+  }
+  
+  // Legacy Query Client (Pre-Phase 4)
+  console.log('[QueryClient] Using legacy Query Client with standard polling');
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -40,7 +54,7 @@ function createQueryClient() {
         refetchOnReconnect: true, // Refetch when network reconnects
         
         // Performance optimizations
-        refetchInterval: false, // No automatic polling by default (we'll set per-query)
+        refetchInterval: 30000, // Pre-Phase 4: Standard 30s polling for all systems
         refetchIntervalInBackground: false, // Don't poll in background
         
         // Error handling

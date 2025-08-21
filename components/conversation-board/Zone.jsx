@@ -12,7 +12,7 @@ import { useDroppable } from '@dnd-kit/core';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { CARD_ZONES as ZONES, CARD_DIMENSIONS, CARD_TYPES } from '@/lib/utils/card-type-constants';
+import { CARD_ZONES as ZONES, CARD_DIMENSIONS, TYPE_COLORS } from '@/lib/utils/card-type-constants';
 import { CARD_LAYOUT, APP_THEME } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
@@ -77,7 +77,7 @@ export function Zone({
     return Array.from(grouped.entries()).map(([type, bucket]) => ({
       type,
       cards: bucket,
-      label: CARD_TYPES?.[type]?.label ?? type,
+      label: TYPE_COLORS?.[type]?.label ?? type,
     }));
   }, [cards, effectiveOrganize]);
 
