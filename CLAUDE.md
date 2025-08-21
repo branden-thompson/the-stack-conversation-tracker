@@ -1,4 +1,12 @@
 # Claude Code Memory - Conversation Tracker Project
+**🎖️ BRTOPS ENABLED** - Military-precision development operations active
+
+## BRTOPS Integration Status
+✅ **Framework Version**: 1.0.000  
+✅ **Command Structure**: GO RCC, GO PLAN, GO CODE, GO FINAL, GO VAL, DEBRIEF  
+✅ **Guide Mode**: GUIDE AUTO (adaptive to user experience)  
+✅ **Collaboration Mode**: COLLAB (equal partnership default)  
+✅ **Quality Gates**: Enabled for all SEV levels  
 
 ## Important Project Information
 
@@ -43,13 +51,18 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 9. **React Query Migration** - Successfully migrated all hooks to React Query with safety switches (2025-08-18)
 10. **Bag n Tag Cleanup** - Deprecated legacy hooks after successful React Query migration (2025-08-18)
 11. **Synthwave84 Theme** - Implemented custom dark-mode exclusive retro-futuristic theme (2025-08-18)
+12. **User Theme Mode Isolation** - MINOR SEV-0 feature completed with per-user theme storage (2025-08-21)
+13. **BRTOPS Framework Development** - MAJOR SEV-0 system created and deployed to GitHub (2025-08-21)
 
-### Development Notes
+### Development Notes  
+**🎖️ BRTOPS PRIORITY**: When BRTOPS commands are used, they supersede all legacy terminology and workflows
+
 - NEVER NEVER NEVER add unprompted features unless you specifically ask to create them
 - When making changes, always check if files already exist before creating new ones
 - Use the existing project structure and conventions
 - Docker configuration is already set up in `/docker/` directory
 - The project uses a unified user management system for both app and dev pages
+- **Legacy Override**: "AN-SOP" → "GO RCC", "PLAN-SOP" → "GO PLAN", "DEV-SOP" → "GO CODE", "PDSOP" → "GO FINAL"
 - **Theme System**: Always use theme constants from `/lib/utils/ui-constants.js`
   - `THEME.colors.background.card` for card backgrounds in dev pages
   - `APP_THEME.colors.background.card` for card backgrounds in main app
@@ -86,9 +99,11 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 - Document all linting, build fixes, and optimization work in this folder
 - This keeps cleanup work organized and trackable over time
 
-### "Bag n Tag" Process
+### "BAG TAG" Process (BRTOPS Command)
 **🏷️ Post-Success Legacy Code Cleanup**
-When a major migration or refactor is successfully completed, use the "Bag n Tag" process:
+When a major migration or refactor is successfully completed, use the "BAG TAG" process:
+
+**BRTOPS Command**: `BAG TAG [target]` - Execute legacy code cleanup
 
 1. **Determine** if legacy code is still needed after the successful implementation
 2. **Create** `/deprecated` folders in appropriate directories (e.g., `hooks/deprecated`)
@@ -107,7 +122,7 @@ When a major migration or refactor is successfully completed, use the "Bag n Tag
 6. **Document** the process in project hygiene docs
 7. **Remember**: Files can be restored by moving them out of `/deprecated` folders if needed
 
-**Terminology**: "Bag n Tag", "Bag and Tag", or "Bag-n-Tag" all refer to this deprecation process.
+**BRTOPS Terminology**: Use "BAG TAG" command. Legacy terms ("Bag n Tag", "Bag and Tag", "Bag-n-Tag") are superseded by BRTOPS.
 
 ### Custom Theme Implementation
 **🎨 Adding New Color Themes**
@@ -127,7 +142,39 @@ When implementing custom themes, follow this established pattern:
 - Balanced approach: Maintains readability while preserving aesthetic
 - Universal application: All theme-aware elements styled consistently
 
-## Commands to Remember
+## BRTOPS Commands Available
+```
+# Phase Commands
+GO RCC        - Start Requirements & Context Collection
+GO PLAN       - Begin Strategic Planning  
+GO CODE       - Start Implementation
+GO FINAL      - Execute Quality Assurance
+GO VAL        - Begin Post-deployment Validation
+DEBRIEF       - Present findings and retrospective
+
+# Control Commands
+GOFLIGHT      - Auto-proceed to next phase
+SITREP        - Get current project status
+OPSCHECK      - Comprehensive system verification
+HOLD/RESUME   - Pause and continue work
+
+# Collaboration Commands
+HUM LEAD      - Human-led collaboration mode
+AI LEAD       - AI-led collaboration mode
+COLLAB        - Equal partnership mode
+
+# Guide Commands  
+GUIDE ACTIVE  - Full explanations and tips
+GUIDE BRIEF   - Minimal guidance
+GUIDE SILENT  - No explanations
+GUIDE AUTO    - Adaptive to experience
+
+# Process Commands
+BAG TAG       - Execute legacy code cleanup
+AAR           - Execute After Action Report
+```
+
+## Docker Commands to Remember
 ```bash
 # Build Docker container
 cd docker && docker-compose build
@@ -144,5 +191,6 @@ npm run dev
 
 ---
 
-*Last updated: 2025-08-18*
+*Last updated: 2025-08-21*
 *This file helps Claude Code remember important project details across sessions*
+*🎖️ BRTOPS Framework v1.0.000 integrated - Military-precision development operations active*
