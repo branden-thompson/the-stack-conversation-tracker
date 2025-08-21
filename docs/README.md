@@ -1,55 +1,79 @@
 # Documentation
 
 ## Overview
-This directory contains all project documentation for the Conversation Tracker application.
+This directory contains all project documentation for the Conversation Tracker application, organized according to BRTOPS v1.1.002 standards.
 
 ## Directory Structure
 
-### 📁 `/features/`
-Feature-specific documentation including:
-- Implementation details
-- Architecture decisions
-- Feature specifications
-- User guides
+### 📁 `00_standards_and_practices/` - Project Standards
+Core project standards, practices, and configuration:
+- Development standards
+- Emergency procedures
+- SEV classification guidelines
+- OPSCHECK procedures
 
-### 📁 `/project-hygiene/` ⚠️ IMPORTANT FOR AI ASSISTANTS
-**All cleanup and maintenance documentation MUST go here:**
-- Build cleanup summaries
-- Linting and error fixes
-- Performance optimizations
-- Code refactoring logs
-- Technical debt reduction
-- Security fixes
+### 📁 `01_application/` - Architecture & System Design
+System architecture, design decisions, and technical infrastructure:
+- Architecture overview and data flow
+- Performance monitoring systems
+- Development infrastructure
+- Troubleshooting guides
+- Component systems documentation
 
-**AI Instructions**: When documenting any cleanup, optimization, or hygiene activities, ALWAYS save files in `/project-hygiene/` with the naming format: `YYYY-MM-DD-description.md`
+### 📁 `02_features/` - Feature Documentation
+Feature-specific documentation using 6-folder BRTOPS structure:
+- `1-requirements/` - Requirements and user stories
+- `2-analysis/` - Risk assessment and feasibility
+- `3-architecture/` - Design and technical architecture
+- `4-development/` - Implementation logs and decisions
+- `5-debugging/` - Issue resolution and debugging
+- `6-key_learnings/` - Lessons learned and insights
 
-### 📁 `/api/` (if exists)
-API documentation and endpoint specifications
+### 📁 `03_operations/` - Operational Procedures
+Deployment, maintenance, and operational hygiene documentation:
+- Build and deployment procedures
+- Performance optimization logs
+- Cleanup and maintenance activities
+- Production monitoring
 
-### 📁 `/architecture/` (if exists)
-System architecture and design documents
+### 📁 `04_after-action-reports/` - After Action Reports
+Post-completion analysis and retrospectives:
+- Feature completion AARs
+- Project milestone reviews
+- Incident analysis and learnings
 
-## Quick Links
-- [Project Hygiene Guidelines](./project-hygiene/README.md)
-- [Expanded Guest System](./features/expanded-guest-system.md)
-- [Unified User Management](./features/unified-user-management.md)
+### 📁 `05_quality/` - Quality Assurance
+Quality standards, testing procedures, and review guidelines:
+- Testing strategies and automation
+- Quality gate definitions
+- Code review procedures
+- Security and performance checklists
 
-## For Contributors
-When adding new documentation:
-1. Place feature docs in `/features/`
-2. Place cleanup/hygiene docs in `/project-hygiene/`
-3. Use descriptive filenames
-4. Include dates in hygiene documentation
-5. Update this README with new sections as needed
+### 📁 `06_for-agents/` - AI Agent Context
+AI agent-specific documentation and context:
+- BRTOPS integration guidelines
+- Project-specific AI context
+- Terminology and procedure references
 
-## For AI Assistants
-### Critical Instructions:
-1. **Hygiene Work**: Always document in `/project-hygiene/`
-2. **Features**: Document in `/features/`
-3. **Naming**: Use `YYYY-MM-DD-` prefix for hygiene docs
-4. **Metrics**: Include before/after metrics in cleanup docs
-5. **Linking**: Update relevant READMEs when adding new docs
+### 📁 `07_archive/` - Historical Documentation
+Archived and historical project information:
+- Completed feature documentation
+- Deprecated decisions and procedures
+- Migration records
+
+## BRTOPS Integration
+
+This documentation structure follows BRTOPS v1.1.002 standards for military-precision development operations. All features use the standardized 6-folder structure for consistent documentation lifecycle management.
+
+## Navigation
+
+- Start with `/00_standards_and_practices/00-START-HERE.md` for project overview
+- Feature work: See `/02_features/{feature-name}/` for specific feature documentation
+- System understanding: Review `/01_application/architecture-overview.md`
+- Quality procedures: Check `/05_quality/README.md`
 
 ---
 
-*Last updated: 2025-08-18*
+**Documentation Standards**: BRTOPS v1.1.002  
+**Last Updated**: 2025-08-21  
+**Structure**: Universal BRTOPS project template
