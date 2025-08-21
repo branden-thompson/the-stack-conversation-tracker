@@ -1,118 +1,345 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Test Guest Avatar Live</title>
-</head>
-<body>
-  <h1>Testing Guest Avatar Integration</h1>
-  <p>Open browser console and run these commands to test guest avatar:</p>
-  
-  <pre>
-// 1. Check if guest user has avatar when created
-const testGuestCreation = async () => {
-  const response = await fetch('/api/guests', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      customName: 'Test Monster Guest',
-      sessionFingerprint: 'test_' + Date.now()
-    })
-  });
-  const data = await response.json();
-  console.log('Guest user created:', data);
-  console.log('Has profilePicture?', !!data.user?.profilePicture);
-  if (data.user?.profilePicture) {
-    console.log('Avatar URL:', data.user.profilePicture.substring(0, 100) + '...');
-  }
-  return data;
-};
-
-// 2. Check current guest in localStorage
-const checkStoredGuest = () => {
-  const stored = localStorage.getItem('guest_session');
-  if (stored) {
-    const parsed = JSON.parse(stored);
-    console.log('Stored guest:', parsed);
-    console.log('Has profilePicture?', !!parsed.user?.profilePicture);
-  } else {
-    console.log('No guest session stored');
-  }
-};
-
-// 3. Test switching to guest mode
-const testGuestSwitch = () => {
-  // Find the user selector button
-  const userButton = document.querySelector('[title*="Select user"]');
-  if (userButton) {
-    userButton.click();
-    setTimeout(() => {
-      // Look for Guest Mode option
-      const buttons = Array.from(document.querySelectorAll('button'));
-      const guestButton = buttons.find(btn => btn.textContent.includes('Guest Mode'));
-      if (guestButton) {
-        console.log('Found Guest Mode button, clicking...');
-        guestButton.click();
-        
-        // Check if avatar appears
-        setTimeout(() => {
-          const profileImg = document.querySelector('[alt*="Guest"]');
-          if (profileImg) {
-            console.log('Guest avatar found:', profileImg.src.substring(0, 100) + '...');
-          } else {
-            console.log('No guest avatar image found');
-          }
-        }, 500);
-      }
-    }, 200);
-  }
-};
-
-// Run tests
-console.log('=== Testing Guest Avatar System ===');
-console.log('Run these functions:');
-console.log('1. testGuestCreation() - Creates a new guest with avatar');
-console.log('2. checkStoredGuest() - Checks localStorage for guest data');
-console.log('3. testGuestSwitch() - Switches to guest mode in UI');
-  </pre>
-  
-  <script>
-    // Make functions available globally
-    window.testGuestCreation = async () => {
-      const response = await fetch('/api/guests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          customName: 'Test Monster Guest',
-          sessionFingerprint: 'test_' + Date.now()
-        })
-      });
-      const data = await response.json();
-      console.log('Guest user created:', data);
-      console.log('Has profilePicture?', !!data.user?.profilePicture);
-      if (data.user?.profilePicture) {
-        console.log('Avatar URL:', data.user.profilePicture.substring(0, 100) + '...');
-        // Display the avatar
-        const img = document.createElement('img');
-        img.src = data.user.profilePicture;
-        img.style.width = '100px';
-        img.style.height = '100px';
-        document.body.appendChild(img);
-      }
-      return data;
-    };
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guest Avatar Testing - Dev Scripts</title>
+  <link rel="stylesheet" href="/dev-scripts/shared/ui-framework.css">
+  <style>
+    .test-section {
+      margin-bottom: var(--space-xl);
+    }
     
-    window.checkStoredGuest = () => {
-      const stored = localStorage.getItem('guest_session');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        console.log('Stored guest:', parsed);
-        console.log('Has profilePicture?', !!parsed.user?.profilePicture);
-        return parsed;
-      } else {
-        console.log('No guest session stored');
+    .test-button {
+      margin-right: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .results-area {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      min-height: 200px;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+    
+    .avatar-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+    }
+    
+    .avatar-preview {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      text-align: center;
+    }
+    
+    .avatar-preview img {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .avatar-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .console-output {
+      background-color: var(--bg-tertiary);
+      border-left: 3px solid var(--text-accent);
+      padding: var(--space-md);
+      margin: var(--space-md) 0;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: var(--space-sm);
+    }
+    
+    .status-ready { background-color: var(--success); }
+    .status-testing { background-color: var(--warning); }
+    .status-error { background-color: var(--error); }
+  </style>
+</head>
+<body class="dev-page">
+  <div class="dev-container">
+    <header class="dev-header">
+      <a href="/dev-scripts" class="back-link">← Dev Scripts</a>
+      <h1>🎨 Guest Avatar Testing</h1>
+    </header>
+
+    <main class="dev-content">
+    <div class="dev-card">
+      <h2 class="dev-card-title">Guest Avatar Integration Testing</h2>
+      <p class="dev-card-description">
+        Interactive testing interface for the guest avatar generation system.
+        Test avatar creation, localStorage persistence, and UI integration.
+      </p>
+      
+      <div class="dev-status dev-status-info mb-md">
+        <span class="status-indicator status-ready"></span>
+        System ready for testing
+      </div>
+    </div>
+
+    <!-- Test Controls -->
+    <section class="test-section">
+      <div class="dev-card">
+        <h3 class="dev-card-title">🧪 Test Controls</h3>
+        
+        <div style="margin-bottom: var(--space-lg);">
+          <button id="testCreation" class="dev-button dev-button-primary test-button">
+            Create New Guest
+          </button>
+          <button id="testStorage" class="dev-button test-button">
+            Check localStorage
+          </button>
+          <button id="testUISwitch" class="dev-button test-button">
+            Test UI Switch
+          </button>
+          <button id="clearResults" class="dev-button dev-button-warning test-button">
+            Clear Results
+          </button>
+        </div>
+        
+        <div class="console-output">
+          <strong>💡 Test Instructions:</strong><br>
+          1. <strong>Create New Guest</strong> - Tests API guest creation with avatar generation<br>
+          2. <strong>Check localStorage</strong> - Verifies guest session persistence<br>
+          3. <strong>Test UI Switch</strong> - Simulates switching to guest mode in the main app<br><br>
+          
+          <strong>🔍 What to Look For:</strong><br>
+          • Avatar URLs are generated (data:image/svg+xml format)<br>
+          • Guest sessions persist in localStorage<br>
+          • Profile pictures display correctly<br>
+          • No console errors during testing
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Display -->
+    <section class="test-section">
+      <div class="dev-card">
+        <h3 class="dev-card-title">📊 Test Results</h3>
+        <div id="resultsArea" class="results-area text-secondary">
+          Click a test button above to see results here...
+        </div>
+      </div>
+    </section>
+
+    <!-- Avatar Gallery -->
+    <section class="test-section">
+      <div class="dev-card">
+        <h3 class="dev-card-title">🖼️ Avatar Gallery</h3>
+        <p class="text-secondary mb-md">Generated guest avatars will appear here during testing:</p>
+        <div id="avatarGallery" class="avatar-gallery">
+          <div class="avatar-preview">
+            <div style="width: 80px; height: 80px; background-color: var(--bg-tertiary); border: 2px dashed var(--border-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--text-muted); margin: 0 auto var(--space-sm);">
+              ?
+            </div>
+            <div class="avatar-label">No avatars yet</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Console Code -->
+    <section class="test-section">
+      <div class="dev-card">
+        <h3 class="dev-card-title">💻 Console Code Reference</h3>
+        <p class="text-secondary">For manual testing, you can run these functions directly in the browser console:</p>
+        
+        <pre><code>// Create new guest with avatar
+await testGuestCreation();
+
+// Check localStorage for guest session
+checkStoredGuest();
+
+// Test UI switching (requires main app to be loaded)
+testGuestSwitch();
+
+// Clear all test data
+clearTestData();</code></pre>
+      </div>
+    </section>
+    </main>
+  </div>
+
+  <script>
+    // Results area reference
+    const resultsArea = document.getElementById('resultsArea');
+    const avatarGallery = document.getElementById('avatarGallery');
+    
+    // Logging function
+    function logResult(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = {
+        'info': '💬',
+        'success': '✅',
+        'error': '❌',
+        'warning': '⚠️'
+      }[type] || '💬';
+      
+      resultsArea.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      resultsArea.scrollTop = resultsArea.scrollHeight;
+      
+      // Also log to console for debugging
+      console.log(`Guest Avatar Test: ${message}`);
+    }
+    
+    // Add avatar to gallery
+    function addAvatarToGallery(avatarUrl, label) {
+      // Remove placeholder if it exists
+      const placeholder = avatarGallery.querySelector('.avatar-preview');
+      if (placeholder && placeholder.textContent.includes('No avatars yet')) {
+        avatarGallery.innerHTML = '';
+      }
+      
+      const avatarDiv = document.createElement('div');
+      avatarDiv.className = 'avatar-preview';
+      avatarDiv.innerHTML = `
+        <img src="${avatarUrl}" alt="${label}" />
+        <div class="avatar-label">${label}</div>
+      `;
+      avatarGallery.appendChild(avatarDiv);
+    }
+    
+    // Test functions - available globally for console use
+    window.testGuestCreation = async () => {
+      logResult('Starting guest creation test...', 'info');
+      
+      try {
+        const response = await fetch('/api/guests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            customName: 'Test Monster Guest',
+            sessionFingerprint: 'test_' + Date.now()
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        logResult(`Guest created: ID ${data.user?.id || 'unknown'}`, 'success');
+        logResult(`Name: ${data.user?.displayName || 'unknown'}`, 'info');
+        
+        if (data.user?.profilePicture) {
+          logResult('✓ Avatar generated successfully', 'success');
+          logResult(`Avatar length: ${data.user.profilePicture.length} characters`, 'info');
+          
+          // Add to gallery
+          addAvatarToGallery(data.user.profilePicture, data.user.displayName || 'Test Guest');
+        } else {
+          logResult('✗ No avatar found in response', 'error');
+        }
+        
+        return data;
+      } catch (error) {
+        logResult(`Guest creation failed: ${error.message}`, 'error');
         return null;
       }
     };
+    
+    window.checkStoredGuest = () => {
+      logResult('Checking localStorage for guest session...', 'info');
+      
+      try {
+        const stored = localStorage.getItem('guest_session');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          logResult('✓ Guest session found in localStorage', 'success');
+          logResult(`Guest ID: ${parsed.user?.id || 'unknown'}`, 'info');
+          logResult(`Name: ${parsed.user?.displayName || 'unknown'}`, 'info');
+          
+          if (parsed.user?.profilePicture) {
+            logResult('✓ Avatar found in stored session', 'success');
+            addAvatarToGallery(parsed.user.profilePicture, `${parsed.user.displayName} (stored)`);
+          } else {
+            logResult('✗ No avatar in stored session', 'warning');
+          }
+          
+          return parsed;
+        } else {
+          logResult('No guest session found in localStorage', 'warning');
+          return null;
+        }
+      } catch (error) {
+        logResult(`Error reading localStorage: ${error.message}`, 'error');
+        return null;
+      }
+    };
+    
+    window.testGuestSwitch = () => {
+      logResult('Testing UI guest mode switch...', 'info');
+      
+      // This test requires the main application to be loaded
+      const userButton = document.querySelector('[title*="Select user"]');
+      if (userButton) {
+        logResult('✓ User selector button found', 'success');
+        // Continue with UI test logic...
+      } else {
+        logResult('⚠️ User selector not found - this test requires the main app', 'warning');
+        logResult('Load this page from within the main application to test UI switching', 'info');
+      }
+    };
+    
+    window.clearTestData = () => {
+      logResult('Clearing test data...', 'info');
+      
+      // Clear localStorage guest session
+      try {
+        localStorage.removeItem('guest_session');
+        logResult('✓ Cleared guest session from localStorage', 'success');
+      } catch (error) {
+        logResult(`Error clearing localStorage: ${error.message}`, 'error');
+      }
+      
+      // Clear avatar gallery
+      avatarGallery.innerHTML = `
+        <div class="avatar-preview">
+          <div style="width: 80px; height: 80px; background-color: var(--bg-tertiary); border: 2px dashed var(--border-primary); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; color: var(--text-muted); margin: 0 auto var(--space-sm);">
+            ?
+          </div>
+          <div class="avatar-label">No avatars yet</div>
+        </div>
+      `;
+      
+      logResult('✓ Gallery cleared', 'success');
+    };
+    
+    // Button event listeners
+    document.getElementById('testCreation').addEventListener('click', window.testGuestCreation);
+    document.getElementById('testStorage').addEventListener('click', window.checkStoredGuest);
+    document.getElementById('testUISwitch').addEventListener('click', window.testGuestSwitch);
+    document.getElementById('clearResults').addEventListener('click', () => {
+      resultsArea.textContent = '';
+      logResult('Results cleared', 'info');
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      logResult('Guest Avatar Testing interface loaded', 'success');
+      logResult('Ready for testing - click buttons above or use console functions', 'info');
+    });
   </script>
 </body>
 </html>

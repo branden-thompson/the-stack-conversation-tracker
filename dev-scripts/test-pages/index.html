@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Test Pages - Dev Scripts</title>
+  <link rel="stylesheet" href="/dev-scripts/shared/ui-framework.css">
+</head>
+<body class="dev-page">
+  <div class="dev-container">
+    <header class="dev-header">
+      <a href="/dev-scripts" class="back-link">← Dev Scripts</a>
+      <h1>🧪 Interactive Test Pages</h1>
+    </header>
+
+    <main class="dev-content">
+    <div class="dev-card">
+      <h2 class="dev-card-title">Interactive Testing Interfaces</h2>
+      <p class="dev-card-description">
+        Browser-based testing tools with visual interfaces and real-time feedback.
+        These pages provide interactive alternatives to console-only testing.
+      </p>
+    </div>
+
+    <!-- Available Test Pages -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">🧪</span>
+        Available Test Pages
+      </h2>
+      <div class="tool-grid">
+        <a href="/dev-scripts/test-pages/test-guest-avatar-live.html" class="tool-card tool-card-clickable">
+          <div class="tool-title">
+            <span>🎨</span>
+            Guest Avatar Testing
+          </div>
+          <div class="tool-description">
+            Interactive interface for testing guest avatar generation, localStorage persistence,
+            and UI integration with real-time feedback and visual gallery.
+          </div>
+          <div class="tool-meta">
+            <span>Interactive HTML</span>
+            <span class="dev-status dev-status-success">Ready</span>
+        </div>
+      </a>
+
+      <!-- Placeholder for additional test pages -->
+      <div class="tool-card tool-card-disabled">
+        <div class="tool-title">
+          <span>⚡</span>
+          API Test Dashboard
+        </div>
+        <div class="tool-description">
+          Visual interface for testing API endpoints, session management,
+          and system functionality. Coming in Phase 2.
+        </div>
+        <div class="tool-meta">
+          <span>Planned</span>
+          <span class="dev-status dev-status-warning">Phase 2</span>
+        </div>
+      </div>
+
+      <div class="tool-card tool-card-disabled">
+        <div class="tool-title">
+          <span>🐛</span>
+          Debug Console
+        </div>
+        <div class="tool-description">
+          Enhanced browser console interface with helper functions,
+          state inspection, and debugging utilities. Coming in Phase 2.
+        </div>
+        <div class="tool-meta">
+          <span>Planned</span>
+          <span class="dev-status dev-status-warning">Phase 2</span>
+        </div>
+      </div>
+      </div>
+    </section>
+
+    <!-- Usage Instructions -->
+    <div class="dev-card">
+      <h3 class="dev-card-title">💡 Usage Instructions</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg);">
+        <div>
+          <h4 style="color: var(--text-primary); margin-bottom: var(--space-sm);">For Developers</h4>
+          <ul style="color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: var(--space-lg);">
+            <li>Click test page links to open interactive interfaces</li>
+            <li>Use visual controls for easy testing</li>
+            <li>View results in real-time feedback areas</li>
+            <li>Access browser console for advanced debugging</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 style="color: var(--text-primary); margin-bottom: var(--space-sm);">For AI Agents</h4>
+          <ul style="color: var(--text-secondary); line-height: 1.6; margin: 0; padding-left: var(--space-lg);">
+            <li>All console functions remain available</li>
+            <li>Test functions exposed to <code>window</code> object</li>
+            <li>Programmatic access maintained</li>
+            <li>No breaking changes to existing automation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Notes -->
+    <div class="dev-card">
+      <h3 class="dev-card-title">🔧 Technical Notes</h3>
+      <p style="color: var(--text-secondary); margin-bottom: var(--space-md);">
+        These test pages are built with zero dependencies using only vanilla HTML, CSS, and JavaScript.
+        They integrate with the existing dev-scripts ecosystem while providing enhanced user experience.
+      </p>
+      
+      <div class="dev-status dev-status-info">
+        <span>💡</span>
+        All pages are mobile-responsive and work across modern browsers
+      </div>
+    </div>
+    </main>
+  </div>
+</body>
+</html>

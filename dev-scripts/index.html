@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Scripts - Development Tools</title>
+  <link rel="stylesheet" href="/dev-scripts/shared/ui-framework.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: var(--space-2xl) var(--space-lg);
+      border-bottom: 1px solid var(--border-primary);
+      margin-bottom: var(--space-xl);
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(45, 45, 48, 0.8));
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(86, 156, 214, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--space-md);
+      background: linear-gradient(135deg, var(--text-accent), var(--info));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    
+    
+    /* Page-specific hover enhancement */
+    .tool-card:hover {
+      box-shadow: var(--shadow-md), 0 0 20px rgba(86, 156, 214, 0.1);
+    }
+    
+    
+    .file-count {
+      background-color: var(--bg-tertiary);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--radius-sm);
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-lg);
+      margin: var(--space-xl) 0 var(--space-2xl) 0;
+    }
+    
+    .stat-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-accent);
+      margin-bottom: var(--space-sm);
+    }
+    
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+  </style>
+</head>
+<body class="dev-page">
+  <div class="dev-container">
+    <header class="dev-header">
+      <h1>🛠️ Dev Scripts</h1>
+      <p class="text-secondary">Development and Testing Tools</p>
+    </header>
+
+    <main class="dev-content">
+    <section class="hero">
+      <h1>Development Tools Dashboard</h1>
+      <p class="text-secondary">
+        Comprehensive collection of development scripts for testing, debugging, and system management.
+        <br>All tools are designed for both human developers and AI automation.
+      </p>
+      
+      <div class="dev-status dev-status-warning" style="margin-top: var(--space-md); display: inline-flex;">
+        <span>🔒</span>
+        Development Mode Only - Not accessible in production builds
+      </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats">
+      <div class="stat-card">
+        <div class="stat-number">44</div>
+        <div class="stat-label">Scripts Available</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">7</div>
+        <div class="stat-label">Tool Categories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">1</div>
+        <div class="stat-label">HTML Test Page</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Dependencies</div>
+      </div>
+    </section>
+
+    <!-- Setup Tools -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">⚙️</span>
+        Environment Setup
+      </h2>
+      <div class="tool-grid">
+        <a href="setup/clean-start-dev.sh" class="tool-card" onclick="return false;">
+          <div class="tool-title">🧹 Clean Development Server</div>
+          <div class="tool-description">
+            Prevents multiple npm dev server instances that split session data across different backend instances.
+            Kills existing processes and starts fresh development server.
+          </div>
+          <div class="tool-meta">
+            <span>Bash Script</span>
+            <span class="file-count">1 file</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Safety Tools -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">🛡️</span>
+        Safety & Controls
+      </h2>
+      <div class="tool-grid">
+        <div class="tool-card tool-card-disabled">
+          <div class="tool-title">Reset Safety Switches</div>
+          <div class="tool-description">
+            Resets all safety switches to their default states for optimization rollback scenarios.
+            Provides emergency reset capabilities and validation of safety system health.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Script</span>
+            <span class="file-count">2 files</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Debug Tools -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">🐛</span>
+        Debug & Troubleshooting
+      </h2>
+      <div class="tool-grid">
+        <a href="#" class="tool-card" onclick="return false;">
+          <div class="tool-title">🔬 SSE Debug Suite</div>
+          <div class="tool-description">
+            Debug optimized SSE hooks in isolation, validate API runaway prevention fixes,
+            and test hook coordination functionality.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js & Browser</span>
+            <span class="file-count">7 files</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Test Tools -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">🧪</span>
+        Testing Suite
+      </h2>
+      <div class="tool-grid">
+        <a href="/dev-scripts/test-pages/" class="tool-card tool-card-clickable">
+          <div class="tool-title">🎨 Interactive Test Pages</div>
+          <div class="tool-description">
+            Visual HTML interfaces for testing guest avatars, API endpoints, and system functionality.
+            Includes browser console helpers and live testing tools.
+          </div>
+          <div class="tool-meta">
+            <span>HTML Pages</span>
+            <span class="file-count">1 page</span>
+          </div>
+        </a>
+        
+        <a href="/dev-scripts/test-visual-polish.html" class="tool-card tool-card-clickable">
+          <div class="tool-title">✨ Visual Polish Test</div>
+          <div class="tool-description">
+            Test responsive design, container structure, and visual improvements.
+            Includes viewport size indicator and spacing verification tools.
+          </div>
+          <div class="tool-meta">
+            <span>HTML Test Page</span>
+            <span class="file-count">1 page</span>
+          </div>
+        </a>
+        
+        <div class="tool-card tool-card-disabled">
+          <div class="tool-title">API Testing</div>
+          <div class="tool-description">
+            Node.js scripts for testing API endpoints, browser sessions, guest systems, 
+            card operations, and complete application flows.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Scripts</span>
+            <span class="file-count">9 files</span>
+          </div>
+        </div>
+        
+        <a href="#" class="tool-card" onclick="return false;">
+          <div class="tool-title">🔄 Integration Testing</div>
+          <div class="tool-description">
+            Migration testing, React Query performance analysis, SSE optimizations,
+            and user session management validation.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Scripts</span>
+            <span class="file-count">12 files</span>
+          </div>
+        </a>
+        
+        <a href="#" class="tool-card" onclick="return false;">
+          <div class="tool-title">⚡ Performance Testing</div>
+          <div class="tool-description">
+            Performance monitoring system impact analysis and optimization validation.
+            Measures baseline vs monitored performance.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Scripts</span>
+            <span class="file-count">1 file</span>
+          </div>
+        </a>
+        
+        <a href="#" class="tool-card" onclick="return false;">
+          <div class="tool-title">✅ Feature Verification</div>
+          <div class="tool-description">
+            Component verification scripts for testing chart implementations,
+            coverage displays, and UI size adjustments.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Scripts</span>
+            <span class="file-count">6 files</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Utility Tools -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">🔧</span>
+        Utilities & Maintenance
+      </h2>
+      <div class="tool-grid">
+        <a href="#" class="tool-card" onclick="return false;">
+          <div class="tool-title">🗄️ Database Management</div>
+          <div class="tool-description">
+            Reset UI test data, clean simulated sessions, clear browser storage,
+            and comprehensive system cleanup utilities.
+          </div>
+          <div class="tool-meta">
+            <span>Node.js Scripts</span>
+            <span class="file-count">6 files</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Results & Data -->
+    <section class="category-section">
+      <h2 class="category-title">
+        <span class="category-icon">📊</span>
+        Results & Data
+      </h2>
+      <div class="tool-grid">
+        <a href="/dev-scripts/results/" class="tool-card tool-card-clickable">
+          <div class="tool-title">📈 Test Results Viewer</div>
+          <div class="tool-description">
+            Browse test execution results, performance comparison data,
+            migration test outcomes, and coverage reports.
+          </div>
+          <div class="tool-meta">
+            <span>JSON Data Files</span>
+            <span class="file-count">4 files</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section class="dev-card">
+      <h2 class="dev-card-title">🚀 Quick Start Guide</h2>
+      <div class="dev-card-description">
+        New to these development tools? Here are the most commonly used scripts:
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md);">
+        <div>
+          <h4>Development Setup</h4>
+          <code>./setup/clean-start-dev.sh</code>
+          <p class="text-secondary" style="font-size: 0.875rem;">Clean development server startup</p>
+        </div>
+        
+        <div>
+          <h4>API Testing</h4>
+          <code>node tests/api/test-flip-api.js</code>
+          <p class="text-secondary" style="font-size: 0.875rem;">Test card flip functionality</p>
+        </div>
+        
+        <div>
+          <h4>Visual Testing</h4>
+          <a href="/dev-scripts/test-pages/test-guest-avatar-live.html">Guest Avatar Testing</a>
+          <p class="text-secondary" style="font-size: 0.875rem;">Interactive browser-based testing</p>
+        </div>
+        
+        <div>
+          <h4>System Reset</h4>
+          <code>node safety/reset-safety-switches.js</code>
+          <p class="text-secondary" style="font-size: 0.875rem;">Reset all safety controls</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation -->
+    <section class="dev-card">
+      <h2 class="dev-card-title">📚 Documentation</h2>
+      <p>
+        For detailed information about each tool, usage instructions, and adding new scripts,
+        see the <a href="#" onclick="return false;"><strong>README.md</strong></a> file in this directory.
+      </p>
+      <div class="dev-status dev-status-info">
+        <span>💡</span>
+        All tools are designed for both human developers and AI automation
+      </div>
+    </section>
+    </main>
+  </div>
+
+  <script>
+    // Add some interactive functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add hover effects for tool cards
+      const toolCards = document.querySelectorAll('.tool-card');
+      toolCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-4px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(-2px)';
+        });
+      });
+      
+      // Add click handling for non-linked cards
+      const nonLinkedCards = document.querySelectorAll('.tool-card[onclick="return false;"]');
+      nonLinkedCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+          e.preventDefault();
+          const title = this.querySelector('.tool-title').textContent;
+          alert(`${title}\n\nThis tool category contains multiple scripts. See the file structure in the sidebar or README.md for individual script locations.`);
+        });
+      });
+      
+      // Show current time in footer
+      const now = new Date();
+      const footer = document.createElement('footer');
+      footer.style.cssText = 'text-align: center; padding: var(--space-md); color: var(--text-muted); font-size: 0.75rem; margin-top: var(--space-lg); opacity: 0.7;';
+      footer.innerHTML = `Dev Scripts Dashboard • Generated ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+      document.querySelector('.dev-container').appendChild(footer);
+    });
+  </script>
+</body>
+</html>
