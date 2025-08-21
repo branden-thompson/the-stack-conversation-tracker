@@ -10,11 +10,107 @@
         "y": 177.78515625
       },
       "stackOrder": 0,
-      "faceUp": false,
+      "faceUp": true,
       "createdByUserId": "guest_7TYZhvyJ",
       "assignedToUserId": null,
       "createdAt": "2025-08-18T17:08:47.264Z",
-      "updatedAt": "2025-08-21T01:35:23.547Z"
+      "updatedAt": "2025-08-21T01:37:28.074Z"
+    },
+    {
+      "id": "Am17UyvVJoSVhpxUmc30S",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:42.654Z",
+      "updatedAt": "2025-08-21T01:37:42.654Z"
+    },
+    {
+      "id": "-EWrcHsJDwZq6mfOYE2Hn",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:44.479Z",
+      "updatedAt": "2025-08-21T01:37:44.479Z"
+    },
+    {
+      "id": "QDDClGydm3nAbZ80Yq5ff",
+      "type": "question",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:45.675Z",
+      "updatedAt": "2025-08-21T01:37:45.675Z"
+    },
+    {
+      "id": "aiFGIFWp4l-WyloOfLt0k",
+      "type": "accusation",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:46.653Z",
+      "updatedAt": "2025-08-21T01:37:46.653Z"
+    },
+    {
+      "id": "jfYo9UJR8yrIj5jMqisFV",
+      "type": "fact",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:47.842Z",
+      "updatedAt": "2025-08-21T01:37:47.842Z"
+    },
+    {
+      "id": "zovwLYSZD6onwxFcqx9n8",
+      "type": "guess",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-21T01:37:50.681Z",
+      "updatedAt": "2025-08-21T01:37:50.681Z"
     }
   ],
   "users": [

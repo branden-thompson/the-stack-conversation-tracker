@@ -414,7 +414,7 @@ export function Phase4ValidationDashboard() {
                       </div>
                     </div>
                     <Badge variant={status === 'sse' ? 'default' : status === 'polling' ? 'secondary' : 'destructive'}>
-                      {status.toUpperCase()}
+                      {String(status).toUpperCase()}
                     </Badge>
                   </div>
                 ))}
