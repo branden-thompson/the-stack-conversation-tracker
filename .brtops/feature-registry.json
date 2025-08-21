@@ -1,0 +1,112 @@
+{
+  "registry": {
+    "lastUpdated": "2025-08-21",
+    "totalFeatures": 9,
+    "activeFeatures": 0,
+    "completedFeatures": 9
+  },
+  "features": [
+    {
+      "id": "card-flip-sse-safe-implementation",
+      "name": "Card Flip SSE Safe Implementation",
+      "status": "completed",
+      "sevLevel": "SEV-2",
+      "type": "MINOR",
+      "startDate": "2025-08-20",
+      "completedDate": "2025-08-21",
+      "path": "docs/02_features/card-flip-sse-safe-implementation/",
+      "hasAAR": false
+    },
+    {
+      "id": "dev-scripts-visual-polish",
+      "name": "Dev Scripts Visual Polish",
+      "status": "completed", 
+      "sevLevel": "SEV-4",
+      "type": "TWEAK",
+      "startDate": "2025-08-20",
+      "completedDate": "2025-08-21",
+      "path": "docs/02_features/dev-scripts-visual-polish/",
+      "hasAAR": true,
+      "aarPath": "docs/04_after-action-reports/dev-scripts-visual-polish_2025-08-21.md"
+    },
+    {
+      "id": "guest-system-expansion", 
+      "name": "Guest System Expansion",
+      "status": "completed",
+      "sevLevel": "SEV-1",
+      "type": "MAJOR",
+      "startDate": "2025-08-18",
+      "completedDate": "2025-08-19",
+      "path": "docs/02_features/guest-system-expansion/",
+      "hasAAR": false
+    },
+    {
+      "id": "react-query-migration",
+      "name": "React Query Migration",
+      "status": "completed",
+      "sevLevel": "SEV-1", 
+      "type": "MAJOR",
+      "startDate": "2025-08-18",
+      "completedDate": "2025-08-18",
+      "path": "docs/02_features/react-query-migration/",
+      "hasAAR": false
+    },
+    {
+      "id": "sse-conversation-polling-elimination",
+      "name": "SSE Conversation Polling Elimination",
+      "status": "completed",
+      "sevLevel": "SEV-2",
+      "type": "MINOR", 
+      "startDate": "2025-08-18",
+      "completedDate": "2025-08-19",
+      "path": "docs/02_features/sse-conversation-polling-elimination/",
+      "hasAAR": false
+    },
+    {
+      "id": "sse-real-time-collaboration",
+      "name": "SSE Real-Time Collaboration",
+      "status": "completed",
+      "sevLevel": "SEV-0",
+      "type": "MAJOR",
+      "startDate": "2025-08-19", 
+      "completedDate": "2025-08-21",
+      "path": "docs/02_features/sse-real-time-collaboration/",
+      "hasAAR": true,
+      "aarPath": "docs/04_after-action-reports/sse-multi-tab-synchronization_2025-08-21.md"
+    },
+    {
+      "id": "unified-user-management",
+      "name": "Unified User Management",
+      "status": "completed",
+      "sevLevel": "SEV-2",
+      "type": "MINOR",
+      "startDate": "2025-08-18",
+      "completedDate": "2025-08-18", 
+      "path": "docs/02_features/unified-user-management/",
+      "hasAAR": false
+    },
+    {
+      "id": "user-selectable-themes",
+      "name": "User Selectable Themes", 
+      "status": "completed",
+      "sevLevel": "SEV-3",
+      "type": "MINOR",
+      "startDate": "2025-08-18",
+      "completedDate": "2025-08-18",
+      "path": "docs/02_features/user-selectable-themes/",
+      "hasAAR": false
+    },
+    {
+      "id": "user-theme-mode-isolation",
+      "name": "User Theme Mode Isolation",
+      "status": "completed",
+      "sevLevel": "SEV-3", 
+      "type": "MINOR",
+      "startDate": "2025-08-20",
+      "completedDate": "2025-08-21",
+      "path": "docs/02_features/user-theme-mode-isolation/",
+      "hasAAR": true,
+      "aarPath": "docs/04_after-action-reports/user-theme-mode-isolation_2025-08-21.md"
+    }
+  ]
+}

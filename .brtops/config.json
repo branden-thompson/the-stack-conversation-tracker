@@ -1,0 +1,40 @@
+{
+  "project": {
+    "name": "conversation-tracker",
+    "type": "SOFTWARE",
+    "complexity": "COMPLEX",
+    "teamSize": "SOLO",
+    "primaryLanguage": "JavaScript",
+    "framework": "Next.js"
+  },
+  "brtops": {
+    "version": "1.1.002",
+    "guideMode": "GUIDE AUTO",
+    "collaborationMode": "COLLAB",
+    "qualityLevel": "STANDARD"
+  },
+  "structure": {
+    "features": "docs/02_features/",
+    "operations": "docs/03_operations/",
+    "aars": "docs/04_after-action-reports/",
+    "quality": "docs/05_quality/",
+    "agents": "docs/06_for-agents/",
+    "archive": "docs/07_archive/"
+  },
+  "qualityGates": {
+    "build": "npm run build",
+    "lint": "npm run lint",
+    "test": "npm test",
+    "typecheck": "npm run typecheck"
+  },
+  "hooks": {
+    "preCommit": [".brtops/hooks/pre-commit"],
+    "commitMsg": [".brtops/hooks/commit-msg"],
+    "prePush": [".brtops/hooks/pre-push"],
+    "postMerge": [".brtops/hooks/post-merge"]
+  },
+  "features": {
+    "registry": ".brtops/feature-registry.json",
+    "template": ".brtops/templates/feature-template.md"
+  }
+}
