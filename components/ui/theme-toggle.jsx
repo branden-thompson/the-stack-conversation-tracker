@@ -5,17 +5,25 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Laptop } from 'lucide-react';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
+import { useUserTheme } from '@/lib/hooks/useUserTheme';
+import { useUserManagement } from '@/lib/hooks/useUserManagement';
+import { isUserThemeIsolationEnabled } from '@/lib/utils/user-theme-storage';
 
 const TOOLBAR_H = 40; // px — keep in sync with Board header buttons
 
 export function ThemeToggle() {
-  const { theme, setTheme, systemTheme } = useTheme();
+  const { theme: nextTheme, setTheme: setNextTheme, systemTheme } = useTheme();
+  const { currentUser } = useUserManagement();
+  const userTheme = useUserTheme(currentUser);
   const [mounted, setMounted] = useState(false);
   const dynamicTheme = useDynamicAppTheme();
 
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
+  // Use user-isolated theme if enabled, otherwise use next-themes
+  const theme = isUserThemeIsolationEnabled() ? userTheme.theme : nextTheme;
+  const setTheme = isUserThemeIsolationEnabled() ? userTheme.setTheme : setNextTheme;
   const current = theme === 'system' ? systemTheme : theme;
 
   const iconBtnClass =

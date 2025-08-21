@@ -3,8 +3,10 @@
 import { ThemeProvider } from 'next-themes';
 import { GlobalSessionProvider } from '@/lib/contexts/GlobalSessionProvider';
 import { DynamicThemeProvider } from '@/lib/contexts/ThemeProvider';
+import { SafeUserThemeProvider } from '@/lib/contexts/UserThemeProvider';
 import { QueryProvider } from '@/lib/providers/query-client';
 import { useUserManagement } from '@/lib/hooks/useUserManagement';
+import { isUserThemeIsolationEnabled } from '@/lib/utils/user-theme-storage';
 
 function AppThemeWrapper({ children }) {
   const { currentUser, updateUser, updateGuestPreferences, isCurrentUserGuest } = useUserManagement();
@@ -30,7 +32,8 @@ function AppThemeWrapper({ children }) {
     }
   };
 
-  return (
+  // Enhanced theme wrapper with user theme mode isolation
+  const themeContent = (
     <DynamicThemeProvider 
       currentUser={currentUser}
       initialColorTheme="gray"
@@ -39,6 +42,20 @@ function AppThemeWrapper({ children }) {
       {children}
     </DynamicThemeProvider>
   );
+
+  // Conditional UserThemeProvider based on feature flag
+  if (isUserThemeIsolationEnabled()) {
+    return (
+      <SafeUserThemeProvider 
+        currentUser={currentUser}
+        enableCrossTabSync={true}
+      >
+        {themeContent}
+      </SafeUserThemeProvider>
+    );
+  }
+
+  return themeContent;
 }
 
 export default function Providers({ children }) {
