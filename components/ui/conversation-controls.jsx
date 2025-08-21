@@ -83,7 +83,7 @@ export function ConversationControls({
             size="sm"
             variant="outline"
             title={activeConversation?.status === 'paused' ? 'Resume conversation' : 'Start conversation'}
-            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline}`}
+            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline} ${activeConversation?.status === 'active' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <Play className="w-3 h-3" />
           </Button>
@@ -97,7 +97,7 @@ export function ConversationControls({
             size="sm"
             variant="outline"
             title="Pause conversation"
-            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline}`}
+            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline} ${activeConversation?.status !== 'active' ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <PauseIcon className="w-3 h-3" />
           </Button>
@@ -111,7 +111,7 @@ export function ConversationControls({
             size="sm"
             variant="outline"
             title="Stop conversation"
-            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline}`}
+            className={`h-[${UI_HEIGHTS.button}px] w-[${UI_HEIGHTS.button}px] p-0 leading-none ${buttonClasses.outline} ${(!activeConversation || activeConversation.status === 'stopped') ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <Square className="w-3 h-3" />
           </Button>

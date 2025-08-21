@@ -166,7 +166,7 @@ export function AppHeader({
             <Button
               variant="outline"
               size="icon"
-              className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px] ${buttonClasses.outline}`}
+              className={`h-[${TOOLBAR_H}px] w-[${TOOLBAR_H}px] ${buttonClasses.outline} cursor-pointer`}
               title="Open menu"
               onClick={onOpenTray}
             >
@@ -212,7 +212,7 @@ export function AppHeader({
                 {onOpenNewCard && (
                   <Button
                     onClick={onOpenNewCard}
-                    className={`${actionBtnClass} ${buttonClasses.default} !border-2 !${dynamicTheme.colors.border.strong}`}
+                    className={`${actionBtnClass} ${buttonClasses.default} !border-2 !${dynamicTheme.colors.border.strong} cursor-pointer`}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     <span className="hidden sm:inline">New Card</span>
@@ -227,7 +227,7 @@ export function AppHeader({
                     variant="outline"
                     title="Help and keyboard shortcuts"
                     aria-label="Help and keyboard shortcuts"
-                    className={`${iconBtnClass} ${buttonClasses.outline}`}
+                    className={`${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                   >
                     <HelpCircle className="w-4 h-4" />
                   </Button>
@@ -240,7 +240,7 @@ export function AppHeader({
                     variant="outline"
                     title="Refresh cards"
                     aria-label="Refresh cards"
-                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline}`}
+                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
@@ -253,7 +253,7 @@ export function AppHeader({
                     variant="outline"
                     title="Reset layout to start sizes"
                     aria-label="Reset layout to start sizes"
-                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline}`}
+                    className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                   >
                     <Maximize2 className="w-4 h-4" />
                   </Button>
@@ -265,7 +265,7 @@ export function AppHeader({
                     <Button
                       variant="outline"
                       title="More actions"
-                      className={`${iconBtnClass} ${buttonClasses.outline}`}
+                      className={`${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                       onClick={() => setIsAppOverflowOpen(!isAppOverflowOpen)}
                     >
                       <MoreHorizontal className="w-4 h-4" />
@@ -276,7 +276,7 @@ export function AppHeader({
                         <div className="p-1">
                           {onRefreshCards && (
                             <button
-                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
+                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 cursor-pointer`}
                               onClick={() => {
                                 onRefreshCards();
                                 setIsAppOverflowOpen(false);
@@ -288,7 +288,7 @@ export function AppHeader({
                           )}
                           {onResetLayout && (
                             <button
-                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2`}
+                              className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 cursor-pointer`}
                               onClick={() => {
                                 onResetLayout();
                                 setIsAppOverflowOpen(false);
@@ -323,7 +323,7 @@ export function AppHeader({
                       : activeConversation?.status === 'paused'
                       ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
                       : buttonClasses.outline
-                  }`}
+                  } cursor-pointer`}
                   onClick={() => setIsConversationOverflowOpen(!isConversationOverflowOpen)}
                 >
                   <MessageCircle className={`w-3 h-3 sm:w-4 sm:h-4 ${
@@ -363,7 +363,7 @@ export function AppHeader({
                         {onConversationResumeOrStart && (
                           <button
                             className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
-                              activeConversation?.status === 'active' ? 'opacity-50 cursor-not-allowed' : ''
+                              activeConversation?.status === 'active' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                             }`}
                             onClick={() => {
                               if (activeConversation?.status !== 'active') {
@@ -381,7 +381,7 @@ export function AppHeader({
                         {onConversationPause && (
                           <button
                             className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
-                              activeConversation?.status !== 'active' ? 'opacity-50 cursor-not-allowed' : ''
+                              activeConversation?.status !== 'active' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                             }`}
                             onClick={() => {
                               if (activeConversation?.status === 'active') {
@@ -399,7 +399,7 @@ export function AppHeader({
                         {onConversationStop && (
                           <button
                             className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 ${
-                              (!activeConversation || activeConversation.status === 'stopped') ? 'opacity-50 cursor-not-allowed' : ''
+                              (!activeConversation || activeConversation.status === 'stopped') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                             }`}
                             onClick={() => {
                               if (activeConversation && activeConversation.status !== 'stopped') {
