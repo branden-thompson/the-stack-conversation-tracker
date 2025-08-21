@@ -4,7 +4,7 @@
  * SSE Optimization Test Script
  * 
  * PURPOSE: Validate the new SSE infrastructure optimizations
- * USAGE: node dev-scripts/test-sse-optimizations.js
+ * USAGE: node dev-scripts/tests/integration/test-sse-optimizations.js
  */
 
 import { createOptimizationConfig, OPTIMIZATION_PATTERNS, OptimizationValidation } from '../lib/sse-infrastructure/templates/hash-optimization-patterns.js';

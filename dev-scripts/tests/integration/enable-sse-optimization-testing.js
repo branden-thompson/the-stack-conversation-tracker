@@ -4,7 +4,7 @@
  * Enable SSE Optimization Testing Script
  * 
  * PURPOSE: Enable and test the new SSE infrastructure optimizations in Active Stackers
- * USAGE: npm run test:sse-optimization (or node dev-scripts/enable-sse-optimization-testing.js)
+ * USAGE: npm run test:sse-optimization (or node dev-scripts/tests/integration/enable-sse-optimization-testing.js)
  */
 
 console.log('🚀 Enabling SSE Optimization Testing');
@@ -92,7 +92,7 @@ console.log('• If flickering persists: Check console for error messages');
 console.log('');
 
 console.log('📊 To run validation tests:');
-console.log('   node dev-scripts/test-sse-optimizations.js');
+console.log('   node dev-scripts/tests/integration/test-sse-optimizations.js');
 console.log('');
 
 console.log('🚀 Start testing by refreshing your browser and monitoring the console!');

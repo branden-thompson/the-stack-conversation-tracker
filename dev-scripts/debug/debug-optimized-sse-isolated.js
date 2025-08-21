@@ -166,7 +166,7 @@ const implementationSteps = [
   {
     step: 5,
     title: 'Integration Testing',
-    file: 'dev-scripts/test-hook-coordination.js',
+    file: 'dev-scripts/debug/test-hook-coordination.js',
     status: 'PENDING'
   }
 ];

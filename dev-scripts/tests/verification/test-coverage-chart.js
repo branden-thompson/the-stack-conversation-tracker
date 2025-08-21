@@ -1,6 +1,6 @@
 /**
  * Test script to verify the coverage chart is working
- * Run this with: node dev-scripts/test-coverage-chart.js
+ * Run this with: node dev-scripts/tests/verification/test-coverage-chart.js
  */
 
 const fetch = require('node-fetch');

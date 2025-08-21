@@ -2,7 +2,7 @@
  * Safety Switch Testing Script
  * 
  * Tests the safety switch functionality and circuit breakers
- * Run with: node dev-scripts/test-safety-switches.js
+ * Run with: node dev-scripts/safety/test-safety-switches.js
  */
 
 // Mock window and localStorage for Node environment

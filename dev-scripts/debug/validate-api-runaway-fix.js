@@ -4,7 +4,7 @@
  * API Runaway Fix Validation Script
  * 
  * PURPOSE: Validate the API runaway fixes are working correctly
- * USAGE: node dev-scripts/validate-api-runaway-fix.js
+ * USAGE: node dev-scripts/debug/validate-api-runaway-fix.js
  */
 
 import { getEnvironmentConfig, getPollingInterval } from '../lib/sse-infrastructure/config/environment-config.js';
