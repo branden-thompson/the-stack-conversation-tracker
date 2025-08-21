@@ -118,7 +118,7 @@ export default function TimelinePage() {
   }
 
   return (
-    <div className={`h-screen flex flex-col ${getAppThemeClasses('page')}`}>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
       <AppHeader
         title="Timeline Explorer"
@@ -131,7 +131,7 @@ export default function TimelinePage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Enhanced Header with All Controls */}
-        <div className={`${getAppThemeClasses('header')} px-6 py-4`}>
+        <div className={`${dynamicTheme.colors.background.secondary} px-6 py-4`}>
           {/* Top Row: Conversation Selector and Refresh */}
           <div className="flex items-center justify-between mb-4">
             <ConversationSelector 

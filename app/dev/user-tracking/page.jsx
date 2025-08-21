@@ -27,8 +27,10 @@ import {
 import { THEME, DEV_LAYOUT, UI_HEIGHTS } from '@/lib/utils/ui-constants';
 import { SESSION_STATUS } from '@/lib/utils/session-constants';
 import { cn } from '@/lib/utils';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export default function UserTrackingPage() {
+  const dynamicTheme = useDynamicAppTheme();
   const [trayOpen, setTrayOpen] = useState(false);
   const [autoActivity, setAutoActivity] = useState(true);
   const [viewMode, setViewMode] = useState('grouped'); // 'grouped' | 'list' | 'timeline'
