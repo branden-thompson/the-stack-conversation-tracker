@@ -1,5 +1,22 @@
 {
-  "cards": [],
+  "cards": [
+    {
+      "id": "unukzOU9lqM67WTdl3S1M",
+      "type": "topic",
+      "content": "Super Cool Stuff",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": "system",
+      "createdAt": "2025-08-21T15:06:19.451Z",
+      "updatedAt": "2025-08-21T15:29:29.218Z"
+    }
+  ],
   "users": [
     {
       "id": "system",

@@ -6,6 +6,11 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
   output: 'standalone',
   
+  // Feature flags
+  env: {
+    NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION: process.env.NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION || 'true',
+  },
+  
   // Performance and optimization settings
   compiler: {
     // Remove console statements in production builds
