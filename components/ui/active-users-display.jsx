@@ -6,11 +6,12 @@
 
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, memo, useRef } from 'react';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { UserProfileTooltip } from '@/components/ui/user-profile-tooltip';
 import { OverflowTooltip } from '@/components/ui/overflow-tooltip';
 import { useStableActiveUsers } from '@/lib/hooks/useStableActiveUsers';
+import { useSSEActiveUsers } from '@/lib/hooks/useSSEActiveUsers';
 import { cn } from '@/lib/utils';
 import { APP_THEME, ANIMATION } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
@@ -24,17 +25,50 @@ const DISPLAY_LIMITS = {
   '2xl': 5, // Extra large - more space available
 };
 
-export function ActiveUsersDisplay({ 
+const ActiveUsersDisplayComponent = ({ 
   className,
   size = 'sm',
   showLabel = true,
   maxVisible,
-}) {
+}) => {
+  // DEBUGGING: Track component render cycles to verify fix
+  const renderTimestamp = Date.now();
+  const renderCountRef = useRef(0);
+  const lastPropsRef = useRef({});
+  renderCountRef.current++;
+  
+  const currentProps = { className, size, showLabel, maxVisible };
+  const propsChanged = JSON.stringify(lastPropsRef.current) !== JSON.stringify(currentProps);
+  
+  console.log(`[ActiveUsersDisplayComponent] Render #${renderCountRef.current} at ${renderTimestamp}`, {
+    propsChanged,
+    currentProps,
+    lastProps: lastPropsRef.current,
+    timestamp: renderTimestamp
+  });
+  
+  lastPropsRef.current = currentProps;
+
   const [hoveredUser, setHoveredUser] = useState(null);
   const [showOverflow, setShowOverflow] = useState(false);
   const dynamicTheme = useDynamicAppTheme();
   
-  // Use optimized stable active users hook with faster polling for better UX
+  // Phase 4: Detect if we're in SSE mode by checking environment and Phase 4 status
+  const isPhase4Enabled = process.env.NEXT_PUBLIC_PHASE4_SSE_ONLY === 'true' || 
+                         process.env.NODE_ENV === 'development';
+  
+  // Phase 4: Use SSE hook when enabled, fallback to polling hook
+  const sseHookResult = useSSEActiveUsers({
+    maxVisible,
+    enabled: isPhase4Enabled
+  });
+  
+  const pollingHookResult = useStableActiveUsers({
+    maxVisible,
+    pollInterval: 5000 // Fallback polling when SSE not available
+  });
+  
+  // Select the appropriate hook result based on Phase 4 status and SSE availability
   const {
     activeUsers,
     loading,
@@ -42,20 +76,76 @@ export function ActiveUsersDisplay({
     visibleUsers,
     overflowUsers,
     hasOverflow,
-    getPerformanceStats
-  } = useStableActiveUsers({
-    maxVisible,
-    pollInterval: 2000 // Reduced from 5000ms to 2000ms for better responsiveness
-  });
+    getPerformanceStats,
+    isSSEConnected,
+    connectionMode: hookConnectionMode,
+    trackActivity
+  } = isPhase4Enabled ? sseHookResult : pollingHookResult;
   
-  // Performance monitoring - disabled by default
+  // DEBUGGING: Track hook result changes to verify SSE still works after timer fix
+  const hookResultRef = useRef(null);
+  const currentHookResult = {
+    activeUsersCount: activeUsers.length,
+    loading,
+    error: error?.message || null,
+    visibleUsersCount: visibleUsers.length,
+    overflowUsersCount: overflowUsers.length,
+    hasOverflow,
+    isSSEConnected,
+    connectionMode: hookConnectionMode
+  };
+  const hookResultHash = JSON.stringify(currentHookResult);
+  const hookResultChanged = hookResultRef.current !== hookResultHash;
+  
+  if (hookResultChanged) {
+    console.log(`[ActiveUsersDisplayComponent] Hook result changed`, {
+      renderCount: renderCountRef.current,
+      oldResult: hookResultRef.current ? JSON.parse(hookResultRef.current) : null,
+      newResult: currentHookResult,
+      timestamp: renderTimestamp
+    });
+    hookResultRef.current = hookResultHash;
+  }
+  
+  const connectionMode = hookConnectionMode || 'polling-fallback';
+  const isConnectedViaSSE = isSSEConnected || false;
+  
+  // Performance monitoring with Phase 4 SSE tracking
   const logPerformanceStats = useCallback(() => {
-    // Performance stats can be accessed via getPerformanceStats() if needed
-  }, [getPerformanceStats]);
+    if (process.env.NODE_ENV === 'development') {
+      const stats = getPerformanceStats();
+      console.log('[ActiveUsersDisplay] Performance Stats:', {
+        ...stats,
+        connectionMode,
+        isSSEConnected: isConnectedViaSSE,
+        phase4Enabled: isPhase4Enabled,
+        hookUsed: isPhase4Enabled ? 'useSSEActiveUsers' : 'useStableActiveUsers'
+      });
+    }
+  }, [getPerformanceStats, connectionMode, isConnectedViaSSE, isPhase4Enabled]);
   
-  // Optional: Log performance stats periodically (can be removed)
+  // Track user interactions for session activity
+  const handleUserInteraction = useCallback((user, action = 'hover') => {
+    // Phase 4: Use trackActivity if available from SSE hook, otherwise log for debugging
+    if (trackActivity && typeof trackActivity === 'function') {
+      trackActivity(`active-users-${action}`);
+    } else if (process.env.NODE_ENV === 'development') {
+      console.log(`[ActiveUsersDisplay] User interaction: ${action} for user ${user.name} (${connectionMode})`);
+    }
+    
+    if (action === 'hover') {
+      setHoveredUser(user);
+    }
+  }, [trackActivity, connectionMode]);
+  
+  // Log performance stats only when meaningful changes occur
+  const prevUserCountRef = useRef(activeUsers.length);
   useMemo(() => {
-    logPerformanceStats();
+    // Only log if user count actually changed
+    if (prevUserCountRef.current !== activeUsers.length) {
+      prevUserCountRef.current = activeUsers.length;
+      logPerformanceStats();
+    }
   }, [activeUsers.length, logPerformanceStats]);
   
   // Don't render if no active users or in error state
@@ -70,13 +160,19 @@ export function ActiveUsersDisplay({
     )}>
       {/* Label */}
       {showLabel && (
-        <div className="flex items-start">
+        <div className="flex items-center gap-1.5">
           <span className={cn(
             "text-xs font-medium",
             dynamicTheme.colors.text.tertiary
           )}>
             Active Stackers:
           </span>
+          {/* Phase 4: Connection mode indicator */}
+          <div className={cn(
+            "w-1.5 h-1.5 rounded-full",
+            isConnectedViaSSE ? "bg-green-500" : "bg-yellow-500"
+          )} 
+          title={`Phase 4: ${connectionMode.toUpperCase()} mode | ${isPhase4Enabled ? 'SSE Hook' : 'Polling Hook'}`} />
         </div>
       )}
       
@@ -86,7 +182,7 @@ export function ActiveUsersDisplay({
           <div
             key={user._stableKey || user.id}
             className="relative"
-            onMouseEnter={() => setHoveredUser(user)}
+            onMouseEnter={() => handleUserInteraction(user, 'hover')}
             onMouseLeave={() => setHoveredUser(null)}
           >
             <ProfilePicture
@@ -145,4 +241,28 @@ export function ActiveUsersDisplay({
       </div>
     </div>
   );
-}
+};
+
+// Memoize the component to prevent unnecessary re-renders
+export const ActiveUsersDisplay = memo(ActiveUsersDisplayComponent, (prevProps, nextProps) => {
+  // Deep debugging: Log every comparison attempt
+  const propsChanged = !(
+    prevProps.className === nextProps.className &&
+    prevProps.size === nextProps.size &&
+    prevProps.showLabel === nextProps.showLabel &&
+    prevProps.maxVisible === nextProps.maxVisible
+  );
+  
+  if (propsChanged) {
+    console.log('[ActiveUsersDisplay] Props changed, re-rendering:', {
+      className: { prev: prevProps.className, next: nextProps.className, changed: prevProps.className !== nextProps.className },
+      size: { prev: prevProps.size, next: nextProps.size, changed: prevProps.size !== nextProps.size },
+      showLabel: { prev: prevProps.showLabel, next: nextProps.showLabel, changed: prevProps.showLabel !== nextProps.showLabel },
+      maxVisible: { prev: prevProps.maxVisible, next: nextProps.maxVisible, changed: prevProps.maxVisible !== nextProps.maxVisible }
+    });
+  } else {
+    console.log('[ActiveUsersDisplay] Props identical, preventing re-render');
+  }
+  
+  return !propsChanged;
+});

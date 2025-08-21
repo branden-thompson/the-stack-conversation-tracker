@@ -89,6 +89,18 @@ export function AppHeader({
   showAppActions = true,
   showUserContext = true,
 }) {
+  // DEBUGGING: Track AppHeader render cycles to verify fix
+  const renderTimestamp = Date.now();
+  const renderCountRef = useRef(0);
+  renderCountRef.current++;
+  
+  console.log(`[AppHeader] Render #${renderCountRef.current} at ${renderTimestamp}`, {
+    activeConversation: activeConversation?.id || 'none',
+    runtime,
+    userCount: users.length,
+    currentUserId: currentUser?.id || 'none',
+    timestamp: renderTimestamp
+  });
   // Overflow menu state
   const [isAppOverflowOpen, setIsAppOverflowOpen] = useState(false);
   const [isConversationOverflowOpen, setIsConversationOverflowOpen] = useState(false);
