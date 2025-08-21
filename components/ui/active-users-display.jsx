@@ -95,7 +95,8 @@ const ActiveUsersDisplayComponent = ({
     trackActivity,
     runOptimizationTests,
     systemStatus,
-    _optimization
+    _optimization,
+    _hookRegistry
   } = isPhase4Enabled && useOptimizedSSE ? optimizedHookResult :
       isPhase4Enabled ? sseHookResult : pollingHookResult;
   
@@ -109,7 +110,9 @@ const ActiveUsersDisplayComponent = ({
     overflowUsersCount: overflowUsers.length,
     hasOverflow,
     isSSEConnected,
-    connectionMode: hookConnectionMode
+    connectionMode: hookConnectionMode,
+    hookRegistrationStatus: _hookRegistry?.registrationStatus || 'unknown',
+    hookActive: _hookRegistry?.isActive || false
   };
   const hookResultHash = JSON.stringify(currentHookResult);
   const hookResultChanged = hookResultRef.current !== hookResultHash;
