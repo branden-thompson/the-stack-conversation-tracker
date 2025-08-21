@@ -12,6 +12,7 @@ import { UserProfileTooltip } from '@/components/ui/user-profile-tooltip';
 import { OverflowTooltip } from '@/components/ui/overflow-tooltip';
 import { useStableActiveUsers } from '@/lib/hooks/useStableActiveUsers';
 import { useSSEActiveUsers } from '@/lib/hooks/useSSEActiveUsers';
+import { useSSEActiveUsersOptimized } from '@/lib/hooks/useSSEActiveUsersOptimized';
 import { cn } from '@/lib/utils';
 import { APP_THEME, ANIMATION } from '@/lib/utils/ui-constants';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
@@ -57,10 +58,19 @@ const ActiveUsersDisplayComponent = ({
   const isPhase4Enabled = process.env.NEXT_PUBLIC_PHASE4_SSE_ONLY === 'true' || 
                          process.env.NODE_ENV === 'development';
   
-  // Phase 4: Use SSE hook when enabled, fallback to polling hook
+  // OPTIMIZATION TEST: Use optimized SSE hook when enabled
+  const useOptimizedSSE = process.env.NEXT_PUBLIC_SSE_OPTIMIZATION_TEST === 'true' || 
+                         process.env.NODE_ENV === 'development';
+  
+  // Phase 4: Use optimized SSE hook for testing, fallback to regular SSE, then polling
+  const optimizedHookResult = useSSEActiveUsersOptimized({
+    maxVisible,
+    enabled: isPhase4Enabled && useOptimizedSSE
+  });
+  
   const sseHookResult = useSSEActiveUsers({
     maxVisible,
-    enabled: isPhase4Enabled
+    enabled: isPhase4Enabled && !useOptimizedSSE
   });
   
   const pollingHookResult = useStableActiveUsers({
@@ -68,7 +78,7 @@ const ActiveUsersDisplayComponent = ({
     pollInterval: 5000 // Fallback polling when SSE not available
   });
   
-  // Select the appropriate hook result based on Phase 4 status and SSE availability
+  // Select the appropriate hook result based on optimization testing and Phase 4 status
   const {
     activeUsers,
     loading,
@@ -79,8 +89,12 @@ const ActiveUsersDisplayComponent = ({
     getPerformanceStats,
     isSSEConnected,
     connectionMode: hookConnectionMode,
-    trackActivity
-  } = isPhase4Enabled ? sseHookResult : pollingHookResult;
+    trackActivity,
+    runOptimizationTests,
+    systemStatus,
+    _optimization
+  } = isPhase4Enabled && useOptimizedSSE ? optimizedHookResult :
+      isPhase4Enabled ? sseHookResult : pollingHookResult;
   
   // DEBUGGING: Track hook result changes to verify SSE still works after timer fix
   const hookResultRef = useRef(null);
@@ -109,6 +123,7 @@ const ActiveUsersDisplayComponent = ({
   
   const connectionMode = hookConnectionMode || 'polling-fallback';
   const isConnectedViaSSE = isSSEConnected || false;
+  const isOptimizedSSE = _optimization?.enabled || false;
   
   // Performance monitoring with Phase 4 SSE tracking
   const logPerformanceStats = useCallback(() => {
@@ -119,7 +134,11 @@ const ActiveUsersDisplayComponent = ({
         connectionMode,
         isSSEConnected: isConnectedViaSSE,
         phase4Enabled: isPhase4Enabled,
-        hookUsed: isPhase4Enabled ? 'useSSEActiveUsers' : 'useStableActiveUsers'
+        optimizedSSE: isOptimizedSSE,
+        hookUsed: isPhase4Enabled && useOptimizedSSE ? 'useSSEActiveUsersOptimized' :
+                  isPhase4Enabled ? 'useSSEActiveUsers' : 'useStableActiveUsers',
+        systemStatus: systemStatus || 'unknown',
+        optimization: _optimization || 'none'
       });
     }
   }, [getPerformanceStats, connectionMode, isConnectedViaSSE, isPhase4Enabled]);
@@ -167,12 +186,16 @@ const ActiveUsersDisplayComponent = ({
           )}>
             Active Stackers:
           </span>
-          {/* Phase 4: Connection mode indicator */}
+          {/* Phase 4: Connection mode indicator with optimization status */}
           <div className={cn(
             "w-1.5 h-1.5 rounded-full",
+            isOptimizedSSE ? "bg-blue-500" : // Blue for optimized SSE
             isConnectedViaSSE ? "bg-green-500" : "bg-yellow-500"
           )} 
-          title={`Phase 4: ${connectionMode.toUpperCase()} mode | ${isPhase4Enabled ? 'SSE Hook' : 'Polling Hook'}`} />
+          title={`Phase 4: ${connectionMode.toUpperCase()} mode | ${
+            isPhase4Enabled && useOptimizedSSE ? 'Optimized SSE Hook' :
+            isPhase4Enabled ? 'SSE Hook' : 'Polling Hook'
+          }${isOptimizedSSE ? ' | Infrastructure v' + (_optimization?.version || '1.0.0') : ''}`} />
         </div>
       )}
       
