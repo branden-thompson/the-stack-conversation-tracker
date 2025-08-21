@@ -21,8 +21,8 @@ LEARNINGS:
 BRTOPS v1.1.001 directive commands proved highly effective for scope management, preventing feature creep through clear boundary definition. The DIRECTIVE command successfully established persistent operational instructions equivalent to Claude '#' commands. Project's automated quality integration via post-commit hooks maintained dev page accuracy without manual intervention. Clean development startup script ensured single, isolated testing environment eliminating port conflicts and cross-tab synchronization issues.
 
 DOCUMENTATION:
- 1. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/components/ui/conversation-controls.jsx
- 2. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/04_after-action-reports/app-header-button-tweaks_2025-08-21.md
+ 1. components/ui/conversation-controls.jsx
+ 2. docs/04_after-action-reports/app-header-button-tweaks_2025-08-21.md
 
 NOTES AND ACTION ITEMS:
 Feature successfully demonstrates icon-only conversion pattern for future UI tweaks. BRTOPS v1.1.001 integration during live development validated new directive system effectiveness.

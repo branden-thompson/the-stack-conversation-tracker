@@ -75,6 +75,12 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
   - ✅ Good: `'0.75rem'` (direct value, since 1rem = 16px, 0.75rem = 12px)
   - Calculations are expensive and should only be used when absolutely necessary
 
+**DIRECTIVE: RELATIVE PATHS ONLY**
+- ALL file paths in documentation MUST be relative to project root
+- NEVER use absolute paths (e.g., /Users/username/...) in any documentation
+- Use relative paths: `docs/file.md` instead of `/full/path/to/project/docs/file.md`
+- This directive applies to AARs, README files, and all project documentation
+
 ### Dev-Scripts Web Interface
 **🎨 Professional Development Tools Dashboard**
 - **Access URL**: `http://localhost:3000/dev-scripts/` (development only)

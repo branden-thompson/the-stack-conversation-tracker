@@ -24,10 +24,10 @@ The conversation-tracker project already had strong documentation organization t
 The migration demonstrated that existing well-organized projects can be adapted to BRTOPS standards without disrupting established workflows. The addition of formal quality documentation structure enhances project governance while the standardized folder hierarchy improves navigation and discoverability for both human team members and AI agents.
 
 DOCUMENTATION:
- 1. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/README.md
- 2. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/05_quality/README.md
- 3. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/05_quality/testing/testing-strategy.md
- 4. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/04_after-action-reports/documentation-migration-brtops-v1102_2025-08-21.md
+ 1. docs/README.md
+ 2. docs/05_quality/README.md
+ 3. docs/05_quality/testing/testing-strategy.md
+ 4. docs/04_after-action-reports/documentation-migration-brtops-v1102_2025-08-21.md
 
 NOTES AND ACTION ITEMS:
 Migration establishes foundation for consistent BRTOPS adoption across all future projects. Quality documentation structure now available for enhanced testing and review procedures. Universal structure compliance enables better AI agent navigation and understanding of project organization.

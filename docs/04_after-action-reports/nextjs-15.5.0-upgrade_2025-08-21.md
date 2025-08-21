@@ -44,12 +44,12 @@ The military-precision BRTOPS workflow excelled in managing complex system upgra
 **FINAL PERFORMANCE VALIDATION**: Post-abort testing confirmed Next.js 15.4.6 baseline delivers exceptional performance with 25-100ms response times - demonstrating the massive regression impact (1000%+ slower) that Next.js 15.5.0 would have introduced. The abort decision was validated as protecting core user experience quality. All safety systems were successfully restored to original configurations, eliminating emergency bypasses and restoring full request coordination controls.
 
 DOCUMENTATION:
- 1. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/package.json
- 2. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/package-lock.json
- 3. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/04_after-action-reports/nextjs-15.5.0-upgrade_2025-08-21.md
+ 1. package.json
+ 2. package-lock.json
+ 3. docs/04_after-action-reports/nextjs-15.5.0-upgrade_2025-08-21.md
  4. https://github.com/branden-thompson/the-stack-conversation-tracker/pull/1
- 5. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/sse-infrastructure/config/environment-config.js (reverted)
- 6. /Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/sse-infrastructure/utils/request-coordinator.js (reverted)
+ 5. lib/sse-infrastructure/config/environment-config.js (reverted)
+ 6. lib/sse-infrastructure/utils/request-coordinator.js (reverted)
  7. Git branch: feature/sev-0-nextjs-15.5.0-upgrade (isolated, preserved for analysis)
  8. Pull Request: https://github.com/branden-thompson/the-stack-conversation-tracker/pull/1 (closed)
  9. Commit history: 5f57b76 (upgrade) → c742a28 (dev pages update) → emergency fixes

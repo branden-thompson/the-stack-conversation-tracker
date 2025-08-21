@@ -21,13 +21,13 @@ The primary issue was **multiple dev server instances** running simultaneously o
 The `useSSEIntegration` hook had a hardcoded 3000ms default that was overriding safe intervals, but fixing this didn't resolve the optimized hook's runaway behavior. The issue appears to be in the SSE infrastructure components that compose the optimized hook, suggesting multiple timers or polling mechanisms are active simultaneously within the infrastructure.
 
 DOCUMENTATION:
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/sse-infrastructure/registry/hook-registry.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/hooks/useSSEActiveUsers.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/hooks/useSSEActiveUsersOptimized.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/components/ui/active-users-display.jsx
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/sse-infrastructure/core/useSSEIntegration.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/sse-infrastructure/config/environment-config.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/dev-scripts/clean-start-dev.sh
+lib/sse-infrastructure/registry/hook-registry.js
+lib/hooks/useSSEActiveUsers.js
+lib/hooks/useSSEActiveUsersOptimized.js
+components/ui/active-users-display.jsx
+lib/sse-infrastructure/core/useSSEIntegration.js
+lib/sse-infrastructure/config/environment-config.js
+dev-scripts/clean-start-dev.sh
 
 NOTES AND ACTION ITEMS:
 - Regular SSE hook is stable and ready for Card Event Migration

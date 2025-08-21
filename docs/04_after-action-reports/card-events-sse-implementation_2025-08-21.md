@@ -23,12 +23,12 @@ The key requirement for real-time card collaboration was achieving sub-second re
 The card-flip debugging implementation required special attention due to historical issues with 3D animations and state synchronization. We addressed this with enhanced metadata tracking, detailed event logging, separate performance counters for flip events, and comprehensive testing infrastructure. The solution provides the real-time collaboration capabilities needed while maintaining debuggability and system reliability.
 
 DOCUMENTATION:
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/app/api/cards/events/route.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/lib/hooks/useSSECardEvents.js
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/components/test/CardEventsSSETest.jsx
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/app/test/card-events-sse/page.jsx
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/02_features/sse-real-time-collaboration/5-debugging/card-events-sse-implementation_2025-08-21.md
-/Users/bthompso/Desktop/PERSONAL_PROJECTS/conversation-tracker/docs/02_features/sse-real-time-collaboration/5-debugging/optimized-sse-failure-analysis_2025-08-21.md
+app/api/cards/events/route.js
+lib/hooks/useSSECardEvents.js
+components/test/CardEventsSSETest.jsx
+app/test/card-events-sse/page.jsx
+docs/02_features/sse-real-time-collaboration/5-debugging/card-events-sse-implementation_2025-08-21.md
+docs/02_features/sse-real-time-collaboration/5-debugging/optimized-sse-failure-analysis_2025-08-21.md
 
 NOTES AND ACTION ITEMS:
 - Card Events SSE provides 1-second intervals for real-time card collaboration
