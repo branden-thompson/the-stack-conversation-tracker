@@ -62,8 +62,9 @@ const ActiveUsersDisplayComponent = ({
   const isPhase4Enabled = process.env.NEXT_PUBLIC_PHASE4_SSE_ONLY === 'true' || 
                          process.env.NODE_ENV === 'development';
   
-  // FAILED: Optimized SSE still causing runaway despite interval fix
-  const useOptimizedSSE = false; // DISABLED - deeper issue in SSE infrastructure
+  // EMERGENCY: Still API runaway after timer fix attempt
+  // FAILED: Centralized timer approach didn't resolve the issue
+  const useOptimizedSSE = false; // DISABLED - deeper architectural problem
   
   // CRITICAL FIX: Prevent API runaway by ensuring only one hook is active at a time
   const optimizedHookResult = useSSEActiveUsersOptimized({
