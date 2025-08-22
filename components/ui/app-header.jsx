@@ -21,6 +21,8 @@ import { CompactUserSelector } from '@/components/ui/compact-user-selector';
 import { ConversationControls } from '@/components/ui/conversation-controls';
 import { ActiveUsersDisplay } from '@/components/ui/active-users-display';
 import { ColorThemeSelector } from '@/components/ui/color-theme-selector';
+import { InfoDialog } from '@/components/ui/info-dialog';
+import { ClearBoardDialog } from '@/components/ui/clear-board-dialog';
 import { useTheme } from 'next-themes';
 import { useAppTheme, useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { cn } from '@/lib/utils';
@@ -28,7 +30,10 @@ import {
   Plus, 
   RefreshCw, 
   HelpCircle, 
-  Maximize2, 
+  PanelsRightBottom, // Changed from Maximize2
+  Trash2, // New for clear board
+  Info, // New for info dialog
+  Bell, // New for notifications
   Menu, 
   Play, 
   Pause as PauseIcon, 
@@ -52,6 +57,7 @@ export function AppHeader({
   onOpenNewCard,
   onResetLayout,
   onRefreshCards,
+  onClearBoard, // New callback for clear board functionality
   
   // Conversation data
   activeConversation = null,
@@ -206,7 +212,7 @@ export function AppHeader({
               {/* Divider */}
               <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
 
-              {/* App controls */}
+              {/* Card Controls Group - Reorganized for v1.0 */}
               <div className="flex items-center gap-2">
                 {/* New Card - Always visible, most important action */}
                 {onOpenNewCard && (
@@ -220,33 +226,20 @@ export function AppHeader({
                   </Button>
                 )}
 
-                {/* Help - Icon only */}
-                {onOpenHelp && (
-                  <Button
-                    onClick={onOpenHelp}
-                    variant="outline"
-                    title="Help and keyboard shortcuts"
-                    aria-label="Help and keyboard shortcuts"
-                    className={`${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
-                  >
-                    <HelpCircle className="w-4 h-4" />
-                  </Button>
-                )}
-
-                {/* Refresh - Hide on smaller screens */}
+                {/* Refresh Board - Renamed from Refresh Cards */}
                 {onRefreshCards && (
                   <Button
                     onClick={onRefreshCards}
                     variant="outline"
-                    title="Refresh cards"
-                    aria-label="Refresh cards"
+                    title="Refresh board"
+                    aria-label="Refresh board"
                     className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                   >
                     <RefreshCw className="w-4 h-4" />
                   </Button>
                 )}
 
-                {/* Reset - Hide on smaller screens */}
+                {/* Reset Layout - Updated icon */}
                 {onResetLayout && (
                   <Button
                     onClick={onResetLayout}
@@ -255,16 +248,25 @@ export function AppHeader({
                     aria-label="Reset layout to start sizes"
                     className={`hidden lg:flex ${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                   >
-                    <Maximize2 className="w-4 h-4" />
+                    <PanelsRightBottom className="w-4 h-4" />
                   </Button>
                 )}
 
-                {/* Overflow menu for hidden actions on small-medium screens */}
-                {(onRefreshCards || onResetLayout) && (
+                {/* Clear Board - Farthest right, destructive action */}
+                {onClearBoard && (
+                  <ClearBoardDialog
+                    onClearBoard={onClearBoard}
+                    size="icon"
+                    className={`${iconBtnClass} ${buttonClasses.outline}`}
+                  />
+                )}
+
+                {/* Overflow menu for card actions on smaller screens */}
+                {(onClearBoard || onRefreshCards || onResetLayout) && (
                   <div className="lg:hidden relative" ref={appOverflowRef}>
                     <Button
                       variant="outline"
-                      title="More actions"
+                      title="More card actions"
                       className={`${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
                       onClick={() => setIsAppOverflowOpen(!isAppOverflowOpen)}
                     >
@@ -274,6 +276,20 @@ export function AppHeader({
                     {isAppOverflowOpen && (
                       <div className={`absolute top-[42px] right-0 z-50 ${dynamicTheme.colors.background.dropdown} rounded-md min-w-[160px]`}>
                         <div className="p-1">
+                          {onClearBoard && (
+                            <ClearBoardDialog
+                              onClearBoard={onClearBoard}
+                              trigger={
+                                <button
+                                  className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 cursor-pointer`}
+                                  onClick={() => setIsAppOverflowOpen(false)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Clear Board
+                                </button>
+                              }
+                            />
+                          )}
                           {onRefreshCards && (
                             <button
                               className={`w-full text-left px-3 py-2 text-sm ${dynamicTheme.colors.background.hoverStrong} rounded-sm flex items-center gap-2 cursor-pointer`}
@@ -283,7 +299,7 @@ export function AppHeader({
                               }}
                             >
                               <RefreshCw className="w-4 h-4" />
-                              Refresh Cards
+                              Refresh Board
                             </button>
                           )}
                           {onResetLayout && (
@@ -294,7 +310,7 @@ export function AppHeader({
                                 setIsAppOverflowOpen(false);
                               }}
                             >
-                              <Maximize2 className="w-4 h-4" />
+                              <PanelsRightBottom className="w-4 h-4" />
                               Reset Layout
                             </button>
                           )}
@@ -432,13 +448,13 @@ export function AppHeader({
             </>
           )}
 
-          {/* Active Users Display - Between conversation controls and user profile */}
+          {/* Active-Stackers Group - Enhanced with mobile support */}
           {showConversationControls && (
             <>
               {/* Divider before active users */}
               <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
               
-              {/* Active Users with responsive min-width */}
+              {/* Desktop/Tablet: Full Active Users Display */}
               <div className="hidden lg:flex min-w-[120px] xl:min-w-[160px] 2xl:min-w-[200px]">
                 <ActiveUsersDisplay 
                   className="w-full"
@@ -447,8 +463,52 @@ export function AppHeader({
                   maxVisible={undefined} // Let component determine responsive limits
                 />
               </div>
+              
+              {/* Mobile: Hidden for now - count display to be implemented later */}
+              <div className="hidden">
+                {/* Mobile count display will be implemented in future iteration */}
+              </div>
             </>
           )}
+
+          {/* Info & Help Group - NEW for v1.0 */}
+          <>
+            {/* Divider before info & help */}
+            <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} ${DIVIDER_MX}`} />
+            
+            {/* Info & Help controls */}
+            <div className="flex items-center gap-2">
+              {/* Info Dialog - App version and GitHub */}
+              <InfoDialog 
+                size="icon"
+                className={`${iconBtnClass} ${buttonClasses.outline}`}
+              />
+              
+              {/* Help - Moved from Card Controls */}
+              {onOpenHelp && (
+                <Button
+                  onClick={onOpenHelp}
+                  variant="outline"
+                  title="Help and keyboard shortcuts"
+                  aria-label="Help and keyboard shortcuts"
+                  className={`${iconBtnClass} ${buttonClasses.outline} cursor-pointer`}
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </Button>
+              )}
+              
+              {/* Notifications - Placeholder for future feature */}
+              <Button
+                variant="outline"
+                disabled={true}
+                title="Notifications (coming soon)"
+                aria-label="Notifications (coming soon)"
+                className={`${iconBtnClass} ${buttonClasses.outline} cursor-not-allowed opacity-50`}
+              >
+                <Bell className="w-4 h-4" />
+              </Button>
+            </div>
+          </>
 
           {/* User Selector - ALWAYS VISIBLE - Highest priority */}
           {showUserContext && users.length > 0 && (

@@ -235,6 +235,38 @@ function BoardInner({
     }
   }
 
+  // Clear all cards from the board
+  async function clearBoard() {
+    const cardIds = cards.map(card => card.id);
+    
+    // Delete all cards one by one
+    for (const cardId of cardIds) {
+      try {
+        await deleteCard(cardId);
+      } catch (error) {
+        console.error(`Failed to delete card ${cardId}:`, error);
+      }
+    }
+    
+    // Emit bulk delete event
+    emitCardEvent('bulk_deleted', {
+      count: cardIds.length,
+      cardIds
+    });
+    
+    // Log conversation event if active
+    try {
+      if (conv.activeId) {
+        await conv.logEvent(conv.activeId, 'board.cleared', { 
+          cardCount: cardIds.length,
+          cardIds 
+        });
+      }
+    } catch (err) {
+      console.error('[Conv Events] Error logging clear board event:', err);
+    }
+  }
+
   const wrappedUpdateCard = async (id, updates) => {
     const before = cards.find(c => c.id === id);
     const updated = await updateCard(id, updates);
@@ -322,6 +354,7 @@ function BoardInner({
           }}
           onResetLayout={resetLayout}
           onRefreshCards={refreshCards}
+          onClearBoard={clearBoard}
           activeConversation={activeConversation}
           runtime={runtime}
           onConversationResumeOrStart={onResumeOrStart}

@@ -16,6 +16,8 @@ export default function ThemeIsolationTestPage() {
   const { currentUser, allUsers, handleUserSelect } = useUserManagement();
   const userTheme = useUserTheme(currentUser);
   const [testResults, setTestResults] = useState([]);
+  const [isClient, setIsClient] = useState(false);
+  const [featureEnabled, setFeatureEnabled] = useState(false);
 
   const addTestResult = (test, result, details = '') => {
     setTestResults(prev => [...prev, {
@@ -26,9 +28,12 @@ export default function ThemeIsolationTestPage() {
     }]);
   };
 
-  // Test feature flag
+  // Handle client-side hydration
   useEffect(() => {
+    setIsClient(true);
     const enabled = isUserThemeIsolationEnabled();
+    setFeatureEnabled(enabled);
+    
     addTestResult(
       'Feature Flag Check',
       enabled ? 'PASS' : 'FAIL',
@@ -70,6 +75,7 @@ export default function ThemeIsolationTestPage() {
     }, 100);
   };
 
+
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
@@ -82,7 +88,7 @@ export default function ThemeIsolationTestPage() {
           <h2 className="text-lg font-semibold mb-2">Feature Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <strong>Feature Enabled:</strong> {isUserThemeIsolationEnabled() ? '✅ Yes' : '❌ No'}
+              <strong>Feature Enabled:</strong> {isClient ? (featureEnabled ? '✅ Yes' : '❌ No') : '⏳ Loading...'}
             </div>
             <div>
               <strong>Current Theme Mode:</strong> {userTheme.theme}

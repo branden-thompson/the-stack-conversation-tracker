@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug User Loading</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            background: #1e1e1e; 
+            color: #d4d4d4; 
+            padding: 2rem; 
+        }
+        .status { 
+            margin: 1rem 0; 
+            padding: 1rem; 
+            background: #2d2d30; 
+            border-radius: 4px; 
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug User Loading</h1>
+    <p>This page will open the main app and check the console for user loading states.</p>
+    
+    <div class="status">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click "Open Main App" below</li>
+            <li>Open Developer Tools (F12) in the new tab</li>
+            <li>Look for user-related console logs</li>
+            <li>Check if currentUser is null/undefined vs an actual user object</li>
+        </ol>
+    </div>
+
+    <div class="status">
+        <h3>What to look for:</h3>
+        <ul>
+            <li><strong>User loading logs:</strong> Look for [UserManagement] or [GuestUsers] logs</li>
+            <li><strong>Theme provider logs:</strong> Look for [UserTheme] logs</li>
+            <li><strong>Current user value:</strong> Should show actual user object, not undefined</li>
+            <li><strong>Emergency disable status:</strong> Should be false</li>
+        </ul>
+    </div>
+
+    <button onclick="openMainApp()">🚀 Open Main App</button>
+    <button onclick="openThemeTest()">🧪 Open Theme Test</button>
+    
+    <div class="status">
+        <h3>Console Debug Commands:</h3>
+        <p>Copy these into the browser console:</p>
+        <pre style="background: #1e1e1e; padding: 1rem; border-radius: 4px;">
+// Check localStorage emergency flags
+console.log('Emergency Disabled:', localStorage.getItem('user_theme_isolation_disabled'));
+
+// Check if user context is working
+console.log('Window location:', window.location.href);
+
+// Check environment variable
+console.log('Environment variable:', process.env.NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION);
+
+// Look for React DevTools to inspect component state
+console.log('React DevTools available:', typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined');
+        </pre>
+    </div>
+
+    <script>
+        function openMainApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+        
+        function openThemeTest() {
+            window.open('http://localhost:3000/dev/theme-isolation-test', '_blank');
+        }
+    </script>
+</body>
+</html>

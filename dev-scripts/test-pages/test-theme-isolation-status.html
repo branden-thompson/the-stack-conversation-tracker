@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Isolation Status Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status-card {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .status-ok { border-left: 4px solid #4CAF50; }
+        .status-warning { border-left: 4px solid #ff9800; }
+        .status-error { border-left: 4px solid #f44336; }
+        
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+        .danger {
+            background: #d32f2f;
+        }
+        .danger:hover {
+            background: #f44336;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .result {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #2d2d30;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Theme Isolation Status Test</h1>
+        <p>This page tests the user theme isolation feature status and provides tools to fix issues.</p>
+
+        <div id="environmentStatus" class="status-card">
+            <h3>Environment Variable Check</h3>
+            <div id="envResult">Checking...</div>
+        </div>
+
+        <div id="emergencyStatus" class="status-card">
+            <h3>Emergency Disable Status</h3>
+            <div id="emergencyResult">Checking...</div>
+        </div>
+
+        <div id="featureStatus" class="status-card">
+            <h3>Feature Status</h3>
+            <div id="featureResult">Checking...</div>
+        </div>
+
+        <div class="status-card">
+            <h3>Actions</h3>
+            <button onclick="checkStatus()">🔄 Refresh Status</button>
+            <button onclick="clearEmergencyDisable()" class="danger">🚨 Clear Emergency Disable</button>
+            <button onclick="testUserTheme()">🧪 Test User Theme Storage</button>
+        </div>
+
+        <div id="actionResult" class="result" style="display: none;">
+            <h4>Action Result:</h4>
+            <div id="actionOutput"></div>
+        </div>
+
+        <div class="status-card">
+            <h3>Browser Console Code</h3>
+            <p>Copy and paste this code in the browser console for manual testing:</p>
+            <pre id="consoleCode">
+// Check theme isolation status
+console.log('Environment Variable:', process.env.NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION);
+console.log('Emergency Disabled:', localStorage.getItem('user_theme_isolation_disabled'));
+console.log('Feature Function Available:', typeof window.isUserThemeIsolationEnabled !== 'undefined');
+
+// Show all theme-related localStorage keys
+Object.keys(localStorage).filter(key => key.includes('theme')).forEach(key => {
+    console.log(key + ':', localStorage.getItem(key));
+});
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        function showResult(elementId, message, type = 'ok') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.parentElement.className = `status-card status-${type}`;
+        }
+
+        function showActionResult(message) {
+            document.getElementById('actionResult').style.display = 'block';
+            document.getElementById('actionOutput').innerHTML = message;
+        }
+
+        function checkStatus() {
+            // Check environment variable (note: this might not be available in static HTML)
+            try {
+                const envVar = process.env.NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION;
+                showResult('envResult', `Value: ${envVar || 'Not available (static HTML)'}`, envVar === 'true' ? 'ok' : 'warning');
+            } catch (error) {
+                showResult('envResult', 'Not available in static HTML context', 'warning');
+            }
+
+            // Check emergency disable
+            const isEmergencyDisabled = localStorage.getItem('user_theme_isolation_disabled') === 'true';
+            const reason = localStorage.getItem('theme_emergency_disable_reason');
+            const time = localStorage.getItem('theme_emergency_disable_time');
+
+            if (isEmergencyDisabled) {
+                const timeStr = time ? new Date(parseInt(time)).toLocaleString() : 'Unknown';
+                showResult('emergencyResult', 
+                    `🚨 EMERGENCY DISABLE ACTIVE<br>Reason: ${reason}<br>Time: ${timeStr}`, 
+                    'error');
+            } else {
+                showResult('emergencyResult', '✅ Emergency disable is not active', 'ok');
+            }
+
+            // Check feature status (combine checks)
+            let featureStatus = 'Unknown';
+            let statusType = 'warning';
+            
+            if (isEmergencyDisabled) {
+                featureStatus = '❌ Disabled by emergency flag';
+                statusType = 'error';
+            } else {
+                featureStatus = '⚠️ Likely enabled (need app context to verify)';
+                statusType = 'warning';
+            }
+
+            showResult('featureResult', featureStatus, statusType);
+        }
+
+        function clearEmergencyDisable() {
+            const isDisabled = localStorage.getItem('user_theme_isolation_disabled') === 'true';
+            
+            if (isDisabled) {
+                const reason = localStorage.getItem('theme_emergency_disable_reason');
+                const time = localStorage.getItem('theme_emergency_disable_time');
+                
+                localStorage.removeItem('user_theme_isolation_disabled');
+                localStorage.removeItem('theme_emergency_disable_reason');
+                localStorage.removeItem('theme_emergency_disable_time');
+                
+                showActionResult(`✅ Emergency disable cleared!<br>Previous reason: ${reason}<br>Previous time: ${time ? new Date(parseInt(time)).toLocaleString() : 'Unknown'}<br><br>Please refresh the main app to re-enable theme isolation.`);
+                
+                // Refresh status
+                setTimeout(checkStatus, 100);
+            } else {
+                showActionResult('ℹ️ Emergency disable was not active.');
+            }
+        }
+
+        function testUserTheme() {
+            const testUserId = 'test_user_' + Date.now();
+            const testTheme = 'dark';
+            
+            try {
+                // Test setting a user theme
+                localStorage.setItem(`user_${testUserId}_theme_mode`, testTheme);
+                
+                // Test reading it back
+                const retrieved = localStorage.getItem(`user_${testUserId}_theme_mode`);
+                
+                if (retrieved === testTheme) {
+                    showActionResult(`✅ User theme storage test passed<br>Set and retrieved: ${testTheme}<br>Test user: ${testUserId}`);
+                } else {
+                    showActionResult(`❌ User theme storage test failed<br>Set: ${testTheme}, Got: ${retrieved}`);
+                }
+                
+                // Clean up test data
+                localStorage.removeItem(`user_${testUserId}_theme_mode`);
+                
+            } catch (error) {
+                showActionResult(`❌ User theme storage test error: ${error.message}`);
+            }
+        }
+
+        // Run initial check
+        checkStatus();
+    </script>
+</body>
+</html>
