@@ -1,22 +1,5 @@
 {
-  "cards": [
-    {
-      "id": "unukzOU9lqM67WTdl3S1M",
-      "type": "topic",
-      "content": "Super Cool Stuff",
-      "zone": "unresolved",
-      "position": {
-        "x": 478.3359375,
-        "y": 60
-      },
-      "stackOrder": 0,
-      "faceUp": true,
-      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
-      "assignedToUserId": "system",
-      "createdAt": "2025-08-21T15:06:19.451Z",
-      "updatedAt": "2025-08-21T20:29:43.687Z"
-    }
-  ],
+  "cards": [],
   "users": [
     {
       "id": "system",

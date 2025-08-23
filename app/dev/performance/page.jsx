@@ -8,7 +8,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DevHeader } from '@/components/ui/dev-header';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -382,29 +382,17 @@ export default function PerformancePage() {
     );
   };
 
-  // Right controls for DevHeader
-  const rightControls = (
-    <div className="flex items-center gap-2">
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={() => flushMetrics()}
-        className="border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-      >
-        Flush Metrics
-      </Button>
-      {overheadImpact && overheadImpact.averageCollectionTime > 5 && (
-        <Badge variant="secondary" className="bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">High Impact</Badge>
-      )}
-    </div>
-  );
+  // Handlers for UniversalDevHeader
+  const handleExportAllData = () => {
+    flushMetrics();
+  };
 
   return (
     <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
-      <DevHeader
+      <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
-        rightControls={rightControls}
+        onExportAllData={handleExportAllData}
       />
 
       {/* Main Content */}

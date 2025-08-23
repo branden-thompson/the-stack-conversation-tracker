@@ -2,14 +2,18 @@
 **🎖️ BRTOPS ENABLED** - Military-precision development operations active
 
 ## BRTOPS Integration Status
-✅ **Framework Version**: 1.1.003 - Enhanced 6-Folder Structure Integration  
+✅ **Framework Version**: 1.1.004-rc - Automated Protocol Violation Prevention System  
 ✅ **Command Structure**: GO RCC, GO PLAN, GO CODE, GO FINAL, GO VAL, DEBRIEF  
 ✅ **Enhanced Commands**: INIT FEATURE, CREATE DOCS, VALIDATE DOCS, GENERATE TEMPLATES  
+✅ **Protocol Enforcement**: PROTOCOL CHECK, PROTOCOL ENFORCE, CRISIS MODE, SIMPLIFY PROTOCOL  
+✅ **Violation Prevention**: Tool-level blocking, cognitive load detection, predictive prevention  
 ✅ **Documentation System**: Enhanced 6-folder structure with SEV-level requirements  
 ✅ **Project Management**: Complete template library, git workflow integration  
 ✅ **Guide Mode**: GUIDE AUTO (adaptive to user experience)  
 ✅ **Collaboration Mode**: COLLAB (equal partnership default)  
 ✅ **Quality Gates**: Enhanced documentation completeness validation by SEV level  
+✅ **Cognitive Load Management**: 5-level detection (NORMAL → CRISIS) with adaptive responses  
+🔄 **Testing Phase**: Release candidate - monitoring 80% violation prevention target  
 
 ## Important Project Information
 
@@ -34,7 +38,7 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 - `/dev-scripts` - Development and testing scripts
 - `/docker` - Docker configuration files
 - `/docs` - Project documentation
-  - `/docs/project-hygiene/` - **IMPORTANT**: All cleanup and hygiene summaries go here
+  - `/docs/04_after-action-reports/` - **IMPORTANT**: All cleanup and hygiene summaries go here
   - `/docs/features/` - Feature documentation
 
 ### Testing Commands
@@ -102,7 +106,7 @@ Do NOT create Docker files in the project root - they already exist in `/docker/
 
 ### Documentation Guidelines
 **📁 Project Hygiene Documentation**
-- **ALWAYS** save cleanup summaries in `/docs/project-hygiene/`
+- **ALWAYS** save cleanup summaries in `/docs/04_after-action-reports/`
 - Use descriptive filenames with dates (e.g., `2025-08-18-build-cleanup.md`)
 - Include before/after metrics when doing cleanup work
 - Document all linting, build fixes, and optimization work in this folder
@@ -200,11 +204,36 @@ npm run dev
 
 ---
 
-*Last updated: 2025-08-21*
+*Last updated: 2025-08-22*
 *This file helps Claude Code remember important project details across sessions*
-*🎖️ BRTOPS Framework v1.1.003 integrated - Enhanced 6-folder structure with military-precision development operations*
+*🎖️ BRTOPS Framework v1.1.004-rc integrated - Automated protocol violation prevention with military-precision development operations*
 
-## Enhanced 6-Folder Documentation Structure (v1.1.003)
+## Enhanced 6-Folder Documentation Structure (v1.1.004-rc)
+
+## 🚨 AUTOMATED PROTOCOL VIOLATION PREVENTION (v1.1.004-rc)
+
+### Core Enhancement: 80% Violation Prevention Target
+**Status**: Release Candidate - Local testing phase  
+**Method**: Tool-level blocking prevents violations at source  
+**Monitoring**: Real-world effectiveness validation in progress
+
+### Enhanced Protocol Commands Available
+```
+# Protocol Enforcement Commands (v1.1.004-rc)
+PROTOCOL CHECK        - Verify current protocol compliance status
+PROTOCOL ENFORCE      - Activate enhanced enforcement mode  
+PROTOCOL OVERRIDE     - Emergency protocol override with justification
+CRISIS MODE ACTIVATE  - Emergency simplified protocol procedures
+SIMPLIFY PROTOCOL     - Simplified mode during high cognitive load
+RESTORE NORMAL        - Return to standard protocol complexity
+```
+
+### Violation Prevention Integration
+- **Tool Wrapper Protection**: Edit/Write/TodoWrite violations blocked at source
+- **Cognitive Load Detection**: 5-level adaptive response system
+- **Predictive Prevention**: Pattern recognition and early intervention
+- **Crisis Mode**: Emergency simplified procedures for high-stress situations
+- **Adaptive Complexity**: Protocol adjusts to user stress and project criticality
 
 ### Project Excellence Standards
 This project exemplifies BRTOPS enhanced documentation standards with:
@@ -222,6 +251,6 @@ GENERATE TEMPLATES [folder]           - Create required templates
 ```
 
 ### BRTOPS Configuration Location
-- **Global Config**: `/Users/bthompso/.claude/CLAUDE.md` (v1.1.003)
+- **Global Config**: `/Users/bthompso/.claude/CLAUDE.md` (v1.1.004-rc)
 - **Project Config**: `.brtops/config.json` (project-specific settings)
 - **Feature Registry**: `.brtops/feature-registry.json` (feature tracking)

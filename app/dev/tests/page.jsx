@@ -11,7 +11,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { DevHeader } from '@/components/ui/dev-header';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -196,48 +196,29 @@ export default function TestsDashboardPage() {
     setIsRunningTests(false);
   }, []);
 
-  const rightControls = (
-    <>
-      <Button 
-        onClick={() => runTests('unit')} 
-        disabled={isRunningTests}
-        className="h-[40px] leading-none"
-      >
-        {isRunningTests ? (
-          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-        ) : (
-          <Play className="w-4 h-4 mr-2" />
-        )}
-        Run Tests
-      </Button>
-      <Button 
-        variant="outline"
-        onClick={() => {
-          const blob = new Blob(
-            [JSON.stringify(testState.results, null, 2)],
-            { type: 'application/json' }
-          );
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `coverage-report-${Date.now()}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}
-        className="h-[40px] leading-none"
-      >
-        <Download className="w-4 h-4 mr-2" />
-        Export Report
-      </Button>
-    </>
-  );
+  // Test Coverage Control handlers for UniversalDevHeader
+  const handleRunTests = () => runTests('unit');
+  
+  const handleExportAllData = () => {
+    const blob = new Blob(
+      [JSON.stringify(testState.results, null, 2)],
+      { type: 'application/json' }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `coverage-report-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900">
       {/* Header */}
-      <DevHeader
+      <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
-        rightControls={rightControls}
+        onRunTests={handleRunTests}
+        onExportAllData={handleExportAllData}
       />
 
       {/* Main Content */}

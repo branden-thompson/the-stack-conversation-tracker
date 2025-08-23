@@ -7,7 +7,7 @@
 
 'use client';
 
-import { DevHeader } from '@/components/ui/dev-header';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { Phase4ValidationDashboard } from '@/components/dev/Phase4ValidationDashboard';
 import { useState } from 'react';
@@ -20,7 +20,7 @@ export default function Phase4ValidationPage() {
   return (
     <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
-      <DevHeader
+      <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
         title="Phase 4 Validation"
         subtitle="SSE-Only Operation Testing & Monitoring"

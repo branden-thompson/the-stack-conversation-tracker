@@ -9,7 +9,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useUserTracking } from '@/lib/hooks/useUserTracking';
 import { useGuestUsers } from '@/lib/hooks/useGuestUsers';
 import { useButtonTracking } from '@/lib/hooks/useButtonTracking';
-import { DevHeader } from '@/components/ui/dev-header';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { SessionCard } from '@/components/ui/session-card';
 import { SessionGroup } from '@/components/ui/session-group';
@@ -120,7 +120,12 @@ export default function UserTrackingPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Right controls for header - split into two groups
+  // Handlers for UniversalDevHeader
+  const handleExportAllData = () => {
+    handleExport();
+  };
+
+  // Right controls for header - split into two groups (UNUSED - kept for reference)
   const rightControls = (
     <>
       {/* Action Buttons Group */}
@@ -187,9 +192,9 @@ export default function UserTrackingPage() {
   return (
     <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
-      <DevHeader
+      <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
-        rightControls={rightControls}
+        onExportAllData={handleExportAllData}
       />
 
       {/* Main Content */}

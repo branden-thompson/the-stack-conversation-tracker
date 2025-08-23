@@ -5,7 +5,7 @@ import { useTabVisibility } from '@/lib/hooks/useTabVisibility';
 import { useConversations } from '@/lib/hooks/useConversations';
 import { useSSECardEvents } from '@/lib/hooks/useSSECardEvents';
 import { Button } from '@/components/ui/button';
-import { DevHeader } from '@/components/ui/dev-header';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
 import { RefreshCw, Download } from 'lucide-react';
 import { EVENT_TYPES, EVENT_COLORS, EVENT_LABELS, DEV_LAYOUT } from '@/lib/utils/ui-constants';
@@ -225,44 +225,26 @@ export default function DevConvos() {
     }
   ], []);
 
-  const rightControls = (
-    <>
-      <Button 
-        variant="outline"
-        onClick={() => refresh()}
-        className="h-[40px] leading-none"
-      >
-        <RefreshCw className="w-4 h-4 mr-2" />
-        Refresh
-      </Button>
-      <Button 
-        variant="outline"
-        onClick={() => {
-          const blob = new Blob(
-            [JSON.stringify({ conversations: safeItems, events }, null, 2)],
-            { type: 'application/json' }
-          );
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${DEV_LAYOUT.exportFilenames.allConversations}-${Date.now()}.json`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}
-        className="h-[40px] leading-none"
-      >
-        <Download className="w-4 h-4 mr-2" />
-        Export All
-      </Button>
-    </>
-  );
+  // Handlers for UniversalDevHeader
+  const handleExportAllData = () => {
+    const blob = new Blob(
+      [JSON.stringify({ conversations: safeItems, events }, null, 2)],
+      { type: 'application/json' }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${DEV_LAYOUT.exportFilenames.allConversations}-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
-      <DevHeader
+      <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
-        rightControls={rightControls}
+        onExportAllData={handleExportAllData}
       />
 
       {/* Main Content */}
