@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Theme Isolation Debug Test</title>
+</head>
+<body>
+    <h1>Theme Isolation Debug Test</h1>
+    <div id="output"></div>
+    
+    <script>
+    function log(message) {
+        const output = document.getElementById('output');
+        output.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + message + '</p>';
+        console.log('[ThemeDebug]', message);
+    }
+    
+    // Test 1: Check if feature flag is enabled
+    const isEnabled = process.env.NEXT_PUBLIC_ENABLE_USER_THEME_ISOLATION === 'true';
+    log('Theme isolation enabled: ' + isEnabled);
+    
+    // Test 2: Check localStorage access
+    try {
+        localStorage.setItem('test_theme_debug', 'test_value');
+        const testValue = localStorage.getItem('test_theme_debug');
+        log('localStorage access works: ' + (testValue === 'test_value'));
+        localStorage.removeItem('test_theme_debug');
+    } catch (e) {
+        log('localStorage access failed: ' + e.message);
+    }
+    
+    // Test 3: Listen for storage events
+    window.addEventListener('storage', (event) => {
+        log('Storage event detected: key=' + event.key + ', newValue=' + event.newValue);
+    });
+    
+    // Test 4: Simulate theme change
+    function simulateThemeChange() {
+        const userId = 'test_user_123';
+        const key = `user_${userId}_theme_mode`;
+        const newValue = localStorage.getItem(key) === 'dark' ? 'light' : 'dark';
+        
+        log('Simulating theme change: ' + key + ' = ' + newValue);
+        localStorage.setItem(key, newValue);
+        
+        // This should trigger storage event in other tabs
+    }
+    
+    log('Test setup complete. Open this page in multiple tabs and run simulateThemeChange() in console.');
+    </script>
+</body>
+</html>

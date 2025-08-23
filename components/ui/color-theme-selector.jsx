@@ -52,6 +52,24 @@ export function ColorThemeSelector({
     }
   }, [effectiveTheme]); // Re-filter when theme mode changes
 
+  // Group themes into STANDARD and SPECIALS
+  const groupedThemes = {
+    STANDARD: availableThemes.filter(theme => 
+      ['gray', 'blue', 'green', 'purple', 'international-orange', 'tiffany-blue'].includes(theme.id)
+    ).sort((a, b) => {
+      // Custom sort order for STANDARD themes
+      const order = ['gray', 'blue', 'green', 'purple', 'international-orange', 'tiffany-blue'];
+      return order.indexOf(a.id) - order.indexOf(b.id);
+    }),
+    SPECIALS: availableThemes.filter(theme => 
+      ['synthwave-san-diego', 'monokai-like'].includes(theme.id)
+    ).sort((a, b) => {
+      // Custom sort order for SPECIALS themes
+      const order = ['synthwave-san-diego', 'monokai-like'];
+      return order.indexOf(a.id) - order.indexOf(b.id);
+    })
+  };
+
   const handleThemeSelect = (themeId) => {
     if (onColorThemeChange) {
       onColorThemeChange(themeId);
@@ -104,7 +122,10 @@ export function ColorThemeSelector({
                 currentThemeObj.id === 'blue' && (isDark ? 'bg-sky-900' : 'bg-sky-100'),
                 currentThemeObj.id === 'green' && (isDark ? 'bg-emerald-900' : 'bg-emerald-100'),
                 currentThemeObj.id === 'purple' && (isDark ? 'bg-violet-900' : 'bg-violet-100'),
-                currentThemeObj.id === 'synthwave' && (isDark ? 'bg-[#201a2a]' : 'bg-gray-100'),
+                currentThemeObj.id === 'synthwave-san-diego' && (isDark ? 'bg-[#201a2a]' : 'bg-[#e6fffe]'),
+                currentThemeObj.id === 'monokai-like' && (isDark ? 'bg-[#2c2c2c]' : 'bg-[#f5f5f5]'),
+                currentThemeObj.id === 'international-orange' && (isDark ? 'bg-[#2d1100]' : 'bg-[#fff8f0]'),
+                currentThemeObj.id === 'tiffany-blue' && (isDark ? 'bg-[#0f2e2a]' : 'bg-[#f0fdfa]'),
               )} />
               <div className={cn(
                 "w-3 h-3 rounded-full border border-gray-300",
@@ -112,7 +133,10 @@ export function ColorThemeSelector({
                 currentThemeObj.id === 'blue' && (isDark ? 'bg-sky-950' : 'bg-sky-50'),
                 currentThemeObj.id === 'green' && (isDark ? 'bg-emerald-950' : 'bg-emerald-50'),
                 currentThemeObj.id === 'purple' && (isDark ? 'bg-violet-950' : 'bg-violet-50'),
-                currentThemeObj.id === 'synthwave' && (isDark ? 'bg-[#f52baf]' : 'bg-gray-50'),
+                currentThemeObj.id === 'synthwave-san-diego' && (isDark ? 'bg-[#f52baf]' : 'bg-[#FF00EE]'),
+                currentThemeObj.id === 'monokai-like' && (isDark ? 'bg-[#a6e22e]' : 'bg-[#a6e22e]'),
+                currentThemeObj.id === 'international-orange' && (isDark ? 'bg-[#FF4F00]' : 'bg-[#FF4F00]'),
+                currentThemeObj.id === 'tiffany-blue' && (isDark ? 'bg-[#0ABAB5]' : 'bg-[#0ABAB5]'),
               )} />
             </div>
             
@@ -126,7 +150,7 @@ export function ColorThemeSelector({
           )} />
         </Button>
 
-        {/* Dropdown Menu */}
+        {/* Grouped Dropdown Menu */}
         {isOpen && (
           <div className={cn(
             "absolute top-full left-0 right-0 mt-1 z-50",
@@ -135,46 +159,109 @@ export function ColorThemeSelector({
             "border rounded-md shadow-lg",
             "py-1"
           )}>
-            {availableThemes.map((theme) => {
-              const isSelected = currentColorTheme === theme.id;
-              
-              return (
-                <button
-                  key={theme.id}
-                  className={cn(
-                    "w-full px-3 py-2 text-left text-xs",
-                    "flex items-center gap-2",
-                    "transition-colors",
-                    dynamicTheme.colors.background.hover,
-                    isSelected && dynamicTheme.colors.background.accent
-                  )}
-                  onClick={() => handleThemeSelect(theme.id)}
-                >
-                  {/* Color Preview */}
-                  <div className="flex gap-1 flex-shrink-0">
-                    <div className={cn(
-                      "w-3 h-3 rounded-full border border-gray-300",
-                      theme.id === 'gray' && (isDark ? 'bg-gray-800' : 'bg-gray-100'),
-                      theme.id === 'blue' && (isDark ? 'bg-sky-900' : 'bg-sky-100'),
-                      theme.id === 'green' && (isDark ? 'bg-emerald-900' : 'bg-emerald-100'),
-                      theme.id === 'purple' && (isDark ? 'bg-violet-900' : 'bg-violet-100'),
-                      theme.id === 'synthwave' && (isDark ? 'bg-[#201a2a]' : 'bg-gray-100'),
-                    )} />
-                    <div className={cn(
-                      "w-3 h-3 rounded-full border border-gray-300",
-                      theme.id === 'gray' && (isDark ? 'bg-gray-700' : 'bg-gray-50'),
-                      theme.id === 'blue' && (isDark ? 'bg-sky-950' : 'bg-sky-50'),
-                      theme.id === 'green' && (isDark ? 'bg-emerald-950' : 'bg-emerald-50'),
-                      theme.id === 'purple' && (isDark ? 'bg-violet-950' : 'bg-violet-50'),
-                      theme.id === 'synthwave' && (isDark ? 'bg-[#f52baf]' : 'bg-gray-50'),
-                    )} />
-                  </div>
+            {/* STANDARD Group */}
+            {groupedThemes.STANDARD.length > 0 && (
+              <>
+                <div className={cn(
+                  "px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+                  dynamicTheme.colors.text.muted,
+                  "border-b",
+                  dynamicTheme.colors.border.primary
+                )}>
+                  Standard
+                </div>
+                {groupedThemes.STANDARD.map((theme) => {
+                  const isSelected = currentColorTheme === theme.id;
                   
-                  {/* Theme Name */}
-                  <span className="font-medium flex-1">{theme.name}</span>
-                </button>
-              );
-            })}
+                  return (
+                    <button
+                      key={theme.id}
+                      className={cn(
+                        "w-full px-3 py-2 text-left text-xs",
+                        "flex items-center gap-2",
+                        "transition-colors",
+                        dynamicTheme.colors.background.hover,
+                        isSelected && dynamicTheme.colors.background.accent
+                      )}
+                      onClick={() => handleThemeSelect(theme.id)}
+                    >
+                      {/* Color Preview */}
+                      <div className="flex gap-1 flex-shrink-0">
+                        <div className={cn(
+                          "w-3 h-3 rounded-full border border-gray-300",
+                          theme.id === 'gray' && (isDark ? 'bg-gray-800' : 'bg-gray-100'),
+                          theme.id === 'blue' && (isDark ? 'bg-sky-900' : 'bg-sky-100'),
+                          theme.id === 'green' && (isDark ? 'bg-emerald-900' : 'bg-emerald-100'),
+                          theme.id === 'purple' && (isDark ? 'bg-violet-900' : 'bg-violet-100'),
+                          theme.id === 'international-orange' && (isDark ? 'bg-[#2d1100]' : 'bg-[#fff8f0]'),
+                          theme.id === 'tiffany-blue' && (isDark ? 'bg-[#0f2e2a]' : 'bg-[#f0fdfa]'),
+                        )} />
+                        <div className={cn(
+                          "w-3 h-3 rounded-full border border-gray-300",
+                          theme.id === 'gray' && (isDark ? 'bg-gray-700' : 'bg-gray-50'),
+                          theme.id === 'blue' && (isDark ? 'bg-sky-950' : 'bg-sky-50'),
+                          theme.id === 'green' && (isDark ? 'bg-emerald-950' : 'bg-emerald-50'),
+                          theme.id === 'purple' && (isDark ? 'bg-violet-950' : 'bg-violet-50'),
+                          theme.id === 'international-orange' && (isDark ? 'bg-[#FF4F00]' : 'bg-[#FF4F00]'),
+                          theme.id === 'tiffany-blue' && (isDark ? 'bg-[#0ABAB5]' : 'bg-[#0ABAB5]'),
+                        )} />
+                      </div>
+                      
+                      {/* Theme Name */}
+                      <span className="font-medium flex-1">{theme.name}</span>
+                    </button>
+                  );
+                })}
+              </>
+            )}
+
+            {/* SPECIALS Group */}
+            {groupedThemes.SPECIALS.length > 0 && (
+              <>
+                <div className={cn(
+                  "px-3 py-1 text-xs font-semibold uppercase tracking-wide mt-1",
+                  dynamicTheme.colors.text.muted,
+                  "border-b",
+                  dynamicTheme.colors.border.primary
+                )}>
+                  Specials
+                </div>
+                {groupedThemes.SPECIALS.map((theme) => {
+                  const isSelected = currentColorTheme === theme.id;
+                  
+                  return (
+                    <button
+                      key={theme.id}
+                      className={cn(
+                        "w-full px-3 py-2 text-left text-xs",
+                        "flex items-center gap-2",
+                        "transition-colors",
+                        dynamicTheme.colors.background.hover,
+                        isSelected && dynamicTheme.colors.background.accent
+                      )}
+                      onClick={() => handleThemeSelect(theme.id)}
+                    >
+                      {/* Color Preview */}
+                      <div className="flex gap-1 flex-shrink-0">
+                        <div className={cn(
+                          "w-3 h-3 rounded-full border border-gray-300",
+                          theme.id === 'synthwave-san-diego' && (isDark ? 'bg-[#201a2a]' : 'bg-[#e6fffe]'),
+                          theme.id === 'monokai-like' && (isDark ? 'bg-[#2c2c2c]' : 'bg-[#f5f5f5]'),
+                        )} />
+                        <div className={cn(
+                          "w-3 h-3 rounded-full border border-gray-300",
+                          theme.id === 'synthwave-san-diego' && (isDark ? 'bg-[#f52baf]' : 'bg-[#FF00EE]'),
+                          theme.id === 'monokai-like' && (isDark ? 'bg-[#a6e22e]' : 'bg-[#a6e22e]'),
+                        )} />
+                      </div>
+                      
+                      {/* Theme Name */}
+                      <span className="font-medium flex-1">{theme.name}</span>
+                    </button>
+                  );
+                })}
+              </>
+            )}
           </div>
         )}
       </div>

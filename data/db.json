@@ -1,5 +1,70 @@
 {
-  "cards": [],
+  "cards": [
+    {
+      "id": "-fyFU8CIZv2Q9qThcujcs",
+      "type": "topic",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "guest_-X4bpeNe",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-23T18:12:05.464Z",
+      "updatedAt": "2025-08-23T23:36:07.786Z"
+    },
+    {
+      "id": "dJ3vtgHzfC_SX7OFQeANi",
+      "type": "question",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-23T19:06:34.255Z",
+      "updatedAt": "2025-08-23T23:36:07.173Z"
+    },
+    {
+      "id": "WEK27E-qgEEK5ebn6GJjR",
+      "type": "guess",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-23T19:06:35.992Z",
+      "updatedAt": "2025-08-23T23:36:05.901Z"
+    },
+    {
+      "id": "PsG1xsCcGndSU4VqsPxTm",
+      "type": "opinion",
+      "content": "",
+      "zone": "active",
+      "position": {
+        "x": 10,
+        "y": 60
+      },
+      "stackOrder": 0,
+      "faceUp": true,
+      "createdByUserId": "spf6lSu8SSOxZIOsYlYVd",
+      "assignedToUserId": null,
+      "createdAt": "2025-08-23T19:06:38.123Z",
+      "updatedAt": "2025-08-23T23:36:08.485Z"
+    }
+  ],
   "users": [
     {
       "id": "system",

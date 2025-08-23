@@ -379,8 +379,9 @@ function BoardInner({
 
         {/* Board Canvas */}
         <BoardCanvas
-          key={`board-${boardRenderKey}-${cards?.length || 0}-${JSON.stringify(cards?.map(c => c.id) || [])}`}
-          layoutKey={layoutKey + boardRenderKey} // Combine layout key with board render key
+          key={`board-canvas-${layoutKey}`} // Only change key when layout is intentionally reset
+          layoutKey={layoutKey} // Only use layoutKey for intentional layout resets, not card updates
+          // forceRenderKey={boardRenderKey} - Removed to prevent layout resets
           cards={cards}
           getCardsByZone={getCardsByZone}
           onUpdateCard={wrappedUpdateCard}
@@ -487,12 +488,13 @@ export default function Board() {
     console.log(`[Board] 🚨 Card details:`, cards?.map(c => ({ id: c.id?.substring(0, 8), zone: c.zone, type: c.type })) || []);
   }, [cards]);
   
-  // Force re-render when real-time updates occur (even in background tabs)
+  // Force re-render for theme mode isolation (not board layout)  
+  // Note: Board layout persistence works fine, only theme mode sync is broken
   const [boardRenderKey, setBoardRenderKey] = useState(0);
   
   useEffect(() => {
     if (cardEvents.forceRenderCount > 0) {
-      // Force a full component re-render by changing the key
+      // Force re-render for theme components only
       setBoardRenderKey(prev => prev + 1);
     }
   }, [cardEvents.forceRenderCount]);

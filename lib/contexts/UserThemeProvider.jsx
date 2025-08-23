@@ -108,7 +108,7 @@ export function UserThemeProvider({
       // Track which user we're synced to
       setLastUserId(userId);
       
-      console.log(`[UserTheme] Synced theme mode for user ${userId}: ${userMode}`);
+      console.log(`[UserTheme] 🎨 Synced theme mode for user ${userId}: ${userMode}`);
       
       // Optional callback for additional handling
       if (onThemeChange) {
@@ -152,7 +152,7 @@ export function UserThemeProvider({
         // Update next-themes
         setTheme(mode);
         
-        // console.log(`[UserTheme] ✅ SUCCESS: Set theme mode for user ${currentUser.id}: ${mode}`);
+        console.log(`[UserTheme] ✅ SUCCESS: Set theme mode for user ${currentUser.id}: ${mode}`);
         
         // Optional callback
         if (onThemeChange) {
@@ -222,7 +222,7 @@ export function UserThemeProvider({
       
       // Only sync if this is for the current user and the change came from another tab
       if (userId === currentUser?.id && event.newValue && event.newValue !== userThemeMode) {
-        // console.log(`[UserTheme] Cross-tab sync: ${userId} theme changed to ${event.newValue}`);
+        console.log(`[UserTheme] 🔄 Cross-tab sync: ${userId} theme changed to ${event.newValue}`);
         
         setUserThemeModeState(event.newValue);
         setTheme(event.newValue);

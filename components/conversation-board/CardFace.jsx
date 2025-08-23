@@ -18,6 +18,12 @@ import {
   UserCheck,
   UserPlus,
   RotateCw, // Flip icon
+  MessageCirclePlus,
+  MessageCircleQuestion,
+  Puzzle,
+  Speech,
+  Shield,
+  Sword,
 } from 'lucide-react';
 import { 
   BREAKPOINTS,
@@ -55,6 +61,30 @@ function getNextAssignedUser(currentUser, users) {
   
   // Fallback: clear assignment
   return 'none';
+}
+
+/**
+ * Helper function to get the appropriate icon for each card type
+ */
+function getCardTypeIcon(cardType) {
+  const type = cardType?.toLowerCase() || 'topic';
+  
+  switch (type) {
+    case 'topic':
+      return MessageCirclePlus;
+    case 'question':
+      return MessageCircleQuestion;
+    case 'guess':
+      return Puzzle;
+    case 'opinion':
+      return Speech;
+    case 'fact':
+      return Shield;
+    case 'accusation':
+      return Sword;
+    default:
+      return MessageCirclePlus; // Default to topic icon
+  }
 }
 
 export function CardFace({
@@ -192,7 +222,10 @@ export function CardFace({
         {...dragHandleProps}
       >
         <div className="flex items-center gap-2">
-          <GripVertical className={`${screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} ${dynamicTheme.colors.text.muted}`} />
+          {(() => {
+            const IconComponent = getCardTypeIcon(card?.type);
+            return <IconComponent className={`w-[24px] h-[24px] ${dynamicTheme.colors.text.primary}`} />;
+          })()}
           <span className={`font-extrabold tracking-wide ${dynamicTheme.colors.text.primary} text-sm sm:text-base lg:text-lg`}>
             {getTypeLabel(card?.type)}
           </span>

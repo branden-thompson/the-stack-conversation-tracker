@@ -44,7 +44,9 @@ function AppThemeWrapper({ children }) {
   );
 
   // Conditional UserThemeProvider based on feature flag
-  if (isUserThemeIsolationEnabled()) {
+  const isolationEnabled = isUserThemeIsolationEnabled();
+  
+  if (isolationEnabled) {
     return (
       <SafeUserThemeProvider 
         currentUser={currentUser}

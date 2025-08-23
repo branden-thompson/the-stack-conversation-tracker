@@ -48,7 +48,7 @@ function useResponsiveLayout() {
   return isMobile;
 }
 
-export function BoardCanvas({
+function BoardCanvasComponent({
   layoutKey = 0,
   cards = [],
   getCardsByZone,
@@ -241,3 +241,6 @@ export function BoardCanvas({
     </DndContext>
   );
 }
+
+// Export without memo for now to focus on theme isolation
+export const BoardCanvas = BoardCanvasComponent;
