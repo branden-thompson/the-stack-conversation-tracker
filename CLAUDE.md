@@ -254,3 +254,54 @@ GENERATE TEMPLATES [folder]           - Create required templates
 - **Global Config**: `/Users/bthompso/.claude/CLAUDE.md` (v1.1.004-rc)
 - **Project Config**: `.brtops/config.json` (project-specific settings)
 - **Feature Registry**: `.brtops/feature-registry.json` (feature tracking)
+
+## Voice-Mode Integration (2025-08-23)
+**🎤 VOICE SYSTEM FULLY OPERATIONAL** - Local TTS/STT with MCP integration
+
+### Voice Command Aliases (Added to ~/.zshrc)
+```bash
+voice-chat     # Full continuous conversation mode (af_nova voice - default)
+voice-listen   # Listen for 8 seconds, then respond
+voice-quick    # Quick 5-second voice input
+voice-long     # Extended 15-second voice input  
+voice-test     # Test TTS output without listening (af_nova voice)
+```
+
+### Voice Selection Results (2025-08-23)
+**🏆 Chosen Default Voice**: `af_nova` (Female American)
+- **Performance**: 1.4s generation, 7.4s playback, 8.8s total (2nd fastest overall)
+- **Efficiency**: 86 chunks (most efficient processing)
+- **Quality**: Brandon's preferred sound quality after testing af_sky, af_bella, af_jadzia, af_sarah, af_heart
+- **Ranking**: #2 performance, #1 preference (best balance of speed + sound quality)
+
+### Voice System Status
+- **Local Kokoro TTS**: ✅ Fully operational (70+ voices available)
+- **Local Whisper STT**: ✅ Running on port 2022 (CPU mode, no Core ML)
+- **Voice-Mode MCP Server**: ✅ Connected to Claude Code
+- **OpenAI STT Backup**: ✅ Available when local STT unavailable
+- **Audio I/O**: ✅ All devices detected and configured
+
+### Technical Implementation
+- **MCP Server**: `voice-mode` connected via `/Users/bthompso/.local/bin/uvx voice-mode`
+- **TTS Service**: Kokoro FastAPI on `127.0.0.1:8880` (Docker/local install)
+- **STT Service**: Whisper server on `127.0.0.1:2022` (rebuilt without Core ML)
+- **Configuration**: OpenAI API key configured in MCP environment for fallback
+
+### Voice Usage Examples
+```bash
+# Start natural conversation
+voice-chat
+
+# Quick voice command to Claude
+voice-listen
+"Hey Claude, what's the weather like?"
+
+# Test if voice output works
+voice-test
+```
+
+### Voice Integration Notes
+- Voice requires **manual trigger** via aliases (not automatic during text chat)
+- Voice-to-voice conversation works perfectly with local services
+- System falls back to OpenAI STT when local Whisper endpoint issues occur
+- All voice aliases load immediately in new terminal sessions
