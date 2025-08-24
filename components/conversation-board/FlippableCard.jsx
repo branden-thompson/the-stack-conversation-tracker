@@ -30,7 +30,6 @@ export function FlippableCard({
   handleSave,
   handleKeyDown,
   handleDelete,
-  handleAssignUser,
   moveToZone,
   dragHandleProps,
   showAssignMenu,
@@ -40,7 +39,6 @@ export function FlippableCard({
   contentMinHeight,
   dateText,
   createdByUser,
-  assignedToUser,
   inputRef,
   typeColors,
   style,
@@ -89,7 +87,7 @@ export function FlippableCard({
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Failed to flip card:', errorText);
+        // Failed to flip card - error handled by reverting state
         // Revert the flip on error
         setShowingFace(currentlyShowingFace);
       } else {
@@ -109,7 +107,7 @@ export function FlippableCard({
         }
       }
     } catch (error) {
-      console.error('Error flipping card:', error);
+      // Error flipping card - handled by reverting state
       // Revert the flip on error
       setShowingFace(currentlyShowingFace);
     }
@@ -145,7 +143,6 @@ export function FlippableCard({
           handleSave={handleSave}
           handleKeyDown={handleKeyDown}
           handleDelete={handleDelete}
-          handleAssignUser={handleAssignUser}
           moveToZone={moveToZone}
           onFlip={() => handleFlip('user')}
           dragHandleProps={dragHandleProps}
@@ -157,7 +154,6 @@ export function FlippableCard({
           contentMinHeight={contentMinHeight}
           dateText={dateText}
           createdByUser={createdByUser}
-          assignedToUser={assignedToUser}
           inputRef={inputRef}
           typeColors={typeColors}
         />
@@ -195,8 +191,7 @@ export function FlippableCard({
             handleSave={handleSave}
             handleKeyDown={handleKeyDown}
             handleDelete={handleDelete}
-            handleAssignUser={handleAssignUser}
-            moveToZone={moveToZone}
+              moveToZone={moveToZone}
             onFlip={() => handleFlip('user')}
             dragHandleProps={dragHandleProps}
             showAssignMenu={showAssignMenu}
@@ -207,8 +202,7 @@ export function FlippableCard({
             contentMinHeight={contentMinHeight}
             dateText={dateText}
             createdByUser={createdByUser}
-            assignedToUser={assignedToUser}
-            inputRef={inputRef}
+              inputRef={inputRef}
             typeColors={typeColors}
           />
         ) : (
@@ -280,8 +274,7 @@ export function FlippableCard({
             handleSave={handleSave}
             handleKeyDown={handleKeyDown}
             handleDelete={handleDelete}
-            handleAssignUser={handleAssignUser}
-            moveToZone={moveToZone}
+              moveToZone={moveToZone}
             onFlip={() => handleFlip('user')}
             dragHandleProps={dragHandleProps}
             showAssignMenu={showAssignMenu}
@@ -292,8 +285,7 @@ export function FlippableCard({
             contentMinHeight={contentMinHeight}
             dateText={dateText}
             createdByUser={createdByUser}
-            assignedToUser={assignedToUser}
-            inputRef={inputRef}
+              inputRef={inputRef}
             typeColors={typeColors}
           />
         </div>

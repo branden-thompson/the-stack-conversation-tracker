@@ -27,8 +27,8 @@ function fmtDuration(ms) {
 }
 
 
-const typeColor = (type) => {
-  return EVENT_COLORS[type] || 'bg-zinc-400';
+const typeColor = (type, dynamicTheme) => {
+  return EVENT_COLORS[type] || dynamicTheme.colors.background.tertiary;
 };
 
 const typeLabel = (type) => {
@@ -279,7 +279,7 @@ export default function DevConvos() {
 
         <div className={`flex-1 overflow-auto divide-y ${dynamicTheme.colors.border.primary}`}>
           {loading && <div className="p-3 text-sm">Loading…</div>}
-          {error && <div className="p-3 text-sm text-red-500">{error}</div>}
+          {error && <div className={`p-3 text-sm ${dynamicTheme.colors.status.error.text}`}>{error}</div>}
           {safeItems.map((c) => (
             <div
               key={c.id}
@@ -417,14 +417,14 @@ export default function DevConvos() {
                     <ol className="relative ml-5 pt-2">
                       {/* vertical rail */}
                       <div 
-                        className={`absolute left-0 top-2 w-0.5 bg-zinc-300 dark:bg-zinc-600`}
+                        className={`absolute left-0 top-2 w-0.5 ${dynamicTheme.colors.border.secondary}`}
                         style={{ height: 'calc(100% - 8px)' }}
                       />
                       {timeline.map((e) => (
                         <li key={e.id} className="relative pl-4 py-2">
                           {/* dot */}
                           <span
-                            className={`absolute left-[-6px] top-[14px] w-3 h-3 rounded-full ring-2 ring-zinc-50 dark:ring-zinc-900 ${typeColor(e.type)}`}
+                            className={`absolute left-[-6px] top-[14px] w-3 h-3 rounded-full ring-2 ${dynamicTheme.colors.background.primary} ${typeColor(e.type, dynamicTheme)}`}
                             aria-hidden="true"
                           />
                           {/* content */}

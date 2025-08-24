@@ -11,44 +11,45 @@
 
 import { cn } from '@/lib/utils';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { CheckCircle2, XCircle, AlertCircle, Clock, Loader2, Play, Pause, Square } from 'lucide-react';
 
 /**
  * Get status configuration based on type and status type
  */
-function getStatusConfig(status, type = 'coverage') {
+function getStatusConfig(status, type = 'coverage', dynamicTheme) {
   if (type === 'conversation') {
     const conversationConfigs = {
       active: {
-        bg: 'bg-green-100 dark:bg-green-950/30',
-        border: 'border-green-200 dark:border-green-800',
-        text: 'text-green-700 dark:text-green-300',
+        bg: dynamicTheme.colors.status.success.bg,
+        border: dynamicTheme.colors.status.success.border,
+        text: dynamicTheme.colors.status.success.text,
         icon: Play,
-        iconColor: 'text-green-600 dark:text-green-400',
+        iconColor: dynamicTheme.colors.status.success.icon,
         pulse: true
       },
       paused: {
-        bg: 'bg-yellow-100 dark:bg-yellow-950/30',
-        border: 'border-yellow-200 dark:border-yellow-800',
-        text: 'text-yellow-700 dark:text-yellow-300',
+        bg: dynamicTheme.colors.status.warning.bg,
+        border: dynamicTheme.colors.status.warning.border,
+        text: dynamicTheme.colors.status.warning.text,
         icon: Pause,
-        iconColor: 'text-yellow-600 dark:text-yellow-400',
+        iconColor: dynamicTheme.colors.status.warning.icon,
         pulse: false
       },
       stopped: {
-        bg: THEME.colors.background.accent,
-        border: THEME.colors.border.primary,
-        text: THEME.colors.text.muted,
+        bg: dynamicTheme.colors.background.tertiary,
+        border: dynamicTheme.colors.border.secondary,
+        text: dynamicTheme.colors.text.tertiary,
         icon: Square,
-        iconColor: THEME.colors.text.light,
+        iconColor: dynamicTheme.colors.text.secondary,
         pulse: false
       },
       idle: {
-        bg: THEME.colors.background.accent,
-        border: THEME.colors.border.primary,
-        text: THEME.colors.text.muted,
+        bg: dynamicTheme.colors.background.tertiary,
+        border: dynamicTheme.colors.border.secondary,
+        text: dynamicTheme.colors.text.tertiary,
         icon: null,
-        iconColor: THEME.colors.text.light,
+        iconColor: dynamicTheme.colors.text.secondary,
         pulse: false
       }
     };
@@ -58,43 +59,43 @@ function getStatusConfig(status, type = 'coverage') {
   // Coverage/test statuses
   const coverageConfigs = {
     passing: {
-      bg: 'bg-green-100 dark:bg-green-950/30',
-      border: 'border-green-200 dark:border-green-800',
-      text: 'text-green-700 dark:text-green-300',
+      bg: dynamicTheme.colors.status.success.bg,
+      border: dynamicTheme.colors.status.success.border,
+      text: dynamicTheme.colors.status.success.text,
       icon: CheckCircle2,
-      iconColor: 'text-green-600 dark:text-green-400',
+      iconColor: dynamicTheme.colors.status.success.icon,
       pulse: false
     },
     failing: {
-      bg: 'bg-red-100 dark:bg-red-950/30',
-      border: 'border-red-200 dark:border-red-800',
-      text: 'text-red-700 dark:text-red-300',
+      bg: dynamicTheme.colors.status.error.bg,
+      border: dynamicTheme.colors.status.error.border,
+      text: dynamicTheme.colors.status.error.text,
       icon: XCircle,
-      iconColor: 'text-red-600 dark:text-red-400',
+      iconColor: dynamicTheme.colors.status.error.icon,
       pulse: true
     },
     warning: {
-      bg: 'bg-yellow-100 dark:bg-yellow-950/30',
-      border: 'border-yellow-200 dark:border-yellow-800',
-      text: 'text-yellow-700 dark:text-yellow-300',
+      bg: dynamicTheme.colors.status.warning.bg,
+      border: dynamicTheme.colors.status.warning.border,
+      text: dynamicTheme.colors.status.warning.text,
       icon: AlertCircle,
-      iconColor: 'text-yellow-600 dark:text-yellow-400',
+      iconColor: dynamicTheme.colors.status.warning.icon,
       pulse: false
     },
     pending: {
-      bg: 'bg-zinc-100 dark:bg-zinc-800',
-      border: 'border-zinc-200 dark:border-zinc-700',
-      text: 'text-zinc-600 dark:text-zinc-400',
+      bg: dynamicTheme.colors.background.tertiary,
+      border: dynamicTheme.colors.border.secondary,
+      text: dynamicTheme.colors.text.secondary,
       icon: Clock,
-      iconColor: 'text-zinc-500 dark:text-zinc-400',
+      iconColor: dynamicTheme.colors.text.tertiary,
       pulse: false
     },
     running: {
-      bg: 'bg-blue-100 dark:bg-blue-950/30',
-      border: 'border-blue-200 dark:border-blue-800',
-      text: 'text-blue-700 dark:text-blue-300',
+      bg: dynamicTheme.colors.status.info.bg,
+      border: dynamicTheme.colors.status.info.border,
+      text: dynamicTheme.colors.status.info.text,
       icon: Loader2,
-      iconColor: 'text-blue-600 dark:text-blue-400',
+      iconColor: dynamicTheme.colors.status.info.icon,
       pulse: false,
       animate: 'animate-spin'
     }
@@ -115,7 +116,8 @@ export function StatusBadge({
   showIcon = true,
   className
 }) {
-  const config = getStatusConfig(status, type);
+  const dynamicTheme = useDynamicAppTheme();
+  const config = getStatusConfig(status, type, dynamicTheme);
   const Icon = config.icon;
   
   const sizeClasses = {
@@ -211,6 +213,7 @@ export function TestStatusBadge({
   size = 'md',
   className
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const status = failed > 0 ? 'failing' : 'passing';
   const percentage = total > 0 ? (passed / total) * 100 : 0;
   
@@ -245,7 +248,7 @@ export function TestStatusBadge({
       )}
       
       {duration && (
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 ml-2">
+        <span className={`text-xs ${dynamicTheme.colors.text.tertiary} ml-2`}>
           {duration}
         </span>
       )}
@@ -336,6 +339,8 @@ export function ConversationStatusIndicator({
   size = 'md',
   className
 }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
     <div className={cn('flex items-center gap-2', className)}>
       <ConversationStatusBadge 
@@ -349,7 +354,7 @@ export function ConversationStatusIndicator({
           size === 'xs' ? 'text-xs' : 
           size === 's' ? 'text-xs' :
           size === 'md' ? 'text-sm' : 'text-base',
-          THEME.colors.text.secondary
+          dynamicTheme.colors.text.secondary
         )}>
           {runtime}
         </span>

@@ -10,17 +10,20 @@
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { THEME, getThemeClasses } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
  * Section Header Component
  */
 export function SectionHeader({ title, controls, className }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
     <div className={cn(
-      `flex items-center justify-between border-b ${THEME.colors.border.primary} pb-3 mb-4`,
+      `flex items-center justify-between border-b ${dynamicTheme.colors.border.primary} pb-3 mb-4`,
       className
     )}>
-      <h3 className={`text-lg font-semibold ${THEME.colors.text.primary}`}>
+      <h3 className={`text-lg font-semibold ${dynamicTheme.colors.text.primary}`}>
         {title}
       </h3>
       {controls && (
@@ -47,11 +50,13 @@ export function SectionContent({ children, className }) {
  * Section Footer Component
  */
 export function SectionFooter({ controls, pagination, className }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   if (!controls && !pagination) return null;
   
   return (
     <div className={cn(
-      `flex items-center justify-between border-t ${THEME.colors.border.primary} pt-3 mt-4`,
+      `flex items-center justify-between border-t ${dynamicTheme.colors.border.primary} pt-3 mt-4`,
       className
     )}>
       <div className="flex items-center gap-2">
@@ -78,10 +83,12 @@ export function SectionCard({
   contentClassName,
   ...props 
 }) {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
     <Card 
       className={cn(
-        getThemeClasses('section'),
+        `!${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary} p-4`,
         className
       )}
       {...props}

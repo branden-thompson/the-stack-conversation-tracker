@@ -15,8 +15,6 @@ import {
   ThumbsDown,
   Timer,
   Calendar,
-  UserCheck,
-  UserPlus,
   RotateCw, // Flip icon
   MessageCirclePlus,
   MessageCircleQuestion,
@@ -35,33 +33,6 @@ import { cn } from '@/lib/utils';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
-/**
- * Helper function to get the next user in the assignment cycle
- * Cycles through: none -> user1 -> user2 -> ... -> none
- */
-function getNextAssignedUser(currentUser, users) {
-  if (!currentUser) {
-    // If no one assigned, assign to first user
-    if (users.length > 0) {
-      return users[0].id;
-    }
-    return null;
-  }
-  
-  // Find current user index
-  const currentIndex = users.findIndex(u => u.id === currentUser.id);
-  
-  if (currentIndex === users.length - 1) {
-    // If last user, clear assignment
-    return 'none';
-  } else if (currentIndex >= 0) {
-    // Assign to next user
-    return users[currentIndex + 1].id;
-  }
-  
-  // Fallback: clear assignment
-  return 'none';
-}
 
 /**
  * Helper function to get the appropriate icon for each card type
@@ -96,7 +67,6 @@ export function CardFace({
   handleSave,
   handleKeyDown,
   handleDelete,
-  handleAssignUser,
   moveToZone,
   onFlip, // New prop for flip functionality
   dragHandleProps,
@@ -106,7 +76,6 @@ export function CardFace({
   contentMinHeight,
   dateText,
   createdByUser,
-  assignedToUser,
   inputRef,
 }) {
   const typeKey = card?.type?.toLowerCase() || 'topic';
@@ -182,37 +151,6 @@ export function CardFace({
           </Button>
         </div>
         
-        {/* Assignment button - cycles through users */}
-        <div className="relative group">
-          <Button
-            variant="ghost"
-            size="icon"
-            className={dynamicTheme.colors.background.hover}
-            onClick={() => {
-              const nextUserId = getNextAssignedUser(assignedToUser, users);
-              if (nextUserId !== null) {
-                handleAssignUser(nextUserId);
-              }
-            }}
-            style={{ width: railBtnSize, height: railBtnSize }}
-            title={assignedToUser ? `Assigned to: ${assignedToUser.name}\nClick to change` : 'Click to assign user'}
-          >
-            {assignedToUser ? (
-              <UserCheck className={screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
-            ) : (
-              <UserPlus className={screenWidth < BREAKPOINTS.mobile ? "w-3 h-3" : "w-4 h-4"} />
-            )}
-          </Button>
-          
-          {/* Tooltip showing current assignment - positioned to the left to avoid clipping */}
-          {assignedToUser && (
-            <div className="absolute bottom-full right-full mr-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <div className={`${dynamicTheme.colors.background.tertiary} ${dynamicTheme.colors.text.primary} ${dynamicTheme.colors.border.primary} text-xs rounded px-2 py-1 whitespace-nowrap border`}>
-                {assignedToUser.name}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
       
       {/* Header (drag handle) */}
@@ -307,19 +245,6 @@ export function CardFace({
               </div>
             )}
             
-            {assignedToUser && (
-              <div className="flex items-center gap-2">
-                <ProfilePicture
-                  src={assignedToUser.profilePicture}
-                  name={assignedToUser.name}
-                  size="xs"
-                  className="ring-1 ring-blue-200 dark:ring-blue-700"
-                />
-                <span className={getCardTextStyle('footer.assignedTo', screenWidth)}>
-                  Assignee: {assignedToUser.name}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
+import { LeftTray } from '@/components/ui/left-tray';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { useUserManagement } from '@/lib/hooks/useUserManagement';
 import { useUserTheme } from '@/lib/hooks/useUserTheme';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -13,11 +16,13 @@ import { isUserThemeIsolationEnabled } from '@/lib/utils/user-theme-storage';
  * Open multiple tabs/windows to test cross-tab isolation.
  */
 export default function ThemeIsolationTestPage() {
+  const dynamicTheme = useDynamicAppTheme();
   const { currentUser, allUsers, handleUserSelect } = useUserManagement();
   const userTheme = useUserTheme(currentUser);
   const [testResults, setTestResults] = useState([]);
   const [isClient, setIsClient] = useState(false);
   const [featureEnabled, setFeatureEnabled] = useState(false);
+  const [trayOpen, setTrayOpen] = useState(false);
 
   const addTestResult = (test, result, details = '') => {
     setTestResults(prev => [...prev, {
@@ -75,17 +80,47 @@ export default function ThemeIsolationTestPage() {
     }, 100);
   };
 
+  // Handlers for UniversalDevHeader
+  const handleExportAllData = () => {
+    const exportData = {
+      testResults,
+      currentUser,
+      allUsers: allUsers.length,
+      featureEnabled,
+      currentTheme: userTheme.theme,
+      timestamp: new Date().toISOString()
+    };
+    const blob = new Blob(
+      [JSON.stringify(exportData, null, 2)],
+      { type: 'application/json' }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `theme-isolation-test-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg">
-        <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-          🧪 User Theme Mode Isolation Test
-        </h1>
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
+      {/* Header */}
+      <UniversalDevHeader
+        onOpenTray={() => setTrayOpen(true)}
+        onExportAllData={handleExportAllData}
+      />
 
-        {/* Feature Status */}
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Feature Status</h2>
+      {/* Main Content */}
+      <div className={`flex-1 overflow-auto p-6 ${dynamicTheme.colors.text.primary}`}>
+        <div className="container mx-auto space-y-8">
+          <div className={`${dynamicTheme.colors.background.card} rounded-lg p-6 ${dynamicTheme.colors.border.primary} border shadow-lg`}>
+            <h1 className={`text-3xl font-bold mb-6 ${dynamicTheme.colors.text.primary}`}>
+              🧪 User Theme Mode Isolation Test
+            </h1>
+
+            {/* Feature Status */}
+            <div className={`mb-6 p-4 ${dynamicTheme.colors.status.info.bg} rounded-lg`}>
+              <h2 className="text-lg font-semibold mb-2">Feature Status</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
               <strong>Feature Enabled:</strong> {isClient ? (featureEnabled ? '✅ Yes' : '❌ No') : '⏳ Loading...'}
@@ -101,11 +136,11 @@ export default function ThemeIsolationTestPage() {
               <strong>Total Users:</strong> {allUsers.length}
             </div>
           </div>
-        </div>
+            </div>
 
-        {/* User Selection */}
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <h2 className="text-lg font-semibold mb-3">User Switching Test</h2>
+            {/* User Selection */}
+            <div className={`mb-6 p-4 ${dynamicTheme.colors.status.success.bg} rounded-lg`}>
+              <h2 className="text-lg font-semibold mb-3">User Switching Test</h2>
           <div className="flex flex-wrap gap-2 mb-4">
             {allUsers.map(user => (
               <button
@@ -113,8 +148,8 @@ export default function ThemeIsolationTestPage() {
                 onClick={() => handleUserSelect(user)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   currentUser?.id === user.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
+                    ? `${dynamicTheme.colors.status.info.bg} text-white border-0`
+                    : `${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.text.primary} hover:${dynamicTheme.colors.background.tertiary} border ${dynamicTheme.colors.border.primary}`
                 }`}
               >
                 {user.name} {user.isGuest && '(Guest)'}
@@ -123,18 +158,18 @@ export default function ThemeIsolationTestPage() {
           </div>
           <button
             onClick={testUserSwitching}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            className={`px-4 py-2 ${dynamicTheme.colors.status.success.bg} text-white rounded-md hover:opacity-80 border-0`}
           >
             Test User Switching
           </button>
-        </div>
+            </div>
 
-        {/* Theme Controls */}
-        <div className="mb-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-          <h2 className="text-lg font-semibold mb-3">Theme Mode Testing</h2>
+            {/* Theme Controls */}
+            <div className={`mb-6 p-4 rounded-lg`} style={{ backgroundColor: 'rgb(147 51 234 / 0.1)' }}>
+              <h2 className="text-lg font-semibold mb-3">Theme Mode Testing</h2>
           <div className="flex items-center gap-4 mb-4">
             <ThemeToggle />
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>
               Current: <strong>{userTheme.theme}</strong>
             </span>
           </div>
@@ -142,75 +177,87 @@ export default function ThemeIsolationTestPage() {
           <div className="flex gap-2">
             <button
               onClick={() => testThemePersistence('light')}
-              className="px-3 py-2 bg-yellow-400 text-gray-900 rounded-md hover:bg-yellow-500"
+              className={`px-3 py-2 ${dynamicTheme.colors.status.warning.bg} ${dynamicTheme.colors.text.primary} rounded-md hover:opacity-80 border-0`}
             >
               Test Light Mode
             </button>
             <button
               onClick={() => testThemePersistence('dark')}
-              className="px-3 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900"
+              className={`px-3 py-2 ${dynamicTheme.colors.background.secondary} ${dynamicTheme.colors.text.primary} rounded-md hover:opacity-80 border border-2 ${dynamicTheme.colors.border.primary}`}
             >
               Test Dark Mode
             </button>
             <button
               onClick={() => testThemePersistence('system')}
-              className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              className={`px-3 py-2 ${dynamicTheme.colors.status.info.bg} text-white rounded-md hover:opacity-80 border-0`}
             >
               Test System Mode
             </button>
           </div>
-        </div>
+            </div>
 
-        {/* Test Results */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <h2 className="text-lg font-semibold mb-3">Test Results</h2>
+            {/* Test Results */}
+            <div className={`p-4 ${dynamicTheme.colors.background.tertiary} rounded-lg`}>
+              <h2 className="text-lg font-semibold mb-3">Test Results</h2>
           <button
             onClick={() => setTestResults([])}
-            className="mb-3 px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+            className={`mb-3 px-3 py-1 ${dynamicTheme.colors.status.error.bg} text-white rounded text-sm hover:opacity-80 border-0`}
           >
             Clear Results
           </button>
           
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {testResults.length === 0 ? (
-              <p className="text-gray-500 italic">No test results yet</p>
+              <p className={`${dynamicTheme.colors.text.tertiary} italic`}>No test results yet</p>
             ) : (
               testResults.map((result, index) => (
-                <div key={index} className="p-2 bg-white dark:bg-gray-800 rounded text-sm">
+                <div key={index} className={`p-2 ${dynamicTheme.colors.background.card} rounded text-sm`}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium">{result.test}</span>
                     <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      result.result === 'PASS' ? 'bg-green-100 text-green-800' :
-                      result.result === 'FAIL' ? 'bg-red-100 text-red-800' :
-                      result.result === 'SKIP' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
+                      result.result === 'PASS' ? dynamicTheme.colors.status.success.bg + ' ' + dynamicTheme.colors.status.success.text :
+                      result.result === 'FAIL' ? dynamicTheme.colors.status.error.bg + ' ' + dynamicTheme.colors.status.error.text :
+                      result.result === 'SKIP' ? dynamicTheme.colors.status.warning.bg + ' ' + dynamicTheme.colors.status.warning.text :
+                      dynamicTheme.colors.status.info.bg + ' ' + dynamicTheme.colors.status.info.text
                     }`}>
                       {result.result}
                     </span>
-                    <span className="text-gray-500 text-xs">{result.timestamp}</span>
+                    <span className={`${dynamicTheme.colors.text.tertiary} text-xs`}>{result.timestamp}</span>
                   </div>
                   {result.details && (
-                    <p className="text-gray-600 dark:text-gray-400 ml-4">{result.details}</p>
+                    <p className={`${dynamicTheme.colors.text.tertiary} ml-4`}>{result.details}</p>
                   )}
                 </div>
               ))
             )}
           </div>
-        </div>
+            </div>
 
-        {/* Instructions */}
-        <div className="mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-          <h2 className="text-lg font-semibold mb-2">Testing Instructions</h2>
-          <ol className="list-decimal list-inside space-y-1 text-sm">
+            {/* Instructions */}
+            <div className={`mt-6 p-4 ${dynamicTheme.colors.status.warning.bg} rounded-lg`}>
+              <h2 className="text-lg font-semibold mb-2">Testing Instructions</h2>
+              <ol className="list-decimal list-inside space-y-1 text-sm">
             <li>Open this page in multiple browser tabs/windows</li>
             <li>Switch between different users in each tab</li>
             <li>Change theme modes (Light/Dark/System) for each user</li>
             <li>Verify that theme settings are isolated per user across tabs</li>
             <li>Test guest users get dark mode by default</li>
             <li>Check that settings persist after page refresh</li>
-          </ol>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Left Tray */}
+      <LeftTray
+        isOpen={trayOpen}
+        onClose={() => setTrayOpen(false)}
+        onNewCard={() => {}} // Disabled for dev pages
+        onResetLayout={() => {}} // Disabled for dev pages  
+        onRefreshCards={() => window.location.reload()}
+        title="Theme Isolation Test"
+      />
     </div>
   );
 }

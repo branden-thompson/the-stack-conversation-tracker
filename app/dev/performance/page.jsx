@@ -170,7 +170,7 @@ export default function PerformancePage() {
               onCheckedChange={toggleMonitoring}
               disabled={emergencyDisabled || (circuitBreakerStatus?.isTripped && !isEnabled)}
               id="monitoring-toggle"
-              className="data-[state=checked]:bg-zinc-600 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-700"
+              className={`data-[state=checked]:${dynamicTheme.colors.background.tertiary} data-[state=unchecked]:${dynamicTheme.colors.background.secondary}`}
             />
             <div className="flex flex-col">
               <label htmlFor="monitoring-toggle" className="text-sm font-medium">
@@ -179,7 +179,7 @@ export default function PerformancePage() {
                  isEnabled ? 'Monitoring Enabled' : 'Monitoring Disabled'}
               </label>
               {(emergencyDisabled || circuitBreakerStatus?.isTripped) && (
-                <span className="text-xs text-red-600 dark:text-red-400">
+                <span className={`text-xs ${dynamicTheme.colors.status.error.text}`}>
                   {emergencyDisabled ? 'Check environment variables or localStorage' :
                    `Tripped due to safety limits (${circuitBreakerStatus?.consecutiveErrors} errors)`}
                 </span>
@@ -206,7 +206,7 @@ export default function PerformancePage() {
             size="sm"
             onClick={() => flushMetrics()}
             disabled={!isEnabled}
-            className="border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className={`${dynamicTheme.colors.border.secondary} ${dynamicTheme.colors.text.secondary} hover:${dynamicTheme.colors.background.tertiary}`}
           >
             Flush Metrics
           </Button>
@@ -216,7 +216,7 @@ export default function PerformancePage() {
               variant="destructive" 
               size="sm"
               onClick={emergencyDisable}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className={`${dynamicTheme.colors.status.error.bg} hover:opacity-80 text-white`}
             >
               Emergency Stop
             </Button>
@@ -263,7 +263,7 @@ export default function PerformancePage() {
               </p>
               <Button 
                 onClick={() => toggleMonitoring(true)}
-                className="bg-zinc-600 hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                className={`${dynamicTheme.colors.background.tertiary} hover:opacity-80`}
               >
                 <Monitor className="w-4 h-4 mr-2" />
                 Enable Monitoring
@@ -324,13 +324,13 @@ export default function PerformancePage() {
           <div className="space-y-4">
             {/* Emergency Disabled Warning */}
             {emergencyDisabled && (
-              <Card className="border-red-500 bg-red-50 dark:bg-red-950">
+              <Card className={`${dynamicTheme.colors.status.error.border} ${dynamicTheme.colors.status.error.bg}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-2">
-                    <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <XCircle className={`h-5 w-5 ${dynamicTheme.colors.status.error.icon} mt-0.5`} />
                     <div>
-                      <p className="text-sm font-medium text-red-800 dark:text-red-200">Emergency Controls Active</p>
-                      <p className="text-sm text-red-700 dark:text-red-300">
+                      <p className={`text-sm font-medium ${dynamicTheme.colors.status.error.text}`}>Emergency Controls Active</p>
+                      <p className={`text-sm ${dynamicTheme.colors.status.error.text}`}>
                         Performance monitoring is disabled via emergency controls. Check environment variables (NEXT_PUBLIC_PERF_MONITORING_DISABLED) or localStorage flags.
                       </p>
                     </div>
@@ -341,13 +341,13 @@ export default function PerformancePage() {
             
             {/* Circuit Breaker Warning */}
             {circuitBreakerStatus?.isTripped && (
-              <Card className="border-orange-500 bg-orange-50 dark:bg-orange-950">
+              <Card className={`${dynamicTheme.colors.status.warning.border} ${dynamicTheme.colors.status.warning.bg}`}>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <AlertTriangle className={`h-5 w-5 ${dynamicTheme.colors.status.warning.icon} mt-0.5`} />
                     <div>
-                      <p className="text-sm font-medium text-orange-800 dark:text-orange-200">Circuit Breaker Activated</p>
-                      <p className="text-sm text-orange-700 dark:text-orange-300">
+                      <p className={`text-sm font-medium ${dynamicTheme.colors.status.warning.text}`}>Circuit Breaker Activated</p>
+                      <p className={`text-sm ${dynamicTheme.colors.status.warning.text}`}>
                         Monitoring was automatically disabled due to safety limits. 
                         {circuitBreakerStatus.consecutiveErrors} consecutive errors detected. 
                         Will auto-recover in {Math.round((300000 - (Date.now() - (circuitBreakerStatus.trippedAt || 0))) / 60000)} minutes.

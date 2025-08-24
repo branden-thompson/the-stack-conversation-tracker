@@ -9,6 +9,7 @@
 
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { Loader2, Database } from 'lucide-react';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 // Dynamically import coverage data and components
 const getCoverageData = () => 
@@ -26,16 +27,18 @@ const getGroupedCoverageTable = () =>
  * Loading fallback for coverage data
  */
 function CoverageDataSkeleton() {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
     <div className="space-y-4">
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 flex items-center justify-center">
-        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+      <div className={`${dynamicTheme.colors.background.secondary} rounded-lg p-6 flex items-center justify-center`}>
+        <div className={`flex items-center gap-2 ${dynamicTheme.colors.text.tertiary}`}>
           <Database className="h-5 w-5" />
           <span className="text-sm">Loading coverage data...</span>
         </div>
       </div>
-      <div className="bg-gray-100 dark:bg-gray-800 rounded-lg h-32 flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-500 dark:text-gray-400" />
+      <div className={`${dynamicTheme.colors.background.secondary} rounded-lg h-32 flex items-center justify-center`}>
+        <Loader2 className={`h-6 w-6 animate-spin ${dynamicTheme.colors.text.tertiary}`} />
       </div>
     </div>
   );
@@ -78,9 +81,11 @@ function CoverageDataLoader({ children }) {
   }
 
   if (error) {
+    const dynamicTheme = useDynamicAppTheme();
+    
     return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-        <div className="text-red-800 dark:text-red-200 text-sm">
+      <div className={`${dynamicTheme.colors.status.error.bg} ${dynamicTheme.colors.status.error.border} rounded-lg p-4`}>
+        <div className={`${dynamicTheme.colors.status.error.text} text-sm`}>
           Failed to load coverage data: {error.message}
         </div>
       </div>

@@ -3,7 +3,7 @@
  * - Dark-mode placeholder text now uses high-contrast colors across all types
  * - MAX_CARD_WIDTH = 250
  * - Preserves drag, stacking visuals, centered content, footer anchoring
- * - Displays user relationships (created by, assigned to) in footer
+ * - Displays user relationships (created by) in footer
  * - Supports both new user system and legacy person field for backward compatibility
  */
 
@@ -176,13 +176,6 @@ export function ConversationCard({
     });
   };
 
-  const handleAssignUser = async (userId) => {
-    setShowControlMenu(false);
-    await onUpdate?.(card.id, {
-      assignedToUserId: userId === 'none' ? null : userId,
-      updatedAt: Date.now(),
-    });
-  };
 
   const createdTs = card.createdAt ?? Date.now();
   const dateText = useMemo(() => {
@@ -222,7 +215,6 @@ export function ConversationCard({
   };
 
   const createdByUser = getUser(card.createdByUserId);
-  const assignedToUser = getUser(card.assignedToUserId);
   
   // Fallback to old person field for cards created before user system
   const legacyPerson = (card.person && String(card.person).trim()) || null;
@@ -259,7 +251,6 @@ export function ConversationCard({
         handleSave={handleSave}
         handleKeyDown={handleKeyDown}
         handleDelete={handleDelete}
-        handleAssignUser={handleAssignUser}
         moveToZone={moveToZone}
         dragHandleProps={dragHandleProps}
         users={users}
@@ -267,7 +258,6 @@ export function ConversationCard({
         contentMinHeight={CONTENT_MIN_HEIGHT}
         dateText={dateText}
         createdByUser={createdByUser}
-        assignedToUser={assignedToUser}
         inputRef={inputRef}
         typeColors={cardType}
         style={{ 
