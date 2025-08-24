@@ -25,12 +25,12 @@ function createQueryClient() {
                        process.env.NODE_ENV === 'development';
   
   if (phase4Enabled) {
-    console.log('[QueryClient] Phase 4: Using SSE-Only Query Client with selective polling elimination');
+    // Phase 4: SSE-Only Query Client with selective polling elimination
     return createSSEOnlyQueryClient();
   }
   
   // Legacy Query Client (Pre-Phase 4)
-  console.log('[QueryClient] Using legacy Query Client with standard polling');
+  // Using legacy Query Client with standard polling
   return new QueryClient({
     defaultOptions: {
       queries: {

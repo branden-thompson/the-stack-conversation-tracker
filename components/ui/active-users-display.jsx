@@ -42,12 +42,7 @@ const ActiveUsersDisplayComponent = ({
   const currentProps = { className, size, showLabel, maxVisible };
   const propsChanged = JSON.stringify(lastPropsRef.current) !== JSON.stringify(currentProps);
   
-  console.log(`[ActiveUsersDisplayComponent] Render #${renderCountRef.current} at ${renderTimestamp}`, {
-    propsChanged,
-    currentProps,
-    lastProps: lastPropsRef.current,
-    timestamp: renderTimestamp
-  });
+  // Render tracking available in dev tools
   
   lastPropsRef.current = currentProps;
 
@@ -119,12 +114,7 @@ const ActiveUsersDisplayComponent = ({
   const hookResultChanged = hookResultRef.current !== hookResultHash;
   
   if (hookResultChanged) {
-    console.log(`[ActiveUsersDisplayComponent] Hook result changed`, {
-      renderCount: renderCountRef.current,
-      oldResult: hookResultRef.current ? JSON.parse(hookResultRef.current) : null,
-      newResult: currentHookResult,
-      timestamp: renderTimestamp
-    });
+    // Hook result change tracking available in dev tools
     hookResultRef.current = hookResultHash;
   }
   
@@ -136,19 +126,7 @@ const ActiveUsersDisplayComponent = ({
   const logPerformanceStats = useCallback(() => {
     if (process.env.NODE_ENV === 'development') {
       const stats = getPerformanceStats();
-      console.log('[ActiveUsersDisplay] Performance Stats:', {
-        ...stats,
-        connectionMode,
-        isSSEConnected: isConnectedViaSSE,
-        phase4Enabled: isPhase4Enabled,
-        optimizedSSE: isOptimizedSSE,
-        hookUsed: isPhase4Enabled && useOptimizedSSE ? 'useSSEActiveUsersOptimized' :
-                  isPhase4Enabled ? 'useSSEActiveUsers' : 'useStableActiveUsers',
-        systemStatus: systemStatus || 'unknown',
-        optimization: _optimization || 'none',
-        environment: envConfig.environment.type,
-        pollingInterval: envConfig.polling.sessions
-      });
+      // Performance stats tracking available in dev tools
     }
   }, [getPerformanceStats, connectionMode, isConnectedViaSSE, isPhase4Enabled]);
   
@@ -158,7 +136,7 @@ const ActiveUsersDisplayComponent = ({
     if (trackActivity && typeof trackActivity === 'function') {
       trackActivity(`active-users-${action}`);
     } else if (process.env.NODE_ENV === 'development') {
-      console.log(`[ActiveUsersDisplay] User interaction: ${action} for user ${user.name} (${connectionMode})`);
+      // User interaction tracking available in dev tools
     }
     
     if (action === 'hover') {
@@ -286,14 +264,9 @@ export const ActiveUsersDisplay = memo(ActiveUsersDisplayComponent, (prevProps, 
   );
   
   if (propsChanged) {
-    console.log('[ActiveUsersDisplay] Props changed, re-rendering:', {
-      className: { prev: prevProps.className, next: nextProps.className, changed: prevProps.className !== nextProps.className },
-      size: { prev: prevProps.size, next: nextProps.size, changed: prevProps.size !== nextProps.size },
-      showLabel: { prev: prevProps.showLabel, next: nextProps.showLabel, changed: prevProps.showLabel !== nextProps.showLabel },
-      maxVisible: { prev: prevProps.maxVisible, next: nextProps.maxVisible, changed: prevProps.maxVisible !== nextProps.maxVisible }
-    });
+    // Props change tracking available in dev tools
   } else {
-    console.log('[ActiveUsersDisplay] Props identical, preventing re-render');
+    // Props optimization tracking available in dev tools
   }
   
   return !propsChanged;
