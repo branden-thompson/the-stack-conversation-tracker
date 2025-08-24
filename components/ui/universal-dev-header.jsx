@@ -141,7 +141,7 @@ export function UniversalDevHeader({
                 {title}
               </h1>
               {isGuestMode && (
-                <span className="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 rounded-full">
+                <span className={`px-2 py-1 text-xs font-medium ${dynamicTheme.colors.status.warning.bg} ${dynamicTheme.colors.status.warning.text} rounded-full`}>
                   Guest Mode
                 </span>
               )}

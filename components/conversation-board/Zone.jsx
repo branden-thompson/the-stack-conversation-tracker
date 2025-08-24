@@ -59,8 +59,7 @@ export function Zone({
     data: { type: 'zone', accepts: 'card' },
   });
 
-  // CRITICAL DEBUG: Log cards received by Zone
-  console.log(`[Zone-${zoneId}] 🎯 Received ${cards?.length || 0} cards:`, cards?.map(c => c.id?.substring(0, 8)) || []);
+  // Zone card tracking available in dev tools
   
   // Get dynamic theme
   const dynamicTheme = useDynamicAppTheme();

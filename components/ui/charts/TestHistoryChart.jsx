@@ -13,6 +13,7 @@ import { ChevronDown, ChevronUp, TrendingUp, TrendingDown, Table, LineChart } fr
 import { Button } from '@/components/ui/button';
 import { CHART_CONFIG } from '@/lib/utils/ui-constants';
 import { cn } from '@/lib/utils';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
  * Format date for X-axis labels
@@ -46,7 +47,7 @@ function formatFullDate(dateString) {
 /**
  * Custom tooltip formatter for multi-line chart with coverage
  */
-function multiLineTooltipFormatter(payload, label) {
+function multiLineTooltipFormatter(payload, label, dynamicTheme) {
   if (!payload || payload.length === 0) return null;
   
   // Find the test success entry to get metadata
@@ -58,7 +59,7 @@ function multiLineTooltipFormatter(payload, label) {
       className="space-y-2"
       style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
     >
-      <div className="font-semibold text-sm text-zinc-800 dark:text-zinc-200 border-b border-zinc-200 dark:border-zinc-700 pb-1">
+      <div className={`font-semibold text-sm ${dynamicTheme.colors.text.primary} border-b ${dynamicTheme.colors.border.primary} pb-1`}>
         {formatFullDate(label)}
       </div>
       
@@ -68,15 +69,15 @@ function multiLineTooltipFormatter(payload, label) {
           <div className="font-medium">Test Results:</div>
           <div className="pl-2 space-y-1">
             <div className="flex justify-between gap-4">
-              <span className="text-zinc-600 dark:text-zinc-400">Passed:</span>
-              <span className="font-medium text-green-600 dark:text-green-400">
+              <span className={dynamicTheme.colors.text.secondary}>Passed:</span>
+              <span className={`font-medium ${dynamicTheme.colors.status.success.text}`}>
                 {metadata.passed} / {metadata.totalTests}
               </span>
             </div>
             {metadata.failed > 0 && (
               <div className="flex justify-between gap-4">
-                <span className="text-zinc-600 dark:text-zinc-400">Failed:</span>
-                <span className="font-medium text-red-600 dark:text-red-400">
+                <span className={dynamicTheme.colors.text.secondary}>Failed:</span>
+                <span className={`font-medium ${dynamicTheme.colors.status.error.text}`}>
                   {metadata.failed}
                 </span>
               </div>
@@ -98,7 +99,7 @@ function multiLineTooltipFormatter(payload, label) {
                     className="inline-block w-2 h-2 rounded-full" 
                     style={{ backgroundColor: entry.color }} 
                   />
-                  <span className="text-zinc-600 dark:text-zinc-400">
+                  <span className={dynamicTheme.colors.text.secondary}>
                     {entry.name}:
                   </span>
                 </span>
@@ -121,6 +122,7 @@ export function TestHistoryChart({
   onToggleFullHistory = null,
   onControlsReady,
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const [showTable, setShowTable] = useState(false);
   
   // Process and limit test history data for multi-line chart
@@ -229,6 +231,11 @@ export function TestHistoryChart({
     }
   }, [showTable]);
 
+  // Create a wrapper function that has access to dynamicTheme
+  const tooltipFormatterWithTheme = (payload, label) => {
+    return multiLineTooltipFormatter(payload, label, dynamicTheme);
+  };
+
   return (
     <div className="space-y-4">
       {/* Chart Stats Summary */}
@@ -236,15 +243,15 @@ export function TestHistoryChart({
         className="flex items-center gap-4"
         style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
       >
-        <div className="text-sm text-zinc-600 dark:text-zinc-400">
+        <div className={`text-sm ${dynamicTheme.colors.text.secondary}`}>
           <span className="font-medium">Last {chartData.length} runs</span>
         </div>
         
         {trend && (
           <div className={`flex items-center gap-1 text-sm ${
-            trend.direction === 'up' ? 'text-green-600 dark:text-green-400' :
-            trend.direction === 'down' ? 'text-red-600 dark:text-red-400' :
-            'text-zinc-600 dark:text-zinc-400'
+            trend.direction === 'up' ? dynamicTheme.colors.status.success.text :
+            trend.direction === 'down' ? dynamicTheme.colors.status.error.text :
+            dynamicTheme.colors.text.secondary
           }`}>
             {trend.direction === 'up' ? (
               <TrendingUp className="w-4 h-4" />
@@ -276,12 +283,12 @@ export function TestHistoryChart({
           yTicks={CHART_CONFIG.axes.y.ticks}
           xFormatter={formatDateForAxis}
           yFormatter={(value) => `${value}%`}
-          tooltipFormatter={multiLineTooltipFormatter}
-          className="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4"
+          tooltipFormatter={tooltipFormatterWithTheme}
+          className={`${dynamicTheme.colors.background.tertiary} rounded-lg p-4`}
         />
       ) : (
         <div 
-          className="overflow-x-auto bg-white dark:bg-zinc-800 rounded-lg p-4"
+          className={`overflow-x-auto ${dynamicTheme.colors.background.card} rounded-lg p-4`}
           style={{ fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}
         >
           <table className="w-full text-sm">
@@ -321,37 +328,37 @@ export function TestHistoryChart({
                     <td className="px-2 py-1.5 text-right" style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.totalTests}
                     </td>
-                    <td className="px-2 py-1.5 text-right text-green-600 dark:text-green-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.status.success.text}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.passed}
                     </td>
-                    <td className="px-2 py-1.5 text-right text-red-600 dark:text-red-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.status.error.text}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.failed}
                     </td>
                     <td className="px-2 py-1.5 text-right"
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       <span className={
-                        parseFloat(successRate) >= 90 ? 'text-green-600 dark:text-green-400' :
-                        parseFloat(successRate) >= 70 ? 'text-yellow-600 dark:text-yellow-400' :
-                        'text-red-600 dark:text-red-400'
+                        parseFloat(successRate) >= 90 ? dynamicTheme.colors.status.success.text :
+                        parseFloat(successRate) >= 70 ? dynamicTheme.colors.status.warning.text :
+                        dynamicTheme.colors.status.error.text
                       }>
                         {successRate}%
                       </span>
                     </td>
-                    <td className="px-2 py-1.5 text-right text-blue-600 dark:text-blue-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.status.info.text}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.coverage?.statements?.toFixed(1) || '-'}%
                     </td>
-                    <td className="px-2 py-1.5 text-right text-purple-600 dark:text-purple-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.text.secondary}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.coverage?.branches?.toFixed(1) || '-'}%
                     </td>
-                    <td className="px-2 py-1.5 text-right text-orange-600 dark:text-orange-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.status.warning.text}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.coverage?.functions?.toFixed(1) || '-'}%
                     </td>
-                    <td className="px-2 py-1.5 text-right text-teal-600 dark:text-teal-400"
+                    <td className={`px-2 py-1.5 text-right ${dynamicTheme.colors.text.secondary}`}
                         style={{ fontSize: CHART_CONFIG.fonts.table.cellSize, fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' }}>
                       {run.coverage?.lines?.toFixed(1) || '-'}%
                     </td>

@@ -11,35 +11,38 @@ import { useMemo } from 'react';
 import { TrendingUp, TrendingDown, Minus, AlertCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CoverageBar } from './coverage-bar';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
- * Get status color based on metric value and thresholds
+ * Get status color based on metric value and thresholds using dynamic theme
  */
-function getStatusColor(value, thresholds = { good: 90, warning: 70 }) {
+function getStatusColor(value, thresholds = { good: 90, warning: 70 }, dynamicTheme) {
   if (value >= thresholds.good) return {
-    bg: 'bg-green-50 dark:bg-green-950/20',
-    border: 'border-green-200 dark:border-green-800',
-    text: 'text-green-700 dark:text-green-300',
-    icon: 'text-green-600 dark:text-green-400'
+    bg: dynamicTheme.colors.status.success.bg,
+    border: dynamicTheme.colors.status.success.border,
+    text: dynamicTheme.colors.status.success.text,
+    icon: dynamicTheme.colors.status.success.icon
   };
   if (value >= thresholds.warning) return {
-    bg: 'bg-yellow-50 dark:bg-yellow-950/20',
-    border: 'border-yellow-200 dark:border-yellow-800',
-    text: 'text-yellow-700 dark:text-yellow-300',
-    icon: 'text-yellow-600 dark:text-yellow-400'
+    bg: dynamicTheme.colors.status.warning.bg,
+    border: dynamicTheme.colors.status.warning.border,
+    text: dynamicTheme.colors.status.warning.text,
+    icon: dynamicTheme.colors.status.warning.icon
   };
   return {
-    bg: 'bg-red-50 dark:bg-red-950/20',
-    border: 'border-red-200 dark:border-red-800',
-    text: 'text-red-700 dark:text-red-300',
-    icon: 'text-red-600 dark:text-red-400'
+    bg: dynamicTheme.colors.status.error.bg,
+    border: dynamicTheme.colors.status.error.border,
+    text: dynamicTheme.colors.status.error.text,
+    icon: dynamicTheme.colors.status.error.icon
   };
 }
 
 /**
  * Mini sparkline visualization
+ * Note: Uses hardcoded hex colors because SVG elements require actual color values,
+ * not CSS class names. CSS classes don't work with stroke attribute in SVG polylines.
  */
-function Sparkline({ data = [], width = 60, height = 20, className }) {
+function Sparkline({ data = [], width = 60, height = 20, className, dynamicTheme }) {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min || 1;
@@ -51,6 +54,10 @@ function Sparkline({ data = [], width = 60, height = 20, className }) {
   }).join(' ');
 
   const isImproving = data[data.length - 1] > data[0];
+  
+  // Hardcoded hex colors for SVG compatibility - CSS classes don't work with SVG stroke
+  const improvingColor = "#10b981"; // green-500 - success color
+  const decliningColor = "#ef4444"; // red-500 - error color
 
   return (
     <svg 
@@ -62,9 +69,8 @@ function Sparkline({ data = [], width = 60, height = 20, className }) {
       <polyline
         points={points}
         fill="none"
-        stroke={isImproving ? 'currentColor' : 'currentColor'}
+        stroke={isImproving ? improvingColor : decliningColor}
         strokeWidth="1.5"
-        className={isImproving ? 'text-green-500' : 'text-red-500'}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -85,6 +91,7 @@ export function MetricCard({
   size = 'md', // sm, md, lg
   className
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   // Calculate trend if not provided
   const calculatedTrend = useMemo(() => {
     if (trend !== null) return trend;
@@ -100,7 +107,7 @@ export function MetricCard({
     return null;
   }, [trend, value, previousValue]);
 
-  const colors = getStatusColor(value, threshold);
+  const colors = getStatusColor(value, threshold, dynamicTheme);
   
   const sizeClasses = {
     sm: { card: 'p-3', title: 'text-xs', value: 'text-lg', trend: 'text-xs' },
@@ -132,7 +139,7 @@ export function MetricCard({
           )}
         </div>
         {sparkline.length > 0 && (
-          <Sparkline data={sparkline} className="ml-2" />
+          <Sparkline data={sparkline} className="ml-2" dynamicTheme={dynamicTheme} />
         )}
       </div>
 
@@ -149,14 +156,14 @@ export function MetricCard({
             ) : calculatedTrend === 'down' ? (
               <TrendingDown className={cn('w-4 h-4', colors.icon)} />
             ) : (
-              <Minus className={cn('w-4 h-4 text-zinc-400')} />
+              <Minus className={cn('w-4 h-4', dynamicTheme.colors.text.tertiary)} />
             )}
             {trendValue !== null && (
               <span className={cn(
                 'font-medium tabular-nums',
-                trendValue > 0 ? 'text-green-600 dark:text-green-400' : 
-                trendValue < 0 ? 'text-red-600 dark:text-red-400' : 
-                'text-zinc-500'
+                trendValue > 0 ? dynamicTheme.colors.status.success.text : 
+                trendValue < 0 ? dynamicTheme.colors.status.error.text : 
+                dynamicTheme.colors.text.tertiary
               )}>
                 {trendValue > 0 ? '+' : ''}{trendValue.toFixed(1)}{unit}
               </span>
@@ -180,8 +187,9 @@ export function MetricCard({
           onClick={actionable.onClick}
           className={cn(
             'w-full text-left rounded-md px-2 py-1.5 text-xs font-medium',
-            'bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700',
-            'text-zinc-700 dark:text-zinc-300',
+            dynamicTheme.colors.background.secondary,
+            `hover:${dynamicTheme.colors.background.tertiary}`,
+            dynamicTheme.colors.text.secondary,
             'transition-colors duration-150',
             'flex items-center gap-1.5'
           )}
@@ -204,7 +212,8 @@ export function MetricCardCompact({
   unit = '%',
   className
 }) {
-  const colors = getStatusColor(value);
+  const dynamicTheme = useDynamicAppTheme();
+  const colors = getStatusColor(value, { good: 90, warning: 70 }, dynamicTheme);
   
   return (
     <div className={cn(
@@ -214,7 +223,7 @@ export function MetricCardCompact({
       colors.border,
       className
     )}>
-      <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
+      <span className={`text-xs font-medium ${dynamicTheme.colors.text.secondary}`}>
         {label}
       </span>
       <div className="flex items-center gap-2">
@@ -224,7 +233,9 @@ export function MetricCardCompact({
         {trend && (
           <span className={cn(
             'text-xs',
-            trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-zinc-500'
+            trend > 0 ? dynamicTheme.colors.status.success.text : 
+            trend < 0 ? dynamicTheme.colors.status.error.text : 
+            dynamicTheme.colors.text.tertiary
           )}>
             {trend > 0 ? '↑' : trend < 0 ? '↓' : '–'}
           </span>

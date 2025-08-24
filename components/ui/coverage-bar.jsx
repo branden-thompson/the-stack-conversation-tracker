@@ -9,25 +9,28 @@
 
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
  * Get color classes based on coverage percentage
+ * Note: Uses hardcoded hex colors for vibrant bar visualization.
+ * Status colors from theme are too muted for effective data visualization.
  */
-function getCoverageColor(percentage) {
+function getCoverageColor(percentage, dynamicTheme) {
   if (percentage >= 90) return {
-    bg: 'bg-green-500 dark:bg-green-400',
-    gradient: 'from-green-400 to-green-600 dark:from-green-300 dark:to-green-500',
-    text: 'text-green-700 dark:text-green-300'
+    bg: "#10b981",  // green-500 - vibrant success green
+    gradient: "#10b981",
+    text: dynamicTheme.colors.status.success.text  // Keep text theme-aware
   };
   if (percentage >= 70) return {
-    bg: 'bg-yellow-500 dark:bg-yellow-400',
-    gradient: 'from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500',
-    text: 'text-yellow-700 dark:text-yellow-300'
+    bg: "#f59e0b",  // amber-500 - vibrant warning amber
+    gradient: "#f59e0b", 
+    text: dynamicTheme.colors.status.warning.text  // Keep text theme-aware
   };
   return {
-    bg: 'bg-red-500 dark:bg-red-400',
-    gradient: 'from-red-400 to-red-600 dark:from-red-300 dark:to-red-500',
-    text: 'text-red-700 dark:text-red-300'
+    bg: "#ef4444",  // red-500 - vibrant error red
+    gradient: "#ef4444",
+    text: dynamicTheme.colors.status.error.text  // Keep text theme-aware
   };
 }
 
@@ -42,13 +45,14 @@ export function CoverageBar({
   animated = true,
   className
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   // Calculate percentage if not provided
   const coveragePercent = useMemo(() => {
     if (percentage !== null) return percentage;
     return total > 0 ? (covered / total) * 100 : 0;
   }, [covered, total, percentage]);
 
-  const colors = getCoverageColor(coveragePercent);
+  const colors = getCoverageColor(coveragePercent, dynamicTheme);
 
   const heightClasses = {
     sm: 'h-1.5',
@@ -61,17 +65,19 @@ export function CoverageBar({
       {/* Bar Container */}
       <div className="flex-1 min-w-0">
         <div className={cn(
-          'relative w-full bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden',
+          `relative w-full ${dynamicTheme.colors.background.tertiary} rounded-full overflow-hidden`,
           heightClasses[height]
         )}>
           {/* Coverage Fill */}
           <div
             className={cn(
               'absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out',
-              gradient ? `bg-gradient-to-r ${colors.gradient}` : colors.bg,
               animated && 'animate-in slide-in-from-left'
             )}
-            style={{ width: `${coveragePercent}%` }}
+            style={{ 
+              width: `${coveragePercent}%`,
+              backgroundColor: colors.bg  // Use hex color directly in style
+            }}
           >
             {/* Shimmer effect for high coverage */}
             {coveragePercent >= 90 && animated && (
@@ -95,7 +101,7 @@ export function CoverageBar({
 
       {/* Values Label */}
       {showValues && (
-        <div className="text-xs text-zinc-500 dark:text-zinc-400 tabular-nums min-w-[4rem] text-right">
+        <div className={`text-xs ${dynamicTheme.colors.text.tertiary} tabular-nums min-w-[4rem] text-right`}>
           {covered}/{total}
         </div>
       )}
@@ -107,19 +113,20 @@ export function CoverageBar({
  * Mini variant for inline table usage
  */
 export function CoverageBarMini({ percentage, width = 60, height = 4, className }) {
-  const colors = getCoverageColor(percentage);
+  const dynamicTheme = useDynamicAppTheme();
+  const colors = getCoverageColor(percentage, dynamicTheme);
   
   return (
     <div 
-      className={cn('relative bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden', className)}
+      className={cn(`relative ${dynamicTheme.colors.background.tertiary} rounded-full overflow-hidden`, className)}
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       <div
-        className={cn(
-          'absolute top-0 left-0 h-full rounded-full transition-all duration-300',
-          `bg-gradient-to-r ${colors.gradient}`
-        )}
-        style={{ width: `${percentage}%` }}
+        className="absolute top-0 left-0 h-full rounded-full transition-all duration-300"
+        style={{ 
+          width: `${percentage}%`,
+          backgroundColor: colors.bg  // Use hex color directly in style
+        }}
       />
     </div>
   );
@@ -136,6 +143,7 @@ export function CoverageBarStack({
   showLabels = true,
   className 
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const metrics = [
     { label: 'Statements', value: statements },
     { label: 'Branches', value: branches },
@@ -149,10 +157,10 @@ export function CoverageBarStack({
         <div key={metric.label} className="space-y-1">
           {showLabels && (
             <div className="flex justify-between items-center">
-              <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              <span className={`text-xs ${dynamicTheme.colors.text.tertiary}`}>
                 {metric.label}
               </span>
-              <span className={cn('text-xs font-medium', getCoverageColor(metric.value).text)}>
+              <span className={cn('text-xs font-medium', getCoverageColor(metric.value, dynamicTheme).text)}>
                 {metric.value.toFixed(1)}%
               </span>
             </div>

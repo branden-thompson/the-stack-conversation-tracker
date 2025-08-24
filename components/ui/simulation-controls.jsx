@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export function SimulationControls({
   onCreateSessions,
@@ -27,6 +28,7 @@ export function SimulationControls({
   onToggleAutoActivity,
   className,
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const [isCreating, setIsCreating] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [sessionCount, setSessionCount] = useState(1);
@@ -44,23 +46,23 @@ export function SimulationControls({
   return (
     <div className={cn(
       "rounded-lg border p-4 space-y-3",
-      THEME.colors.background.secondary,
-      THEME.colors.border.primary,
+      dynamicTheme.colors.background.card,
+      dynamicTheme.colors.border.primary,
       className
     )}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span className={cn("font-semibold", THEME.colors.text.primary)}>
+          <Zap className={`w-4 h-4 ${dynamicTheme.colors.status.warning.icon}`} />
+          <span className={cn("font-semibold", dynamicTheme.colors.text.primary)}>
             Simulation Controls
           </span>
         </div>
         {simulatedCount > 0 && (
           <span className={cn(
             "text-xs px-2 py-0.5 rounded-full",
-            "bg-purple-100 dark:bg-purple-900/30",
-            "text-purple-700 dark:text-purple-300"
+            dynamicTheme.colors.status.warning.bg,
+            dynamicTheme.colors.status.warning.text
           )}>
             {simulatedCount} simulated
           </span>
@@ -102,9 +104,9 @@ export function SimulationControls({
       {onToggleAutoActivity && (
         <div className={cn(
           "flex items-center justify-between p-2 rounded",
-          THEME.colors.background.tertiary
+          dynamicTheme.colors.background.tertiary
         )}>
-          <span className={cn("text-sm", THEME.colors.text.secondary)}>
+          <span className={cn("text-sm", dynamicTheme.colors.text.secondary)}>
             Auto Activity
           </span>
           <Button
@@ -140,7 +142,7 @@ export function SimulationControls({
             <Settings className="w-3 h-3" />
             Advanced Options
           </span>
-          <span className={cn("text-xs", THEME.colors.text.tertiary)}>
+          <span className={cn("text-xs", dynamicTheme.colors.text.tertiary)}>
             {showAdvanced ? '−' : '+'}
           </span>
         </Button>
@@ -148,13 +150,13 @@ export function SimulationControls({
         {showAdvanced && (
           <div className={cn(
             "mt-2 p-3 rounded border",
-            THEME.colors.background.tertiary,
-            THEME.colors.border.primary,
+            dynamicTheme.colors.background.tertiary,
+            dynamicTheme.colors.border.primary,
             "space-y-3"
           )}>
             {/* Custom Session Count */}
             <div>
-              <label className={cn("text-xs font-medium", THEME.colors.text.secondary)}>
+              <label className={cn("text-xs font-medium", dynamicTheme.colors.text.secondary)}>
                 Number of Sessions
               </label>
               <div className="flex items-center gap-2 mt-1">
@@ -166,9 +168,9 @@ export function SimulationControls({
                   onChange={(e) => setSessionCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
                   className={cn(
                     "w-20 px-2 py-1 text-sm rounded border",
-                    THEME.colors.background.secondary,
-                    THEME.colors.border.primary,
-                    THEME.colors.text.primary
+                    dynamicTheme.colors.background.secondary,
+                    dynamicTheme.colors.border.primary,
+                    dynamicTheme.colors.text.primary
                   )}
                 />
                 <Button
@@ -185,7 +187,7 @@ export function SimulationControls({
 
             {/* Presets */}
             <div>
-              <label className={cn("text-xs font-medium", THEME.colors.text.secondary)}>
+              <label className={cn("text-xs font-medium", dynamicTheme.colors.text.secondary)}>
                 Simulation Presets
               </label>
               <div className="grid grid-cols-2 gap-2 mt-1">
@@ -233,7 +235,7 @@ export function SimulationControls({
       </div>
 
       {/* Info Text */}
-      <p className={cn("text-xs", THEME.colors.text.tertiary)}>
+      <p className={cn("text-xs", dynamicTheme.colors.text.tertiary)}>
         Simulated sessions help test the tracking system with realistic user behavior patterns.
         {isAutoActivity && " Auto activity generates random events every 5-15 seconds."}
       </p>

@@ -14,23 +14,24 @@ import { CoverageBar, CoverageBarMini } from '@/components/ui/coverage-bar';
 import { StatusBadge, CoverageBadge } from '@/components/ui/status-badge';
 import { cn } from '@/lib/utils';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 /**
  * Get status icon based on coverage percentage
  */
-function getStatusIcon(percentage) {
-  if (percentage >= 90) return <CheckCircle2 className="w-3 h-3 text-green-500 flex-shrink-0" />;
-  if (percentage >= 70) return <AlertTriangle className="w-3 h-3 text-yellow-500 flex-shrink-0" />;
-  return <XCircle className="w-3 h-3 text-red-500 flex-shrink-0" />;
+function getStatusIcon(percentage, dynamicTheme) {
+  if (percentage >= 90) return <CheckCircle2 className={`w-3 h-3 ${dynamicTheme.colors.status.success.icon} flex-shrink-0`} />;
+  if (percentage >= 70) return <AlertTriangle className={`w-3 h-3 ${dynamicTheme.colors.status.warning.icon} flex-shrink-0`} />;
+  return <XCircle className={`w-3 h-3 ${dynamicTheme.colors.status.error.icon} flex-shrink-0`} />;
 }
 
 /**
  * Get color class based on coverage percentage
  */
-function getColorClass(percentage) {
-  if (percentage >= 90) return 'text-green-600 dark:text-green-400';
-  if (percentage >= 70) return 'text-yellow-600 dark:text-yellow-400';
-  return 'text-red-600 dark:text-red-400';
+function getColorClass(percentage, dynamicTheme) {
+  if (percentage >= 90) return dynamicTheme.colors.status.success.text;
+  if (percentage >= 70) return dynamicTheme.colors.status.warning.text;
+  return dynamicTheme.colors.status.error.text;
 }
 
 /**
@@ -100,17 +101,18 @@ function calculateGroupCoverage(files) {
  * Individual file row component
  */
 function FileRow({ file, isNested = false }) {
+  const dynamicTheme = useDynamicAppTheme();
   const monoStyle = { fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' };
   
   return (
     <tr className={cn(
-      "border-b border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors",
-      isNested && "bg-zinc-50/50 dark:bg-zinc-800/25"
+      `border-b ${dynamicTheme.colors.border.secondary} hover:${dynamicTheme.colors.background.tertiary} transition-colors`,
+      isNested && `${dynamicTheme.colors.background.secondary}`
     )}>
       <td className="py-2" style={monoStyle}>
         <div className={cn("flex items-center gap-2", isNested ? "pl-10 pr-3" : "px-3")}>
-          {getStatusIcon(file.statements.percentage)}
-          <span className="text-xs text-zinc-700 dark:text-zinc-300">{file.name}</span>
+          {getStatusIcon(file.statements.percentage, dynamicTheme)}
+          <span className={`text-xs ${dynamicTheme.colors.text.secondary}`}>{file.name}</span>
         </div>
       </td>
       <td className="px-3 py-2">
@@ -163,11 +165,11 @@ function FileRow({ file, isNested = false }) {
       </td>
       <td className="px-3 py-1.5 text-right" style={monoStyle}>
         {file.uncoveredLines && file.uncoveredLines.length > 0 ? (
-          <div className="text-[11px] text-orange-600 dark:text-orange-400">
+          <div className={`text-[11px] ${dynamicTheme.colors.status.warning.text}`}>
             {file.uncoveredLines.join(', ')}
           </div>
         ) : (
-          <span className="text-green-600 dark:text-green-400 text-[11px]">
+          <span className={`${dynamicTheme.colors.status.success.text} text-[11px]`}>
             All covered
           </span>
         )}
@@ -180,6 +182,7 @@ function FileRow({ file, isNested = false }) {
  * Group row component with expand/collapse
  */
 function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle }) {
+  const dynamicTheme = useDynamicAppTheme();
   const monoStyle = { fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' };
   const overallCoverage = (
     aggregateCoverage.statements.percentage + 
@@ -191,18 +194,18 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
   return (
     <>
       <tr 
-        className="border-b-2 border-zinc-300 dark:border-zinc-600 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
+        className={`border-b-2 ${dynamicTheme.colors.border.primary} ${dynamicTheme.colors.background.secondary} hover:${dynamicTheme.colors.background.tertiary} cursor-pointer transition-colors`}
         onClick={onToggle}
       >
         <td className="px-3 py-2" style={monoStyle}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              {isExpanded ? <FolderOpen className="w-4 h-4 text-blue-500" /> : <Folder className="w-4 h-4 text-blue-500" />}
-              <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">
+              {isExpanded ? <FolderOpen className={`w-4 h-4 ${dynamicTheme.colors.status.info.icon}`} /> : <Folder className={`w-4 h-4 ${dynamicTheme.colors.status.info.icon}`} />}
+              <span className={`text-sm font-medium ${dynamicTheme.colors.text.primary}`}>
                 {groupName}
               </span>
-              <span className="text-xs text-zinc-500 dark:text-zinc-400">
+              <span className={`text-xs ${dynamicTheme.colors.text.tertiary}`}>
                 ({files.length} files)
               </span>
             </div>
@@ -214,49 +217,49 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
-          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.statements.percentage))}>
+          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.statements.percentage, dynamicTheme))}>
             {aggregateCoverage.statements.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className={`text-[11px] ${dynamicTheme.colors.text.tertiary}`}>
             {aggregateCoverage.statements.covered}/{aggregateCoverage.statements.total}
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
-          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.branches.percentage))}>
+          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.branches.percentage, dynamicTheme))}>
             {aggregateCoverage.branches.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className={`text-[11px] ${dynamicTheme.colors.text.tertiary}`}>
             {aggregateCoverage.branches.covered}/{aggregateCoverage.branches.total}
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
-          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.functions.percentage))}>
+          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.functions.percentage, dynamicTheme))}>
             {aggregateCoverage.functions.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className={`text-[11px] ${dynamicTheme.colors.text.tertiary}`}>
             {aggregateCoverage.functions.covered}/{aggregateCoverage.functions.total}
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
-          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.lines.percentage))}>
+          <div className={cn("text-[16px] font-medium", getColorClass(aggregateCoverage.lines.percentage, dynamicTheme))}>
             {aggregateCoverage.lines.percentage.toFixed(1)}%
           </div>
-          <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          <div className={`text-[11px] ${dynamicTheme.colors.text.tertiary}`}>
             {aggregateCoverage.lines.covered}/{aggregateCoverage.lines.total}
           </div>
         </td>
         <td className="px-3 py-2 text-right" style={monoStyle}>
           {aggregateCoverage.totalUncoveredLines > 0 ? (
-            <div className="text-orange-600 dark:text-orange-400">
+            <div className={dynamicTheme.colors.status.warning.text}>
               <div className="text-[14px]">
                 {aggregateCoverage.totalUncoveredLines} lines
               </div>
-              <div className="text-[10px] text-zinc-500 dark:text-zinc-400">
+              <div className={`text-[10px] ${dynamicTheme.colors.text.tertiary}`}>
                 uncovered
               </div>
             </div>
           ) : (
-            <span className="text-green-600 dark:text-green-400 text-[12px]">
+            <span className={`${dynamicTheme.colors.status.success.text} text-[12px]`}>
               All covered
             </span>
           )}
@@ -273,6 +276,7 @@ function GroupRow({ groupName, files, aggregateCoverage, isExpanded, onToggle })
  * Main grouped coverage table component
  */
 export function GroupedCoverageTable({ files = [], fileGroups = {}, onControlsReady }) {
+  const dynamicTheme = useDynamicAppTheme();
   const monoStyle = { fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace' };
   const [expandedGroups, setExpandedGroups] = useState(new Set());
   
@@ -387,39 +391,39 @@ export function GroupedCoverageTable({ files = [], fileGroups = {}, onControlsRe
     <div className="overflow-x-auto -mx-4 px-4">
       <table className="w-full">
         <thead>
-          <tr className={`border-b-2 ${THEME.colors.border.secondary}`}>
+          <tr className={`border-b-2 ${dynamicTheme.colors.border.secondary}`}>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-left`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-left`}
               style={monoStyle}
             >
               File / Group
             </th>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Statements
             </th>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Branches
             </th>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Functions
             </th>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Lines
             </th>
             <th 
-              className={`px-3 py-2 text-xs font-semibold ${THEME.colors.text.secondary} text-right`}
+              className={`px-3 py-2 text-xs font-semibold ${dynamicTheme.colors.text.secondary} text-right`}
               style={monoStyle}
             >
               Uncovered

@@ -21,6 +21,22 @@ import {
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { CHART_CONFIG, THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
+
+/**
+ * Get actual hex colors for SVG elements
+ * Note: Uses hardcoded hex colors because SVG elements require actual color values,
+ * not CSS class names. Chart visibility needs consistent, vibrant colors across themes.
+ */
+function getChartColors(dynamicTheme) {
+  return {
+    primary: "#3b82f6",    // blue-500 - vibrant blue for primary data
+    success: "#10b981",    // green-500 - success/positive trends  
+    warning: "#f59e0b",    // amber-500 - warning/neutral trends
+    danger: "#ef4444",     // red-500 - error/negative trends
+    grid: "#e5e7eb",       // gray-200 - subtle grid lines
+  };
+}
 
 /**
  * Custom tooltip component for hover details

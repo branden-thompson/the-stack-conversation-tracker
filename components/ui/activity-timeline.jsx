@@ -24,17 +24,20 @@ import {
   EVENT_TYPE_CATEGORY_MAP,
 } from '@/lib/utils/session-constants';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
-// Category colors
-const CATEGORY_COLORS = {
-  navigation: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30',
-  board: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30',
-  ui: 'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30',
-  tests: 'text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30',
-  session: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30',
-  settings: 'text-pink-600 dark:text-pink-400 bg-pink-100 dark:bg-pink-900/30',
-  custom: 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900/30',
-};
+// Category colors - now using dynamic theme
+function getCategoryColors(dynamicTheme) {
+  return {
+    navigation: `${dynamicTheme.colors.status.info.text} ${dynamicTheme.colors.status.info.bg}`,
+    board: `${dynamicTheme.colors.status.success.text} ${dynamicTheme.colors.status.success.bg}`,
+    ui: `${dynamicTheme.colors.text.secondary} ${dynamicTheme.colors.background.tertiary}`,
+    tests: `${dynamicTheme.colors.status.warning.text} ${dynamicTheme.colors.status.warning.bg}`,
+    session: `${dynamicTheme.colors.status.warning.text} ${dynamicTheme.colors.status.warning.bg}`,
+    settings: `${dynamicTheme.colors.text.tertiary} ${dynamicTheme.colors.background.secondary}`,
+    custom: `${dynamicTheme.colors.text.tertiary} ${dynamicTheme.colors.background.secondary}`,
+  };
+}
 
 function formatTimestamp(timestamp) {
   const date = new Date(timestamp);
@@ -60,6 +63,8 @@ function formatTimestamp(timestamp) {
 }
 
 function EventItem({ event, users = [] }) {
+  const dynamicTheme = useDynamicAppTheme();
+  const categoryColors = getCategoryColors(dynamicTheme);
   const category = event.category || EVENT_TYPE_CATEGORY_MAP[event.type] || 'custom';
   const label = SESSION_EVENT_LABELS[event.type] || event.type;
   const user = users.find(u => u.id === event.userId || u.id === event.metadata?.userId);
@@ -67,20 +72,20 @@ function EventItem({ event, users = [] }) {
   return (
     <div className={cn(
       "p-3 rounded-lg border",
-      THEME.colors.background.secondary,
-      THEME.colors.border.primary,
+      dynamicTheme.colors.background.secondary,
+      dynamicTheme.colors.border.primary,
       "hover:shadow-sm transition-shadow"
     )}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 space-y-1">
           {/* Event Label & Category */}
           <div className="flex items-center gap-2">
-            <span className={cn("font-medium text-sm", THEME.colors.text.primary)}>
+            <span className={cn("font-medium text-sm", dynamicTheme.colors.text.primary)}>
               {label}
             </span>
             <span className={cn(
               "text-xs px-1.5 py-0.5 rounded",
-              CATEGORY_COLORS[category]
+              categoryColors[category]
             )}>
               {category}
             </span>
@@ -89,19 +94,19 @@ function EventItem({ event, users = [] }) {
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-3 text-xs">
             {user && (
-              <span className={cn("flex items-center gap-1", THEME.colors.text.secondary)}>
+              <span className={cn("flex items-center gap-1", dynamicTheme.colors.text.secondary)}>
                 <User className="w-3 h-3" />
                 {user.name}
               </span>
             )}
             {event.metadata?.route && (
-              <span className={cn("flex items-center gap-1", THEME.colors.text.secondary)}>
+              <span className={cn("flex items-center gap-1", dynamicTheme.colors.text.secondary)}>
                 <MapPin className="w-3 h-3" />
                 {event.metadata.route}
               </span>
             )}
             {event.sessionId && (
-              <span className={cn("flex items-center gap-1 font-mono", THEME.colors.text.tertiary)}>
+              <span className={cn("flex items-center gap-1 font-mono", dynamicTheme.colors.text.tertiary)}>
                 <Hash className="w-3 h-3" />
                 {event.sessionId.slice(0, 8)}
               </span>
@@ -110,7 +115,7 @@ function EventItem({ event, users = [] }) {
           
           {/* Additional metadata */}
           {event.metadata && Object.keys(event.metadata).length > 0 && (
-            <div className={cn("text-xs", THEME.colors.text.tertiary, "mt-1")}>
+            <div className={cn("text-xs", dynamicTheme.colors.text.tertiary, "mt-1")}>
               {Object.entries(event.metadata)
                 .filter(([key]) => !['route', 'userId', 'sessionId', 'simulated'].includes(key))
                 .slice(0, 3)
@@ -124,7 +129,7 @@ function EventItem({ event, users = [] }) {
         </div>
         
         {/* Timestamp */}
-        <span className={cn("text-xs whitespace-nowrap", THEME.colors.text.tertiary)}>
+        <span className={cn("text-xs whitespace-nowrap", dynamicTheme.colors.text.tertiary)}>
           <Clock className="w-3 h-3 inline mr-1" />
           {formatTimestamp(event.timestamp)}
         </span>
@@ -141,6 +146,7 @@ export function ActivityTimeline({
   onRefresh,
   className,
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const timelineRef = useRef(null);
@@ -216,18 +222,18 @@ export function ActivityTimeline({
       {/* Header */}
       <div className={cn(
         "p-3 border-b flex items-center justify-between",
-        THEME.colors.border.primary,
-        THEME.colors.background.secondary
+        dynamicTheme.colors.border.primary,
+        dynamicTheme.colors.background.secondary
       )}>
         <div className="flex items-center gap-2">
           <Activity className="w-4 h-4" />
-          <span className={cn("font-semibold", THEME.colors.text.primary)}>
+          <span className={cn("font-semibold", dynamicTheme.colors.text.primary)}>
             Activity Timeline
           </span>
           <span className={cn(
             "text-xs px-2 py-0.5 rounded-full",
-            THEME.colors.background.tertiary,
-            THEME.colors.text.secondary
+            dynamicTheme.colors.background.tertiary,
+            dynamicTheme.colors.text.secondary
           )}>
             {filteredEvents.length} events
           </span>
@@ -252,15 +258,15 @@ export function ActivityTimeline({
               <div className={cn(
                 "absolute right-0 top-8 z-50 min-w-[150px]",
                 "rounded-md border shadow-lg",
-                THEME.colors.background.secondary,
-                THEME.colors.border.primary
+                dynamicTheme.colors.background.secondary,
+                dynamicTheme.colors.border.primary
               )}>
                 <div className="p-1">
                   <button
                     className={cn(
                       "w-full text-left px-2 py-1.5 text-sm rounded",
-                      "hover:bg-gray-100 dark:hover:bg-gray-800",
-                      selectedCategory === 'all' && "bg-gray-100 dark:bg-gray-800"
+                      `hover:${dynamicTheme.colors.background.tertiary}`,
+                      selectedCategory === 'all' && dynamicTheme.colors.background.tertiary
                     )}
                     onClick={() => {
                       setSelectedCategory('all');
@@ -316,7 +322,7 @@ export function ActivityTimeline({
         {filteredEvents.length === 0 ? (
           <div className={cn(
             "text-center py-8",
-            THEME.colors.text.tertiary
+            dynamicTheme.colors.text.tertiary
           )}>
             <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
             <p className="text-sm">No events yet</p>

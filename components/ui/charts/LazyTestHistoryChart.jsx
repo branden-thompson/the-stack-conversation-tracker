@@ -9,6 +9,7 @@
 
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { Loader2, TrendingUp } from 'lucide-react';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 // Dynamically import the heavy chart component
 const TestHistoryChart = lazy(() => 
@@ -25,9 +26,11 @@ const getTestHistoryData = () =>
  * Loading fallback component
  */
 function ChartSkeleton() {
+  const dynamicTheme = useDynamicAppTheme();
+  
   return (
-    <div className="w-full h-64 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-      <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+    <div className={`w-full h-64 ${dynamicTheme.colors.background.secondary} rounded-lg flex items-center justify-center`}>
+      <div className={`flex items-center gap-2 ${dynamicTheme.colors.text.tertiary}`}>
         <TrendingUp className="h-5 w-5" />
         <span className="text-sm">Loading chart...</span>
       </div>
@@ -70,9 +73,11 @@ function TestHistoryDataLoader({ children, ...props }) {
   }
 
   if (error) {
+    const dynamicTheme = useDynamicAppTheme();
+    
     return (
-      <div className="w-full h-64 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center justify-center">
-        <div className="text-red-800 dark:text-red-200 text-sm">
+      <div className={`w-full h-64 ${dynamicTheme.colors.status.error.bg} ${dynamicTheme.colors.status.error.border} rounded-lg flex items-center justify-center`}>
+        <div className={`${dynamicTheme.colors.status.error.text} text-sm`}>
           Failed to load test history: {error.message}
         </div>
       </div>

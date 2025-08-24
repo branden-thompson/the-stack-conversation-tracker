@@ -211,7 +211,7 @@ function BoardInner({
       } else {
       }
     } catch (err) {
-      console.error('[Conv Events] Error logging event:', err);
+      // Event logging error - handled silently
     }
   }
 
@@ -231,7 +231,7 @@ function BoardInner({
       } else {
       }
     } catch (err) {
-      console.error('[Conv Events] Error logging event:', err);
+      // Event logging error - handled silently
     }
   }
 
@@ -263,7 +263,7 @@ function BoardInner({
         });
       }
     } catch (err) {
-      console.error('[Conv Events] Error logging clear board event:', err);
+      // Event logging error - handled silently
     }
   }
 
@@ -304,7 +304,7 @@ function BoardInner({
         });
       }
     } catch (err) {
-      console.error('[Conv Events] Error logging event:', err);
+      // Event logging error - handled silently
     }
     return updated;
   };
@@ -419,7 +419,7 @@ function BoardInner({
               } else {
                       }
             } catch (err) {
-              console.error('[Conv Events] Error logging event:', err);
+              // Event logging error - handled silently
             }
           }}
         />
@@ -457,36 +457,22 @@ export default function Board() {
     forDevPages: true, // Enable dev-page optimizations for testing
     backgroundOperation: true,
     onCardFlip: (flipEvent) => {
-      console.log('[Board] Card flip detected:', flipEvent);
       // Future: Add real-time flip animations or notifications
     },
     onCardMove: (moveEvent) => {
-      console.log('[Board] Card move detected:', moveEvent);
       // Future: Add real-time move animations or position updates
     },
     onCardUpdate: (updateEvent) => {
-      console.log('[Board] Card update detected:', updateEvent);
       // Future: Add real-time content update animations
     }
   });
   
   // Use real-time cards if SSE is properly registered, fallback to traditional cards
-  console.log(`[Board] 🔍 Card source decision: isRegistered=${cardEvents.isRegistered}, sseCards=${cardEvents.cards?.length || 0}, fallbackCards=${fallbackCards?.length || 0}`);
-  
   const cards = cardEvents.isRegistered 
     ? cardEvents.cards 
     : fallbackCards;
   const loading = cardEvents.isRegistered ? cardEvents.loading : fallbackLoading;
   const error = cardEvents.error || fallbackError;
-  
-  // Debug current cards being used
-  console.log(`[Board] 💳 Final cards being rendered: count=${cards?.length || 0}, data=`, cards?.map(c => ({ id: c.id?.substring(0, 8), zone: c.zone })) || []);
-  
-  // CRITICAL: Add useEffect to track when cards prop actually changes
-  useEffect(() => {
-    console.log(`[Board] 🚨 CARDS PROP CHANGED! New count: ${cards?.length || 0}, Tab: ${document.hidden ? 'BACKGROUND' : 'FOREGROUND'}`);
-    console.log(`[Board] 🚨 Card details:`, cards?.map(c => ({ id: c.id?.substring(0, 8), zone: c.zone, type: c.type })) || []);
-  }, [cards]);
   
   // Force re-render for theme mode isolation (not board layout)  
   // Note: Board layout persistence works fine, only theme mode sync is broken
@@ -501,11 +487,7 @@ export default function Board() {
   
   // Debug logging for card data source (dev only)
   if (process.env.NODE_ENV === 'development' && cardEvents.registrationStatus === 'rejected') {
-    console.log('[Board] SSE Registration Issue:', {
-      registrationStatus: cardEvents.registrationStatus,
-      hookId: cardEvents.hookId,
-      error: cardEvents.error
-    });
+    // SSE registration debugging available in dev tools
   }
 
   const {

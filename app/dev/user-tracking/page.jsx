@@ -150,7 +150,7 @@ export default function UserTrackingPage() {
       </div>
       
       {/* Divider */}
-      <span className="h-6 w-px bg-zinc-300 dark:bg-zinc-600 mx-3" />
+      <span className={`h-6 w-px ${dynamicTheme.colors.background.divider} mx-3`} />
       
       {/* User Tracking Stats Group */}
       <div className={cn(
@@ -161,17 +161,17 @@ export default function UserTrackingPage() {
         `h-[${UI_HEIGHTS.toolbar}px]`
       )}>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <div className={`w-2 h-2 rounded-full ${dynamicTheme.colors.status.success.bg} animate-pulse`} />
           <span>{stats.active} active</span>
         </div>
         <span className={dynamicTheme.colors.text.tertiary}>|</span>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+          <div className={`w-2 h-2 rounded-full ${dynamicTheme.colors.status.warning.bg}`} />
           <span>{stats.inactive} inactive</span>
         </div>
         <span className={dynamicTheme.colors.text.tertiary}>|</span>
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-gray-500" />
+          <div className={`w-2 h-2 rounded-full ${dynamicTheme.colors.text.tertiary}`} />
           <span>{stats.idle} idle</span>
         </div>
       </div>
@@ -259,8 +259,8 @@ export default function UserTrackingPage() {
               {error && (
                 <div className={cn(
                   "p-3 rounded-md mb-4",
-                  "bg-red-100 dark:bg-red-900/30",
-                  "text-red-700 dark:text-red-300",
+                  dynamicTheme.colors.status.error.bg,
+                  dynamicTheme.colors.status.error.text,
                   "text-sm"
                 )}>
                   Error: {error}
@@ -303,7 +303,7 @@ export default function UserTrackingPage() {
                   <div className="space-y-4">
                     {/* Debug info - remove after testing */}
                     {process.env.NODE_ENV === 'development' && (
-                      <div className="text-xs text-gray-500 mb-2">
+                      <div className={`text-xs ${dynamicTheme.colors.text.tertiary} mb-2`}>
                         Registered: {Object.keys(sessions.grouped).length} users, 
                         Active Guests: {activeProvisionedGuests.length}, 
                         Inactive Guests: {inactiveProvisionedGuests.length},
@@ -318,7 +318,7 @@ export default function UserTrackingPage() {
                       groupCount={Object.keys(sessions.grouped).length}
                       defaultExpanded={true}
                       groupIcon={<Users className="w-4 h-4" />}
-                      className="border-blue-200 dark:border-blue-800"
+                      className={dynamicTheme.colors.status.info.border}
                     >
                       {Object.entries(sessions.grouped).map(([userId, userSessions]) => {
                         const user = allUsers.find(u => u.id === userId);
@@ -408,7 +408,7 @@ export default function UserTrackingPage() {
                         );
                       })}
                       {Object.keys(sessions.grouped).length === 0 && (
-                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                        <div className={`text-sm ${dynamicTheme.colors.text.tertiary} italic px-4 py-2`}>
                           No registered user sessions
                         </div>
                       )}
@@ -420,8 +420,8 @@ export default function UserTrackingPage() {
                       groupTitle="Active Provisioned Guests"
                       groupCount={activeProvisionedGuests.length}
                       defaultExpanded={activeProvisionedGuests.length > 0}
-                      groupIcon={<div className="w-3 h-3 bg-green-500 rounded-full" />}
-                      className="border-green-200 dark:border-green-800"
+                      groupIcon={<div className={`w-3 h-3 ${dynamicTheme.colors.status.success.bg} rounded-full`} />}
+                      className={dynamicTheme.colors.status.success.border}
                     >
                       {activeProvisionedGuests.map(session => (
                         <SessionCard
@@ -440,7 +440,7 @@ export default function UserTrackingPage() {
                         />
                       ))}
                       {activeProvisionedGuests.length === 0 && (
-                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                        <div className={`text-sm ${dynamicTheme.colors.text.tertiary} italic px-4 py-2`}>
                           No active provisioned guests
                         </div>
                       )}
@@ -452,8 +452,8 @@ export default function UserTrackingPage() {
                       groupTitle="Inactive Provisioned Guests"
                       groupCount={inactiveProvisionedGuests.length}
                       defaultExpanded={false}
-                      groupIcon={<div className="w-3 h-3 bg-yellow-500 rounded-full" />}
-                      className="border-yellow-200 dark:border-yellow-800"
+                      groupIcon={<div className={`w-3 h-3 ${dynamicTheme.colors.status.warning.bg} rounded-full`} />}
+                      className={dynamicTheme.colors.status.warning.border}
                     >
                       {inactiveProvisionedGuests.map(session => (
                         <SessionCard
@@ -472,7 +472,7 @@ export default function UserTrackingPage() {
                         />
                       ))}
                       {inactiveProvisionedGuests.length === 0 && (
-                        <div className="text-sm text-gray-500 italic px-4 py-2">
+                        <div className={`text-sm ${dynamicTheme.colors.text.tertiary} italic px-4 py-2`}>
                           No inactive provisioned guests
                         </div>
                       )}
@@ -485,8 +485,8 @@ export default function UserTrackingPage() {
                         groupTitle="Other Guest Sessions"
                         groupCount={otherGuestSessions.length}
                         defaultExpanded={false}
-                        groupIcon={<div className="w-3 h-3 bg-gray-500 rounded-full" />}
-                        className="border-gray-200 dark:border-gray-800"
+                        groupIcon={<div className={`w-3 h-3 ${dynamicTheme.colors.text.tertiary} rounded-full`} />}
+                        className={dynamicTheme.colors.border.secondary}
                       >
                         {otherGuestSessions.map(session => (
                           <SessionCard

@@ -45,12 +45,128 @@ import { ProfilePictureUpload } from '@/components/ui/profile-picture-upload';
 import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { ProfilePicture } from '@/components/ui/profile-picture';
 import { useAppTheme } from '@/lib/contexts/ThemeProvider';
+import { useRef } from 'react';
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'System Default' },
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
 ];
+
+// Create mode profile picture upload component
+function CreateModeProfilePictureUpload({ 
+  tempProfilePicture, 
+  onFileSelect, 
+  onRemove, 
+  userName 
+}) {
+  const fileInputRef = useRef(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+    }
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      onFileSelect(files[0]);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      {/* Profile Picture Display/Upload Area */}
+      <div
+        className={cn(
+          'relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 dark:border-gray-600',
+          'flex items-center justify-center cursor-pointer transition-colors',
+          'hover:border-blue-400 dark:hover:border-blue-500',
+          dragOver && 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+        )}
+        onClick={openFileDialog}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {tempProfilePicture ? (
+          <>
+            {/* Selected Profile Picture Preview */}
+            <img
+              src={tempProfilePicture.preview}
+              alt="Profile Preview"
+              className="w-24 h-24 rounded-full object-cover"
+            />
+            
+            {/* Remove Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
+              title="Remove profile picture"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400">
+            <User className="w-8 h-8" />
+            <span className="text-xs">Upload</span>
+          </div>
+        )}
+      </div>
+
+      {/* Upload Button (when no picture) */}
+      {!tempProfilePicture && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={openFileDialog}
+          className="flex items-center gap-2"
+        >
+          <Plus className="w-4 h-4" />
+          Add Photo
+        </Button>
+      )}
+
+      {/* Hidden File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
+
+      {/* Helper Text */}
+      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+        JPEG, PNG, WebP (max 5MB)
+      </p>
+    </div>
+  );
+}
 
 export function UserProfileDialog({ 
   open, 
@@ -78,6 +194,7 @@ export function UserProfileDialog({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [errors, setErrors] = useState({});
   const [uploadMessage, setUploadMessage] = useState('');
+  const [tempProfilePicture, setTempProfilePicture] = useState(null); // For create mode
 
   const isCreateMode = mode === 'create' || !user;
   const isViewMode = mode === 'view';
@@ -108,6 +225,7 @@ export function UserProfileDialog({
     }
     setErrors({});
     setShowDeleteConfirm(false);
+    setTempProfilePicture(null);
   }, [user, isCreateMode, open]);
 
   // Calculate user statistics
@@ -151,7 +269,43 @@ export function UserProfileDialog({
         name: formData.name.trim(),
       };
 
-      await onUserSave?.(userData, user?.id);
+      const savedUser = await onUserSave?.(userData, user?.id);
+      
+      // Handle profile picture upload for create mode after user creation
+      if (isCreateMode && tempProfilePicture && savedUser?.id) {
+        try {
+          // Create FormData for profile picture upload
+          const formData = new FormData();
+          formData.append('profilePicture', tempProfilePicture.file);
+
+          const uploadResponse = await fetch(`/api/users/${savedUser.id}/profile-picture`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const result = await uploadResponse.json();
+            setUploadMessage('Profile picture uploaded successfully!');
+            // Update the user data if callback provided
+            if (onUserSave && result.user) {
+              onUserSave(result.user, result.user.id);
+            }
+          } else {
+            const error = await uploadResponse.json();
+            setErrors({ profilePicture: error.error || 'Failed to upload profile picture' });
+          }
+        } catch (uploadError) {
+          console.error('Profile picture upload error:', uploadError);
+          setErrors({ profilePicture: 'Failed to upload profile picture' });
+        }
+        
+        // Clean up the temp file preview URL
+        if (tempProfilePicture.preview) {
+          URL.revokeObjectURL(tempProfilePicture.preview);
+        }
+        setTempProfilePicture(null);
+      }
+      
       onOpenChange?.(false);
     } catch (error) {
       console.error('Error saving user:', error);
@@ -221,6 +375,46 @@ export function UserProfileDialog({
     }
   };
 
+  // Handlers for create mode profile picture
+  const handleCreateModeFileSelect = (file) => {
+    if (!file) return;
+    
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setErrors({ profilePicture: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' });
+      setTimeout(() => setErrors(prev => ({ ...prev, profilePicture: undefined })), 5000);
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors({ profilePicture: 'File too large. Maximum size is 5MB.' });
+      setTimeout(() => setErrors(prev => ({ ...prev, profilePicture: undefined })), 5000);
+      return;
+    }
+
+    // Store file data for later upload
+    const fileData = {
+      file: file,
+      preview: URL.createObjectURL(file),
+      name: file.name
+    };
+    
+    setTempProfilePicture(fileData);
+    setUploadMessage('Profile picture selected! It will be uploaded when you create the user.');
+    setTimeout(() => setUploadMessage(''), 3000);
+  };
+
+  const handleCreateModeRemovePicture = () => {
+    if (tempProfilePicture?.preview) {
+      URL.revokeObjectURL(tempProfilePicture.preview);
+    }
+    setTempProfilePicture(null);
+    setUploadMessage('Profile picture removed.');
+    setTimeout(() => setUploadMessage(''), 2000);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -288,41 +482,47 @@ export function UserProfileDialog({
                 </div>
 
                 {/* Profile Picture Upload */}
-                {!isCreateMode && user && (
-                  <div className="space-y-3">
-                    <Label>Profile Picture</Label>
-                    <div className="flex flex-col items-center gap-4">
-                      {isViewMode ? (
-                        <ProfilePicture
-                          src={user.profilePicture}
-                          name={user.name}
-                          size="xl"
-                        />
-                      ) : (
-                        <ProfilePictureUpload
-                          userId={user.id}
-                          currentProfilePicture={user.profilePicture}
-                          onUploadSuccess={handleProfilePictureUploadSuccess}
-                          onUploadError={handleProfilePictureUploadError}
-                          onRemoveSuccess={handleProfilePictureRemoveSuccess}
-                          size="lg"
-                        />
-                      )}
-                      
-                      {/* Upload success/error messages */}
-                      {uploadMessage && (
-                        <p className="text-sm text-green-600 dark:text-green-400">
-                          {uploadMessage}
-                        </p>
-                      )}
-                      {errors.profilePicture && (
-                        <p className="text-sm text-red-500">
-                          {errors.profilePicture}
-                        </p>
-                      )}
-                    </div>
+                <div className="space-y-3">
+                  <Label>Profile Picture {isCreateMode && <span className="text-sm opacity-60">(Optional)</span>}</Label>
+                  <div className="flex flex-col items-center gap-4">
+                    {isCreateMode ? (
+                      /* Create Mode: File Selection UI */
+                      <CreateModeProfilePictureUpload
+                        tempProfilePicture={tempProfilePicture}
+                        onFileSelect={handleCreateModeFileSelect}
+                        onRemove={handleCreateModeRemovePicture}
+                        userName={formData.name || 'New User'}
+                      />
+                    ) : isViewMode ? (
+                      <ProfilePicture
+                        src={user.profilePicture}
+                        name={user.name}
+                        size="xl"
+                      />
+                    ) : (
+                      <ProfilePictureUpload
+                        userId={user.id}
+                        currentProfilePicture={user.profilePicture}
+                        onUploadSuccess={handleProfilePictureUploadSuccess}
+                        onUploadError={handleProfilePictureUploadError}
+                        onRemoveSuccess={handleProfilePictureRemoveSuccess}
+                        size="lg"
+                      />
+                    )}
+                    
+                    {/* Upload success/error messages */}
+                    {uploadMessage && (
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        {uploadMessage}
+                      </p>
+                    )}
+                    {errors.profilePicture && (
+                      <p className="text-sm text-red-500">
+                        {errors.profilePicture}
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
 
                 {!isCreateMode && user && (
                   <div className={cn(

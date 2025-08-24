@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SESSION_STATUS_COLORS } from '@/lib/utils/session-constants';
 import { THEME } from '@/lib/utils/ui-constants';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 
 export function SessionGroup({
   userId,
@@ -28,6 +29,7 @@ export function SessionGroup({
   nested = false,
   children, // For nested content instead of sessions
 }) {
+  const dynamicTheme = useDynamicAppTheme();
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   // Determine if this is a generic group or user session group
@@ -90,8 +92,8 @@ export function SessionGroup({
   return (
     <div className={cn(
       "rounded-xl border shadow-sm",
-      THEME.colors.background.secondary,
-      THEME.colors.border.primary,
+      dynamicTheme.colors.background.card,
+      dynamicTheme.colors.border.primary,
       className
     )}>
       {/* Group Header */}
@@ -100,21 +102,21 @@ export function SessionGroup({
           <Button
             variant="ghost"
             size="sm"
-            className={cn("p-0 h-auto", THEME.colors.background.hoverStrong)}
+            className={cn("p-0 h-auto", dynamicTheme.colors.background.hoverStrong)}
             onClick={() => setIsExpanded(!isExpanded)}
           >
             <div className="flex items-center gap-3">
               {isExpanded ? (
-                <ChevronDown className={cn("w-5 h-5", THEME.colors.text.secondary)} />
+                <ChevronDown className={cn("w-5 h-5", dynamicTheme.colors.text.secondary)} />
               ) : (
-                <ChevronRight className={cn("w-5 h-5", THEME.colors.text.secondary)} />
+                <ChevronRight className={cn("w-5 h-5", dynamicTheme.colors.text.secondary)} />
               )}
               
               {isGenericGroup ? (
                 /* Generic Group Header */
                 <div className="flex items-center gap-3">
                   <div className="scale-125">{groupIcon}</div>
-                  <span className={cn("text-lg font-semibold", THEME.colors.text.primary)}>
+                  <span className={cn("text-lg font-semibold", dynamicTheme.colors.text.primary)}>
                     {groupTitle}
                   </span>
                 </div>
@@ -129,11 +131,11 @@ export function SessionGroup({
                     />
                   )}
                   <div>
-                    <span className={cn("text-lg font-semibold", THEME.colors.text.primary)}>
+                    <span className={cn("text-lg font-semibold", dynamicTheme.colors.text.primary)}>
                       {user?.name || 'Unknown User'}
                     </span>
                     {user?.email && (
-                      <div className={cn("text-sm", THEME.colors.text.tertiary)}>
+                      <div className={cn("text-sm", dynamicTheme.colors.text.tertiary)}>
                         {user.email}
                       </div>
                     )}
@@ -147,8 +149,8 @@ export function SessionGroup({
           <div className="flex-1 flex justify-end pr-2">
             <div className={cn(
               "text-lg font-semibold px-3 py-1 rounded-lg",
-              THEME.colors.background.tertiary,
-              THEME.colors.text.secondary
+              dynamicTheme.colors.background.tertiary,
+              dynamicTheme.colors.text.secondary
             )}>
               {isGenericGroup ? stats.total : `${stats.total} sessions`}
             </div>
@@ -159,7 +161,7 @@ export function SessionGroup({
             {stats.active > 0 && (
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className={cn("text-xs", THEME.colors.text.secondary)}>
+                <span className={cn("text-xs", dynamicTheme.colors.text.secondary)}>
                   {stats.active} active
                 </span>
               </div>
@@ -167,7 +169,7 @@ export function SessionGroup({
             {stats.inactive > 0 && (
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                <span className={cn("text-xs", THEME.colors.text.secondary)}>
+                <span className={cn("text-xs", dynamicTheme.colors.text.secondary)}>
                   {stats.inactive} inactive
                 </span>
               </div>
@@ -175,7 +177,7 @@ export function SessionGroup({
             {stats.idle > 0 && (
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-gray-500" />
-                <span className={cn("text-xs", THEME.colors.text.secondary)}>
+                <span className={cn("text-xs", dynamicTheme.colors.text.secondary)}>
                   {stats.idle} idle
                 </span>
               </div>
@@ -185,15 +187,15 @@ export function SessionGroup({
 
         {/* Quick Session Preview (when collapsed) - Only for user session groups */}
         {!isExpanded && !isGenericGroup && sessions.length > 0 && (
-          <div className={cn("mt-2 pt-2 border-t", THEME.colors.border.primary)}>
+          <div className={cn("mt-2 pt-2 border-t", dynamicTheme.colors.border.primary)}>
             <div className="flex flex-wrap gap-2">
               {sessions.slice(0, 3).map(session => (
                 <div
                   key={session.id}
                   className={cn(
                     "text-xs px-2 py-1 rounded-md",
-                    THEME.colors.background.tertiary,
-                    THEME.colors.text.secondary
+                    dynamicTheme.colors.background.tertiary,
+                    dynamicTheme.colors.text.secondary
                   )}
                 >
                   <span className="flex items-center gap-1">
@@ -202,7 +204,7 @@ export function SessionGroup({
                       SESSION_STATUS_COLORS[session.status].indicator
                     )} />
                     {session.browser.split(' ')[0]}
-                    <span className={THEME.colors.text.tertiary}>
+                    <span className={dynamicTheme.colors.text.tertiary}>
                       @ {session.currentRoute}
                     </span>
                   </span>
@@ -211,7 +213,7 @@ export function SessionGroup({
               {sessions.length > 3 && (
                 <div className={cn(
                   "text-xs px-2 py-1",
-                  THEME.colors.text.tertiary
+                  dynamicTheme.colors.text.tertiary
                 )}>
                   +{sessions.length - 3} more
                 </div>
@@ -224,7 +226,7 @@ export function SessionGroup({
       {/* Expanded Content - Within the group border */}
       {isExpanded && (
         <div className="px-6 pb-6">
-          <div className={cn("border-t pt-4", THEME.colors.border.primary)}>
+          <div className={cn("border-t pt-4", dynamicTheme.colors.border.primary)}>
             <div className="space-y-3">
               {isGenericGroup ? (
                 /* Generic Group Content - Render children */
