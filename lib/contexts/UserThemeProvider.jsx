@@ -50,7 +50,7 @@ export function UserThemeProvider({
       // Only override for the specific 'theme' key used by next-themes
       const blockedSetItem = function(key, value) {
         if (key === 'theme') {
-          console.log(`[UserTheme] 🚫 Blocked global theme storage: ${key} = ${value}`);
+          // Global theme storage blocked for user isolation
           return; // Don't store globally
         }
         return themeStorageBlocker.originalSetItem(key, value);
@@ -58,7 +58,7 @@ export function UserThemeProvider({
       
       const blockedGetItem = function(key) {
         if (key === 'theme') {
-          console.log(`[UserTheme] 🚫 Blocked global theme read: ${key}`);
+          // Global theme read blocked for user isolation
           return null; // Return null so next-themes doesn't use global theme
         }
         return themeStorageBlocker.originalGetItem(key);
@@ -108,7 +108,7 @@ export function UserThemeProvider({
       // Track which user we're synced to
       setLastUserId(userId);
       
-      console.log(`[UserTheme] 🎨 Synced theme mode for user ${userId}: ${userMode}`);
+      // Theme mode synced for user isolation
       
       // Optional callback for additional handling
       if (onThemeChange) {
@@ -152,7 +152,7 @@ export function UserThemeProvider({
         // Update next-themes
         setTheme(mode);
         
-        console.log(`[UserTheme] ✅ SUCCESS: Set theme mode for user ${currentUser.id}: ${mode}`);
+        // Theme mode successfully set for user
         
         // Optional callback
         if (onThemeChange) {
@@ -222,7 +222,7 @@ export function UserThemeProvider({
       
       // Only sync if this is for the current user and the change came from another tab
       if (userId === currentUser?.id && event.newValue && event.newValue !== userThemeMode) {
-        console.log(`[UserTheme] 🔄 Cross-tab sync: ${userId} theme changed to ${event.newValue}`);
+        // Cross-tab theme sync detected
         
         setUserThemeModeState(event.newValue);
         setTheme(event.newValue);

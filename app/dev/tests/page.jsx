@@ -13,6 +13,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { UniversalDevHeader } from '@/components/ui/universal-dev-header';
 import { LeftTray } from '@/components/ui/left-tray';
+import { useDynamicAppTheme } from '@/lib/contexts/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import SectionCard from '@/components/ui/section-card';
@@ -171,6 +172,7 @@ const INITIAL_TEST_STATE = {
 };
 
 export default function TestsDashboardPage() {
+  const dynamicTheme = useDynamicAppTheme();
   const [trayOpen, setTrayOpen] = useState(false);
   const [coverageTableControl, setCoverageTableControl] = useState(null);
   const [testHistoryControl, setTestHistoryControl] = useState(null);
@@ -213,7 +215,7 @@ export default function TestsDashboardPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-zinc-50 dark:bg-zinc-900">
+    <div className={`h-screen flex flex-col ${dynamicTheme.colors.background.primary}`}>
       {/* Header */}
       <UniversalDevHeader
         onOpenTray={() => setTrayOpen(true)}
@@ -222,19 +224,19 @@ export default function TestsDashboardPage() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className={`flex-1 overflow-auto p-6 ${dynamicTheme.colors.text.primary}`}>
         <div className="max-w-7xl mx-auto space-y-6">
           
           {/* Test Status Banner */}
-          <Card className="p-4 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
+          <Card className={`p-4 !${dynamicTheme.colors.background.card} ${dynamicTheme.colors.border.primary}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {testState.status === 'running' ? (
-                  <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+                  <RefreshCw className={`w-5 h-5 ${dynamicTheme.colors.status.info.icon} animate-spin`} />
                 ) : testState.results.unit.failed === 0 ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  <CheckCircle2 className={`w-5 h-5 ${dynamicTheme.colors.status.success.icon}`} />
                 ) : (
-                  <XCircle className="w-5 h-5 text-red-600" />
+                  <XCircle className={`w-5 h-5 ${dynamicTheme.colors.status.error.icon}`} />
                 )}
                 <div>
                   <h2 className="font-semibold">
@@ -243,7 +245,7 @@ export default function TestsDashboardPage() {
                      `${testState.results.unit.failed} Tests Failing`}
                   </h2>
                   {testState.lastRun && (
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                    <p className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>
                       Last run: {new Date(testState.lastRun).toLocaleString()}
                     </p>
                   )}
@@ -251,8 +253,8 @@ export default function TestsDashboardPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-zinc-400 dark:text-zinc-500" />
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">{testState.results.unit.duration}</span>
+                  <Clock className={`w-4 h-4 ${dynamicTheme.colors.text.tertiary}`} />
+                  <span className={`text-sm ${dynamicTheme.colors.text.tertiary}`}>{testState.results.unit.duration}</span>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => runTests('unit')}>
